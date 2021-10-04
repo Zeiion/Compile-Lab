@@ -1,4 +1,5 @@
-[jobs.test-submit]
+[jobs.pascal_lex]
+
 image = { source = "dockerfile", path = "."}
 
 run = [
