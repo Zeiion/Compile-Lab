@@ -66,7 +66,7 @@ public class Lex {
 				continue;
 			} else if (isLetter(line.charAt(i))) {
 				String tmpLetter = "";
-				while (isLetter(line.charAt(i))) {
+				while (isLetter(line.charAt(i)) || isDigit(line.charAt(i))) {
 					tmpLetter += line.charAt(i);
 					if (i + 1 < len) {
 						i++;
