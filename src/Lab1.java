@@ -72,7 +72,7 @@ public class Lab1 {
 					if(i+1<len&&(line.charAt(i+1)=='x'||line.charAt(i+1)=='X')){
 						tmpDigit+="0x";
 						i+=2;
-						if(i>=len){
+						if(i>=len||!isDigit(line.charAt(i))){
 							return -1;
 						}
 						while (isDigit(line.charAt(i))) {
