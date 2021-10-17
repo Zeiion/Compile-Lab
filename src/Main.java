@@ -7,13 +7,32 @@ public class Main {
 	public static void main(String[] args) {
 		Scanner input = new Scanner(System.in);
 		ArrayList<String> out = new ArrayList<>();
+		boolean find = false;
 		while (input.hasNextLine()) {
 			String line = input.nextLine();
-			if (Lab1.analyze(line,out) == -1) {
+			if(find){
+				if(line.contains("*/")){
+					line = line.substring(line.indexOf("*/")+2);
+					find = false;
+				}else{
+					continue;
+				}
+			}
+			int flag = Lab1.analyze(line,out);
+			if (flag == -1) {
 				exit(-1);
+			}else if(flag == 1){
+				find = true;
 			}
 		}
-
+		if(find){
+			//没匹配上注释
+			exit(-1);
+		}
+//		System.out.println("----");
+//		for(String s : out){
+//			System.out.println(s);
+//		}
 		String res1 = Lab1.getIntMain(out);
 		if(res1.equals("err")){
 			exit(-1);

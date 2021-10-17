@@ -1,4 +1,7 @@
+import static java.lang.System.exit;
+
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Lab1 {
 
@@ -57,7 +60,8 @@ public class Lab1 {
 	}
 
 	/**
-	 * @System.exit(-1); 出错
+	 * @return -1 出错
+	 * @return 1 继续寻找注释
 	 */
 	public static int analyze(String line, ArrayList<String> out){
 		int len = line.length();
@@ -73,7 +77,7 @@ public class Lab1 {
 						tmpDigit+="0x";
 						i+=2;
 						if(i>=len||!isDigit(line.charAt(i))){
-							System.exit(-1);;
+							System.exit(-1);
 						}
 						while (isDigit(line.charAt(i))) {
 							tmpDigit += line.charAt(i);
@@ -143,7 +147,17 @@ public class Lab1 {
 				// op done
 				out.add(Character.toString(line.charAt(i)));
 			} else {
-				System.exit(-1);;
+				if(i+1<len&&line.charAt(i)=='/'&&line.charAt(i+1)=='/'){
+					return 0;
+				}else if(i+1<len&&line.charAt(i)=='/'&&line.charAt(i+1)=='*'){
+					if(!line.contains("*/")){
+						return 1;
+					}else{
+						i=line.indexOf("*/")+1;
+						continue;
+					}
+				}
+				System.exit(-1);
 			}
 		}
 		return 0;
