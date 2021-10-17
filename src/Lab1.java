@@ -48,6 +48,9 @@ public class Lab1 {
 		}
 		return false;
 	}
+	public static boolean isHexLetter(char c){
+		return isLetter(c)&&c<='f'&&c>='a';
+	}
 
 	public static boolean isNumber(String s){
 		char[] ss = s.toCharArray();
@@ -76,10 +79,10 @@ public class Lab1 {
 					if(i+1<len&&(line.charAt(i+1)=='x'||line.charAt(i+1)=='X')){
 						tmpDigit+="0x";
 						i+=2;
-						if(i>=len||!isDigit(line.charAt(i))){
+						if(i>=len||(!isDigit(line.charAt(i))&&!isHexLetter(line.charAt(i)))){
 							System.exit(-1);
 						}
-						while (isDigit(line.charAt(i))) {
+						while (isDigit(line.charAt(i))||isHexLetter(line.charAt(i))) {
 							tmpDigit += line.charAt(i);
 							if (i + 1 < len) {
 								i++;
