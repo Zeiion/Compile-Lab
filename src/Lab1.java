@@ -165,8 +165,10 @@ public class Lab1 {
 				return "}";
 			case "return":
 				return "\tret ";
+			case ";":
+				return "";
 		}
-		return null;
+		return "-1";
 	}
 
 	public static String getIntMain(ArrayList<String> input){
@@ -196,7 +198,7 @@ public class Lab1 {
 
 	public static String getRet(ArrayList<String> input){
 		String output = "";
-		String[] testList = {"return","任意"};
+		String[] testList = {"return","任意",";"};
 		for(int i=0;i<testList.length;i++){
 			if(testList[i].equals(input.get(i))){
 				output+=getString(testList[i]);

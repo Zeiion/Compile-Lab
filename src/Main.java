@@ -15,7 +15,7 @@ public class Main {
 		}
 
 		String res1 = Lab1.getIntMain(out);
-		if(res1.equals("ERR")){
+		if(res1.equals("err")){
 			exit(-1);
 		}else{
 			System.out.println(res1);
