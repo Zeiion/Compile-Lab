@@ -85,7 +85,6 @@ public class Lab1 {
 								return 0;
 							}
 						}
-						System.out.println(tmpDigit.substring(2));
 						out.add(Integer.valueOf(tmpDigit.substring(2),16).toString());
 					}
 					// 八进制
