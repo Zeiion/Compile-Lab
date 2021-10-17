@@ -57,7 +57,7 @@ public class Lab1 {
 	}
 
 	/**
-	 * @return -1 出错
+	 * @System.exit(-1); 出错
 	 */
 	public static int analyze(String line, ArrayList<String> out){
 		int len = line.length();
@@ -73,7 +73,7 @@ public class Lab1 {
 						tmpDigit+="0x";
 						i+=2;
 						if(i>=len||!isDigit(line.charAt(i))){
-							return -1;
+							System.exit(-1);;
 						}
 						while (isDigit(line.charAt(i))) {
 							tmpDigit += line.charAt(i);
@@ -106,7 +106,7 @@ public class Lab1 {
 						//
 						out.add(Integer.valueOf(tmpDigit,8).toString());
 					}else{
-						return -1;
+						System.exit(-1);
 					}
 				}else{
 					while (isDigit(line.charAt(i))) {
@@ -144,7 +144,7 @@ public class Lab1 {
 				// op done
 				out.add(Character.toString(line.charAt(i)));
 			} else {
-				return -1;
+				System.exit(-1);;
 			}
 		}
 		return 0;
