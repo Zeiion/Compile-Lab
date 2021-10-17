@@ -49,7 +49,7 @@ public class Lab1 {
 		return false;
 	}
 	public static boolean isHexLetter(char c){
-		return isLetter(c)&&c<='f'&&c>='a';
+		return isLetter(c)&&((c<='f'&&c>='a')||(c<='F'&&c>='A'));
 	}
 
 	public static boolean isNumber(String s){
