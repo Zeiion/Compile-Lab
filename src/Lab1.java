@@ -160,7 +160,7 @@ public class Lab1 {
 			case ")":
 				return ")";
 			case "{":
-				return "{\n";
+				return "{\n\r";
 			case "}":
 				return "}";
 			case "return":
@@ -183,7 +183,7 @@ public class Lab1 {
 						return ERR;
 					}else{
 						output+=res;
-						output+="}\n";
+						output+="}\n\r";
 						break;
 					}
 				}else{
@@ -204,7 +204,7 @@ public class Lab1 {
 			}else{
 				if(testList[i].equals("任意")){
 					if(isNumber(input.get(i))){
-						output += "i32 " + input.get(i) + '\n';
+						output += "i32 " + input.get(i) + "\n\r";
 					}else{
 						return ERR;
 					}
