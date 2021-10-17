@@ -9,14 +9,11 @@ public class Main {
 		ArrayList<String> out = new ArrayList<>();
 		while (input.hasNextLine()) {
 			String line = input.nextLine();
-//			if(line.isBlank()) break;
 			if (Lab1.analyze(line,out) == -1) {
 				exit(-1);
 			}
 		}
-//		for(String o : out){
-//			System.out.println(o);
-//		}
+
 		String res1 = Lab1.getIntMain(out);
 		if(res1.equals("ERR")){
 			exit(-1);

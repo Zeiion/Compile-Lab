@@ -81,10 +81,11 @@ public class Lab1 {
 								i++;
 							} else {
 								// number done
-								out.add(tmpDigit);
+								out.add(Integer.valueOf(tmpDigit.substring(2),16).toString());
 								return 0;
 							}
 						}
+						System.out.println(tmpDigit.substring(2));
 						out.add(Integer.valueOf(tmpDigit.substring(2),16).toString());
 					}
 					// 八进制
@@ -98,7 +99,7 @@ public class Lab1 {
 								i++;
 							} else {
 								// number done
-								out.add(tmpDigit);
+								out.add(Integer.valueOf(tmpDigit,8).toString());
 								return 0;
 							}
 						}
