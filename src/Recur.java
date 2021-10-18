@@ -127,7 +127,6 @@ public class Recur {
 	}
 
 	public static String isNumber(List<String> list) {
-		System.out.println(list.get(index));
 		String tmp = list.get(index++);
 		return tmp;
 	}
