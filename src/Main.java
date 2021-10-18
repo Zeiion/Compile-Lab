@@ -10,39 +10,39 @@ public class Main {
 		boolean find = false;
 		while (input.hasNextLine()) {
 			String line = input.nextLine();
-			if(find){
-				if(line.contains("*/")){
-					line = line.substring(line.indexOf("*/")+2);
+			if (find) {
+				if (line.contains("*/")) {
+					line = line.substring(line.indexOf("*/") + 2);
 					find = false;
-				}else{
+				} else {
 					continue;
 				}
 			}
-			int flag = Lab1.analyze(line,out);
+			int flag = Lab1.analyze(line, out);
 			if (flag == -1) {
 				exit(-1);
-			}else if(flag == 1){
+			} else if (flag == 1) {
 				find = true;
 			}
 		}
-		if(find){
+		if (find) {
 			//没匹配上注释
 			exit(-1);
 		}
-		
-//		System.out.println("----");
-//		for(String s : out){
-//			System.out.println(s);
-//		}
-//		System.out.println("----");
 
-//		String res1 = Lab1.getIntMain(out);
-//		if(res1.equals("err")){
-//			exit(-1);
-//		}else{
-//			System.out.println(res1);
-//			exit(0);
-//		}
+		//		System.out.println("----");
+		//		for(String s : out){
+		//			System.out.println(s);
+		//		}
+		//		System.out.println("----");
+
+		//		String res1 = Lab1.getIntMain(out);
+		//		if(res1.equals("err")){
+		//			exit(-1);
+		//		}else{
+		//			System.out.println(res1);
+		//			exit(0);
+		//		}
 		System.out.println(Recur.isCompUnit(out));
 	}
 }

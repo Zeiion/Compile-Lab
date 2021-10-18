@@ -4,7 +4,7 @@ public class Recur {
 	private static int index = 0;
 
 	public static String executeV(String s, List<String> list, int size) {
-		try{
+		try {
 			switch (s) {
 				case V.CompUnit:
 					return isCompUnit(list);
@@ -53,7 +53,7 @@ public class Recur {
 				case V.HexDigit:
 					return isHexDigit(list);
 			}
-		}catch (Exception e){
+		} catch (Exception e) {
 			System.exit(-1);
 		}
 		System.exit(-1);
@@ -93,9 +93,9 @@ public class Recur {
 	public static String catString(String[] grammar, List<String> list) {
 		String ret = "";
 		for (int i = 0; i < grammar.length; i++) {
-			try{
+			try {
 				ret += executeV(grammar[i], list, list.size());
-			}catch (Exception e){
+			} catch (Exception e) {
 				System.exit(-1);
 			}
 		}
@@ -105,9 +105,9 @@ public class Recur {
 	public static String isCompUnit(List<String> list) {
 		String[] grammar = {V.FuncDef};
 		String s = catString(grammar, list);
-		if(index==list.size()){
+		if (index == list.size()) {
 			return s;
-		}else{
+		} else {
 			System.exit(-1);
 			return "err";
 		}
@@ -142,7 +142,7 @@ public class Recur {
 
 	public static String isNumber(List<String> list) {
 		String tmp = list.get(index++);
-		return tmp;
+		return "i32 " + tmp;
 	}
 
 	public static String isDecConst(List<String> list) {
