@@ -29,16 +29,20 @@ public class Main {
 			//没匹配上注释
 			exit(-1);
 		}
+		
 //		System.out.println("----");
 //		for(String s : out){
 //			System.out.println(s);
 //		}
-		String res1 = Lab1.getIntMain(out);
-		if(res1.equals("err")){
-			exit(-1);
-		}else{
-			System.out.println(res1);
-			exit(0);
-		}
+//		System.out.println("----");
+
+//		String res1 = Lab1.getIntMain(out);
+//		if(res1.equals("err")){
+//			exit(-1);
+//		}else{
+//			System.out.println(res1);
+//			exit(0);
+//		}
+		System.out.println(Recur.isCompUnit(out));
 	}
 }
