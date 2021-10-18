@@ -44,5 +44,6 @@ public class Main {
 		//			exit(0);
 		//		}
 		System.out.println(Recur.isCompUnit(out));
+		exit(0);
 	}
 }

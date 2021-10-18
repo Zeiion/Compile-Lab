@@ -84,6 +84,7 @@ public class Recur {
 				case V.SEMICOLON:
 					return "\n";
 				default:
+					index--;
 					System.exit(-1);
 			}
 		}
@@ -116,8 +117,6 @@ public class Recur {
 	public static String isFuncDef(List<String> list) {
 		String[] grammar = {V.FuncType, V.Ident, V.SBL, V.SBR, V.Block};
 		return catString(grammar, list);
-		//		return isFuncType(list) && isIdent(list.subList(1, list.size())) && isVT(list.subList(2, list.size()), "(")
-		//			&& isVT(list.subList(3, list.size()), ")") && isBlock();
 	}
 
 	public static String isFuncType(List<String> list) {
@@ -175,9 +174,5 @@ public class Recur {
 
 	public static String isHexDigit(List<String> list) {
 		return "";
-	}
-
-	public static void judge(List<String> list, int currentIndex) {
-
 	}
 }
