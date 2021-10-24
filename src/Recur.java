@@ -52,6 +52,35 @@ public class Recur {
 					return isHexPre(list);
 				case V.HexDigit:
 					return isHexDigit(list);
+				//
+				case V.EPS:
+					return "";
+				case V.Exp:
+					return isExp(list);
+				case V.AddExp:
+					return isAddExp(list);
+				case V.AddExpPlus:
+					return isAddExpPlus(list);
+				case V.MulExp:
+					return isMulExp(list);
+				case V.MulExpPlus:
+					return isMulExpPlus(list);
+				case V.UnaryExp:
+					return isUnaryExp(list);
+				case V.PrimaryExp:
+					return isPrimaryExp(list);
+				case V.UnaryOp:
+					return isUnaryOp(list);
+				case V.PLUS:
+					return isVT(list, V.PLUS);
+				case V.MINUS:
+					return isVT(list, V.MINUS);
+				case V.MUL:
+					return isVT(list, V.MUL);
+				case V.DIV:
+					return isVT(list, V.DIV);
+				case V.MOD:
+					return isVT(list, V.MOD);
 			}
 		} catch (Exception e) {
 			System.exit(-1);
@@ -61,9 +90,9 @@ public class Recur {
 	}
 
 	public static String isVT(List<String> list, String string) {
+		//		System.out.println(list.get(index)+" isVT "+string);
 		if (!list.get(index).equals(string)) {
-			System.exit(-1);
-			return "";
+			return null;
 		} else {
 			index++;
 			switch (string) {
@@ -83,21 +112,59 @@ public class Recur {
 					return "}";
 				case V.SEMICOLON:
 					return "\n";
+				//
+				case V.PLUS:
+					System.out.println("+++++" + index);
+					return "+";
+				case V.MINUS:
+					return "-";
+				case V.MUL:
+					return "*";
+				case V.DIV:
+					return "/";
+				case V.MOD:
+					return "%";
 				default:
 					index--;
-					System.exit(-1);
+					return null;
 			}
 		}
-		return "";
+	}
+
+	public static String showG(String[] g) {
+		String ret = "[";
+		for (String s : g) {
+			ret += s;
+			ret += " ";
+		}
+		return ret + "]";
+	}
+
+	public static String executeG(String[][] grammar, List<String> list) {
+		String ret = null;
+		for (String[] g : grammar) {
+			System.out.println("---try " + showG(g) + " ing");
+			ret = catString(g, list);
+			if (ret == null) {
+				System.out.println("!!! " + showG(g) + " not work");
+				continue;
+			}
+			return ret;
+		}
+		return null;
 	}
 
 	public static String catString(String[] grammar, List<String> list) {
 		String ret = "";
 		for (int i = 0; i < grammar.length; i++) {
 			try {
-				ret += executeV(grammar[i], list, list.size());
+				String s = executeV(grammar[i], list, list.size());
+				if (s == null) {
+					return null;
+				}
+				ret += s;
 			} catch (Exception e) {
-				System.exit(-1);
+				return null;
 			}
 		}
 		return ret;
@@ -106,12 +173,13 @@ public class Recur {
 	public static String isCompUnit(List<String> list) {
 		String[] grammar = {V.FuncDef};
 		String s = catString(grammar, list);
-		if (index == list.size()) {
-			return s;
-		} else {
-			System.exit(-1);
-			return "err";
-		}
+		return s;
+		//		if (index == list.size()) {
+		//			return s;
+		//		} else {
+		//			System.exit(-1);
+		//			return "err";
+		//		}
 	}
 
 	public static String isFuncDef(List<String> list) {
@@ -135,13 +203,113 @@ public class Recur {
 	}
 
 	public static String isStmt(List<String> list) {
-		String[] grammar = {V.RETURN, V.Number, V.SEMICOLON};
+		String[] grammar = {V.RETURN, V.Exp, V.SEMICOLON};
 		return catString(grammar, list);
+	}
+
+	public static String isExp(List<String> list) {
+		String[][] grammar = {{V.AddExp}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isExp "+s);
+		return s;
+	}
+
+	public static String isAddExp(List<String> list) {
+		String[][] grammar = {{V.MulExp, V.AddExpPlus}};
+		String s = executeG(grammar, list);
+		System.out.println("isAddExp " + s);
+		return getPlus(s);
+	}
+
+	public static String isAddExpPlus(List<String> list) {
+		String[][] grammar = {{V.PLUS, V.MulExp, V.AddExpPlus}, {V.MINUS, V.MulExp, V.AddExpPlus}, {V.EPS}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isAddExpPlus " + s);
+		return s;
+	}
+
+	public static String getMul(String s) {
+		try {
+			if (s.contains("*")) {
+				String[] nums = s.split("\\*");
+				return String.valueOf((Integer.parseInt(nums[0]) * Integer.parseInt(nums[1])));
+			} else if (s.contains("/")) {
+				String[] nums = s.split("/");
+				return String.valueOf((Integer.parseInt(nums[0]) / Integer.parseInt(nums[1])));
+			} else if (s.contains("%")) {
+				String[] nums = s.split("%");
+				return String.valueOf((Integer.parseInt(nums[0]) % Integer.parseInt(nums[1])));
+			}
+		} catch (NumberFormatException e) {
+			return null;
+		}
+		return s;
+	}
+
+	public static String getPlus(String s) {
+		try {
+			if (s.contains("+")) {
+				String[] nums = s.split("\\+");
+				return String.valueOf((Integer.parseInt(nums[0]) + Integer.parseInt(nums[1])));
+			} else if (s.contains("-")) {
+				String[] nums = s.split("-");
+				return String.valueOf((Integer.parseInt(nums[0]) - Integer.parseInt(nums[1])));
+			}
+		} catch (NumberFormatException e) {
+			return null;
+		}
+		return s;
+	}
+
+	public static String isMulExp(List<String> list) {
+		String[][] grammar = {{V.UnaryExp, V.MulExpPlus}};
+		String s = executeG(grammar, list);
+		System.out.println("isME " + s);
+		return getMul(s);
+	}
+
+	public static String isMulExpPlus(List<String> list) {
+		String[][] grammar =
+			{{V.MUL, V.UnaryExp, V.MulExpPlus}, {V.DIV, V.UnaryExp, V.MulExpPlus}, {V.MOD, V.UnaryExp, V.MulExpPlus},
+				{V.EPS}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isMEP " + s);
+		return s;
+	}
+
+	public static String isUnaryExp(List<String> list) {
+		String[][] grammar = {{V.PrimaryExp}, {V.UnaryOp, V.UnaryExp}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isUnaryExp " + s);
+		return s;
+	}
+
+	public static String isPrimaryExp(List<String> list) {
+		String[][] grammar = {{V.SBL, V.Exp, V.SBR}, {V.Number}};
+		String s = executeG(grammar, list);
+		if (s.charAt(0) == '(' && s.charAt(s.length() - 1) == ')') {
+			return s.substring(1, s.length() - 1);
+		}
+		return s;
+	}
+
+	public static String isUnaryOp(List<String> list) {
+		String[][] grammar = {{V.PLUS}, {V.MINUS}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isUnaryOp " + s);
+		return s;
 	}
 
 	public static String isNumber(List<String> list) {
 		String tmp = list.get(index++);
-		return "i32 " + tmp;
+		try {
+			Integer.parseInt(tmp);
+		} catch (NumberFormatException e) {
+			index--;
+			return null;
+		}
+		//		return "i32 " + tmp;
+		return tmp;
 	}
 
 	public static String isDecConst(List<String> list) {

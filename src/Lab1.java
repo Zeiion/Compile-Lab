@@ -6,9 +6,8 @@ import java.util.Scanner;
 public class Lab1 {
 
 	public static String ERR = "err";
-	public static String[] keyWords = {"int","main"};
-	private static char[] ops = {';', '(', ')', '{', '}'};
-
+	public static String[] keyWords = {"int", "main"};
+	private static char[] ops = {';', '(', ')', '{', '}', '+', '-', '*', '/', '%'};
 
 	public static boolean isDigit(char c) {
 		if (c >= '0' && c <= '9') {
@@ -48,14 +47,15 @@ public class Lab1 {
 		}
 		return false;
 	}
-	public static boolean isHexLetter(char c){
-		return isLetter(c)&&((c<='f'&&c>='a')||(c<='F'&&c>='A'));
+
+	public static boolean isHexLetter(char c) {
+		return isLetter(c) && ((c <= 'f' && c >= 'a') || (c <= 'F' && c >= 'A'));
 	}
 
-	public static boolean isNumber(String s){
+	public static boolean isNumber(String s) {
 		char[] ss = s.toCharArray();
-		for(char c :ss){
-			if(!isDigit((c))){
+		for (char c : ss) {
+			if (!isDigit((c))) {
 				return false;
 			}
 		}
@@ -66,7 +66,7 @@ public class Lab1 {
 	 * @return -1 出错
 	 * @return 1 继续寻找注释
 	 */
-	public static int analyze(String line, ArrayList<String> out){
+	public static int analyze(String line, ArrayList<String> out) {
 		int len = line.length();
 		for (int i = 0; i < len; i++) {
 			if (isBlank(line.charAt(i))) {
@@ -74,47 +74,49 @@ public class Lab1 {
 			} else if (isDigit(line.charAt(i))) {
 				String tmpDigit = "";
 				char start = line.charAt(i);
-				if(start == '0'){
+				if (start == '0') {
 					// 十六进制
-					if(i+1<len&&(line.charAt(i+1)=='x'||line.charAt(i+1)=='X')){
-						tmpDigit+="0x";
-						i+=2;
-						if(i>=len||(!isDigit(line.charAt(i))&&!isHexLetter(line.charAt(i)))){
+					if (i + 1 < len && (line.charAt(i + 1) == 'x' || line.charAt(i + 1) == 'X')) {
+						tmpDigit += "0x";
+						i += 2;
+						if (i >= len || (!isDigit(line.charAt(i)) && !isHexLetter(line.charAt(i)))) {
 							System.exit(-1);
 						}
-						while (isDigit(line.charAt(i))||isHexLetter(line.charAt(i))) {
+						while (isDigit(line.charAt(i)) || isHexLetter(line.charAt(i))) {
 							tmpDigit += line.charAt(i);
 							if (i + 1 < len) {
 								i++;
 							} else {
 								// number done
-								out.add(Integer.valueOf(tmpDigit.substring(2),16).toString());
+								out.add(Integer.valueOf(tmpDigit.substring(2), 16).toString());
 								return 0;
 							}
 						}
-						out.add(Integer.valueOf(tmpDigit.substring(2),16).toString());
+						out.add(Integer.valueOf(tmpDigit.substring(2), 16).toString());
 					}
 					// 八进制
-					else if(i+1<len&&isDigit(line.charAt(i+1))){
-						tmpDigit+="0";
+					else if (i + 1 < len && isDigit(line.charAt(i + 1))) {
+						tmpDigit += "0";
 						i++;
-						if(i>=len) continue;
+						if (i >= len) {
+							continue;
+						}
 						while (isDigit(line.charAt(i))) {
 							tmpDigit += line.charAt(i);
 							if (i + 1 < len) {
 								i++;
 							} else {
 								// number done
-								out.add(Integer.valueOf(tmpDigit,8).toString());
+								out.add(Integer.valueOf(tmpDigit, 8).toString());
 								return 0;
 							}
 						}
 						//
-						out.add(Integer.valueOf(tmpDigit,8).toString());
-					}else{
+						out.add(Integer.valueOf(tmpDigit, 8).toString());
+					} else {
 						System.exit(-1);
 					}
-				}else{
+				} else {
 					while (isDigit(line.charAt(i))) {
 						tmpDigit += line.charAt(i);
 						if (i + 1 < len) {
@@ -150,13 +152,13 @@ public class Lab1 {
 				// op done
 				out.add(Character.toString(line.charAt(i)));
 			} else {
-				if(i+1<len&&line.charAt(i)=='/'&&line.charAt(i+1)=='/'){
+				if (i + 1 < len && line.charAt(i) == '/' && line.charAt(i + 1) == '/') {
 					return 0;
-				}else if(i+1<len&&line.charAt(i)=='/'&&line.charAt(i+1)=='*'){
-					if(!line.contains("*/")){
+				} else if (i + 1 < len && line.charAt(i) == '/' && line.charAt(i + 1) == '*') {
+					if (!line.contains("*/")) {
 						return 1;
-					}else{
-						i=line.indexOf("*/")+1;
+					} else {
+						i = line.indexOf("*/") + 1;
 						continue;
 					}
 				}
@@ -165,8 +167,9 @@ public class Lab1 {
 		}
 		return 0;
 	}
-	public static String getString(String s){
-		switch(s){
+
+	public static String getString(String s) {
+		switch (s) {
 			case "int":
 				return "define dso_local i32 ";
 			case "main":
@@ -187,24 +190,24 @@ public class Lab1 {
 		return "-1";
 	}
 
-	public static String getIntMain(ArrayList<String> input){
+	public static String getIntMain(ArrayList<String> input) {
 		String output = "";
-		String[] testList = {"int","main","(",")","{","任意","}"};
-		for(int i=0;i<testList.length;i++){
-			if(testList[i].equals(input.get(i))){
-				output+=getString(testList[i]);
+		String[] testList = {"int", "main", "(", ")", "{", "任意", "}"};
+		for (int i = 0; i < testList.length; i++) {
+			if (testList[i].equals(input.get(i))) {
+				output += getString(testList[i]);
 				continue;
-			}else{
-				if(testList[i].equals("任意")){
-					String res = getRet(new ArrayList<>(input.subList(i,input.size()-1)));
-					if(res.equals(ERR)){
+			} else {
+				if (testList[i].equals("任意")) {
+					String res = getRet(new ArrayList<>(input.subList(i, input.size() - 1)));
+					if (res.equals(ERR)) {
 						return ERR;
-					}else{
-						output+=res;
-						output+="}\n\r";
+					} else {
+						output += res;
+						output += "}\n\r";
 						break;
 					}
-				}else{
+				} else {
 					return ERR;
 				}
 			}
@@ -212,18 +215,18 @@ public class Lab1 {
 		return output;
 	}
 
-	public static String getRet(ArrayList<String> input){
+	public static String getRet(ArrayList<String> input) {
 		String output = "";
-		String[] testList = {"return","任意",";"};
-		for(int i=0;i<testList.length;i++){
-			if(testList[i].equals(input.get(i))){
-				output+=getString(testList[i]);
+		String[] testList = {"return", "任意", ";"};
+		for (int i = 0; i < testList.length; i++) {
+			if (testList[i].equals(input.get(i))) {
+				output += getString(testList[i]);
 				continue;
-			}else{
-				if(testList[i].equals("任意")){
-					if(isNumber(input.get(i))){
+			} else {
+				if (testList[i].equals("任意")) {
+					if (isNumber(input.get(i))) {
 						output += "i32 " + input.get(i) + "\n\r";
-					}else{
+					} else {
 						return ERR;
 					}
 				}
