@@ -247,6 +247,9 @@ public class Recur {
 	}
 
 	public static String getMul(String s) {
+		if (s == null) {
+			return null;
+		}
 		try {
 			if (s.contains("*")) {
 				String[] nums = s.split("\\*");
@@ -309,6 +312,9 @@ public class Recur {
 	}
 
 	public static String getPlus(String s) {
+		if (s == null) {
+			return null;
+		}
 		//		System.out.println("getPlus " + s);
 		try {
 			if (s.contains("++")) {
@@ -373,6 +379,9 @@ public class Recur {
 		String[][] grammar = {{V.PrimaryExp}, {V.UnaryOp, V.UnaryExp}};
 		String s = executeG(grammar, list);
 		//		System.out.println("isUnaryExp " + s);
+		if (s == null) {
+			return null;
+		}
 		int flag = 1;
 		String ss = "";
 		for (int i = 0; i < s.length(); i++) {
@@ -390,6 +399,9 @@ public class Recur {
 	public static String isPrimaryExp(List<String> list) {
 		String[][] grammar = {{V.SBL, V.Exp, V.SBR}, {V.Number}};
 		String s = executeG(grammar, list);
+		if (s == null) {
+			return null;
+		}
 		if (s.charAt(0) == '(' && s.charAt(s.length() - 1) == ')') {
 			return s.substring(1, s.length() - 1);
 		}

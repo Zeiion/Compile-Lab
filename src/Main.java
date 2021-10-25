@@ -8,9 +8,9 @@ public class Main {
 		Scanner input = new Scanner(System.in);
 		ArrayList<String> out = new ArrayList<>();
 		boolean find = false;
-//		while(input.hasNextLine()) {
-//			System.out.println(input.nextLine());
-//		}
+		//		while(input.hasNextLine()) {
+		//			System.out.println(input.nextLine());
+		//		}
 		while (input.hasNextLine()) {
 			String line = input.nextLine();
 			if (find) {
@@ -33,11 +33,11 @@ public class Main {
 			exit(-1);
 		}
 
-//		System.out.println("----");
-//		for (String s : out) {
-//			System.out.println(s);
-//		}
-//		System.out.println("----");
+		//		System.out.println("----");
+		//		for (String s : out) {
+		//			System.out.println(s);
+		//		}
+		//		System.out.println("----");
 
 		//		String res1 = Lab1.getIntMain(out);
 		//		if(res1.equals("err")){
