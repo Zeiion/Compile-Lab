@@ -190,13 +190,12 @@ public class Recur {
 	public static String isCompUnit(List<String> list) {
 		String[] grammar = {V.FuncDef};
 		String s = catString(grammar, list);
-		return s;
-		//		if (index == list.size()) {
-		//			return s;
-		//		} else {
-		//			System.exit(-1);
-		//			return "err";
-		//		}
+		if (index == list.size()) {
+			return s;
+		} else {
+			System.exit(-1);
+			return "err";
+		}
 	}
 
 	public static String isFuncDef(List<String> list) {
@@ -336,7 +335,7 @@ public class Recur {
 			} else if (s.charAt(i) == '+') {
 				continue;
 			} else {
-				ss+=s.charAt(i);
+				ss += s.charAt(i);
 			}
 		}
 		return flag > 0 ? ss : "-" + ss;
