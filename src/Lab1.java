@@ -149,9 +149,6 @@ public class Lab1 {
 				out.add(tmpLetter.toString());
 				continue;
 			} else if (isOp(line.charAt(i))) {
-				// op done
-				out.add(Character.toString(line.charAt(i)));
-			} else {
 				if (i + 1 < len && line.charAt(i) == '/' && line.charAt(i + 1) == '/') {
 					return 0;
 				} else if (i + 1 < len && line.charAt(i) == '/' && line.charAt(i + 1) == '*') {
@@ -161,7 +158,11 @@ public class Lab1 {
 						i = line.indexOf("*/") + 1;
 						continue;
 					}
+				} else {
+					// op done
+					out.add(Character.toString(line.charAt(i)));
 				}
+			} else {
 				System.exit(-1);
 			}
 		}

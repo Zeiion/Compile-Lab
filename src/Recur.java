@@ -190,7 +190,7 @@ public class Recur {
 	public static String isCompUnit(List<String> list) {
 		String[] grammar = {V.FuncDef};
 		String s = catString(grammar, list);
-		if(s == null){
+		if (s == null) {
 			System.exit(-1);
 		}
 		if (index == list.size()) {
@@ -251,13 +251,57 @@ public class Recur {
 		try {
 			if (s.contains("*")) {
 				String[] nums = s.split("\\*");
-				return String.valueOf((Integer.parseInt(nums[0]) * Integer.parseInt(nums[1])));
+				for (int i = 0; i < nums.length; i++) {
+					if (nums[i].contains("/") || nums[i].contains("%")) {
+						nums[i] = getMul(nums[i]);
+						if (nums[i] == null) {
+							return null;
+						}
+					}
+				}
+				int result = 1;
+				for (String num : nums) {
+					result *= Integer.parseInt(num);
+				}
+				return String.valueOf(result);
 			} else if (s.contains("/")) {
 				String[] nums = s.split("/");
-				return String.valueOf((Integer.parseInt(nums[0]) / Integer.parseInt(nums[1])));
+				for (int i = 0; i < nums.length; i++) {
+					if (nums[i].contains("*") || nums[i].contains("%")) {
+						nums[i] = getMul(nums[i]);
+						if (nums[i] == null) {
+							return null;
+						}
+					}
+				}
+				int result = 1;
+				for (int i = 0; i < nums.length; i++) {
+					if (i == 0) {
+						result = Integer.parseInt(nums[i]);
+						continue;
+					}
+					result /= Integer.parseInt(nums[i]);
+				}
+				return String.valueOf(result);
 			} else if (s.contains("%")) {
 				String[] nums = s.split("%");
-				return String.valueOf((Integer.parseInt(nums[0]) % Integer.parseInt(nums[1])));
+				for (int i = 0; i < nums.length; i++) {
+					if (nums[i].contains("*") || nums[i].contains("/")) {
+						nums[i] = getMul(nums[i]);
+						if (nums[i] == null) {
+							return null;
+						}
+					}
+				}
+				int result = 1;
+				for (int i = 0; i < nums.length; i++) {
+					if (i == 0) {
+						result = Integer.parseInt(nums[i]);
+						continue;
+					}
+					result %= Integer.parseInt(nums[i]);
+				}
+				return String.valueOf(result);
 			}
 		} catch (NumberFormatException e) {
 			return null;
@@ -341,7 +385,7 @@ public class Recur {
 				ss += s.charAt(i);
 			}
 		}
-		return flag > 0 ? ss : "-" + ss;
+		return ss.equals("0") ? "0" : flag > 0 ? ss : "-" + ss;
 	}
 
 	public static String isPrimaryExp(List<String> list) {
