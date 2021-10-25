@@ -8,6 +8,9 @@ public class Main {
 		Scanner input = new Scanner(System.in);
 		ArrayList<String> out = new ArrayList<>();
 		boolean find = false;
+		while(input.hasNextLine()) {
+			System.out.println(input.nextLine());
+		}
 		while (input.hasNextLine()) {
 			String line = input.nextLine();
 			if (find) {
