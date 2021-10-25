@@ -73,8 +73,12 @@ public class Recur {
 					return isUnaryOp(list);
 				case V.PLUS:
 					return isVT(list, V.PLUS);
+				case V.PLUSPLUS:
+					return isVT(list, V.PLUSPLUS);
 				case V.MINUS:
 					return isVT(list, V.MINUS);
+				case V.MINUSMINUS:
+					return isVT(list, V.MINUSMINUS);
 				case V.MUL:
 					return isVT(list, V.MUL);
 				case V.DIV:
@@ -83,8 +87,10 @@ public class Recur {
 					return isVT(list, V.MOD);
 			}
 		} catch (Exception e) {
-			System.exit(-1);
+			//			System.out.println("Exception " + e);
+			return null;
 		}
+		//		System.out.println("No match");
 		System.exit(-1);
 		return "";
 	}
@@ -92,6 +98,17 @@ public class Recur {
 	public static String isVT(List<String> list, String string) {
 		//		System.out.println(list.get(index)+" isVT "+string);
 		if (!list.get(index).equals(string)) {
+			if (string.equals("++")) {
+				if (list.get(index).equals("+")) {
+					index++;
+					return "++";
+				}
+			} else if (string.equals("--")) {
+				if (list.get(index).equals("-")) {
+					index++;
+					return "--";
+				}
+			}
 			return null;
 		} else {
 			index++;
@@ -114,7 +131,6 @@ public class Recur {
 					return "\n";
 				//
 				case V.PLUS:
-					System.out.println("+++++" + index);
 					return "+";
 				case V.MINUS:
 					return "-";
@@ -143,10 +159,11 @@ public class Recur {
 	public static String executeG(String[][] grammar, List<String> list) {
 		String ret = null;
 		for (String[] g : grammar) {
-			System.out.println("---try " + showG(g) + " ing");
+			//			System.out.println("---try " + showG(g) + " ing");
 			ret = catString(g, list);
+			//			System.out.println("---result " + ret);
 			if (ret == null) {
-				System.out.println("!!! " + showG(g) + " not work");
+				//				System.out.println("!!! " + showG(g) + " not work");
 				continue;
 			}
 			return ret;
@@ -217,12 +234,12 @@ public class Recur {
 	public static String isAddExp(List<String> list) {
 		String[][] grammar = {{V.MulExp, V.AddExpPlus}};
 		String s = executeG(grammar, list);
-		System.out.println("isAddExp " + s);
+		//		System.out.println("isAddExp " + s);
 		return getPlus(s);
 	}
 
 	public static String isAddExpPlus(List<String> list) {
-		String[][] grammar = {{V.PLUS, V.MulExp, V.AddExpPlus}, {V.MINUS, V.MulExp, V.AddExpPlus}, {V.EPS}};
+		String[][] grammar = {{V.PLUSPLUS, V.MulExp, V.AddExpPlus}, {V.MINUSMINUS, V.MulExp, V.AddExpPlus}, {V.EPS}};
 		String s = executeG(grammar, list);
 		//		System.out.println("isAddExpPlus " + s);
 		return s;
@@ -247,15 +264,45 @@ public class Recur {
 	}
 
 	public static String getPlus(String s) {
+		//		System.out.println("getPlus " + s);
 		try {
-			if (s.contains("+")) {
-				String[] nums = s.split("\\+");
-				return String.valueOf((Integer.parseInt(nums[0]) + Integer.parseInt(nums[1])));
-			} else if (s.contains("-")) {
-				String[] nums = s.split("-");
-				return String.valueOf((Integer.parseInt(nums[0]) - Integer.parseInt(nums[1])));
+			if (s.contains("++")) {
+				String[] nums = s.split("\\+\\+");
+				for (int i = 0; i < nums.length; i++) {
+					if (nums[i].contains("--")) {
+						nums[i] = getPlus(nums[i]);
+						if (nums[i] == null) {
+							return null;
+						}
+					}
+				}
+				int result = 0;
+				for (String num : nums) {
+					result += Integer.parseInt(num);
+				}
+				return String.valueOf(result);
+			} else if (s.contains("--")) {
+				String[] nums = s.split("--");
+				for (int i = 0; i < nums.length; i++) {
+					if (nums[i].contains("++")) {
+						nums[i] = getPlus(nums[i]);
+						if (nums[i] == null) {
+							return null;
+						}
+					}
+				}
+				int result = 0;
+				for (int i = 0; i < nums.length; i++) {
+					if (i == 0) {
+						result = Integer.parseInt(nums[i]);
+						continue;
+					}
+					result -= Integer.parseInt(nums[i]);
+				}
+				return String.valueOf(result);
 			}
 		} catch (NumberFormatException e) {
+			//			System.out.println(e);
 			return null;
 		}
 		return s;
@@ -264,7 +311,7 @@ public class Recur {
 	public static String isMulExp(List<String> list) {
 		String[][] grammar = {{V.UnaryExp, V.MulExpPlus}};
 		String s = executeG(grammar, list);
-		System.out.println("isME " + s);
+		//		System.out.println("isME " + s);
 		return getMul(s);
 	}
 
@@ -281,7 +328,18 @@ public class Recur {
 		String[][] grammar = {{V.PrimaryExp}, {V.UnaryOp, V.UnaryExp}};
 		String s = executeG(grammar, list);
 		//		System.out.println("isUnaryExp " + s);
-		return s;
+		int flag = 1;
+		String ss = "";
+		for (int i = 0; i < s.length(); i++) {
+			if (s.charAt(i) == '-') {
+				flag = -flag;
+			} else if (s.charAt(i) == '+') {
+				continue;
+			} else {
+				ss+=s.charAt(i);
+			}
+		}
+		return flag > 0 ? ss : "-" + ss;
 	}
 
 	public static String isPrimaryExp(List<String> list) {
@@ -290,6 +348,7 @@ public class Recur {
 		if (s.charAt(0) == '(' && s.charAt(s.length() - 1) == ')') {
 			return s.substring(1, s.length() - 1);
 		}
+		//		System.out.println("isPrimaryExp " + s);
 		return s;
 	}
 

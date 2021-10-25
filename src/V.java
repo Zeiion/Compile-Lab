@@ -36,7 +36,9 @@ public class V {
 	public static final String LBR = "}";
 	public static final String SEMICOLON = ";";
 	public static final String PLUS = "+";
+	public static final String PLUSPLUS = "++";
 	public static final String MINUS = "-";
+	public static final String MINUSMINUS = "--";
 
 	public static final String MUL = "*";
 	public static final String DIV = "/";
