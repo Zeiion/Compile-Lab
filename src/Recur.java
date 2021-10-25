@@ -54,6 +54,7 @@ public class Recur {
 					return isHexDigit(list);
 				//
 				case V.EPS:
+					//					System.out.println("index"+index+"epseps");
 					return "";
 				case V.Exp:
 					return isExp(list);
@@ -74,10 +75,12 @@ public class Recur {
 				case V.PLUS:
 					return isVT(list, V.PLUS);
 				case V.PLUSPLUS:
+					//					System.out.println("index"+index+"plusplus");
 					return isVT(list, V.PLUSPLUS);
 				case V.MINUS:
 					return isVT(list, V.MINUS);
 				case V.MINUSMINUS:
+					//					System.out.println("index"+index+"minusminus");
 					return isVT(list, V.MINUSMINUS);
 				case V.MUL:
 					return isVT(list, V.MUL);
@@ -95,23 +98,72 @@ public class Recur {
 		return "";
 	}
 
+	public static boolean isVN(String type) {
+		switch (type) {
+			case V.CompUnit:
+			case V.FuncDef:
+			case V.Ident:
+			case V.FuncType:
+			case V.Block:
+			case V.Stmt:
+			case V.DecConst:
+			case V.OctConst:
+			case V.HexConst:
+			case V.NoneZeroDigit:
+			case V.Digit:
+			case V.OctDigit:
+			case V.HexPre:
+			case V.HexDigit:
+			case V.Exp:
+			case V.AddExp:
+			case V.AddExpPlus:
+			case V.MulExp:
+			case V.MulExpPlus:
+			case V.UnaryExp:
+			case V.PrimaryExp:
+			case V.UnaryOp:
+			//eps
+			case V.EPS:
+				return true;
+			//vt
+			case V.Number:
+			case V.INT:
+			case V.MAIN:
+			case V.SBL:
+			case V.SBR:
+			case V.LBL:
+			case V.LBR:
+			case V.PLUS:
+			case V.PLUSPLUS:
+			case V.MINUS:
+			case V.MINUSMINUS:
+			case V.MUL:
+			case V.DIV:
+			case V.MOD:
+			case V.RETURN:
+			case V.SEMICOLON:
+				return false;
+		}
+		return false;
+	}
+
 	public static String isVT(List<String> list, String string) {
 		//		System.out.println(list.get(index)+" isVT "+string);
 		if (!list.get(index).equals(string)) {
 			if (string.equals("++")) {
 				if (list.get(index).equals("+")) {
-					index++;
+					//					index++;
 					return "++";
 				}
 			} else if (string.equals("--")) {
 				if (list.get(index).equals("-")) {
-					index++;
+					//					index++;
 					return "--";
 				}
 			}
 			return null;
 		} else {
-			index++;
+			//			index++;
 			switch (string) {
 				case V.INT:
 					return "define dso_local i32 ";
@@ -141,7 +193,7 @@ public class Recur {
 				case V.MOD:
 					return "%";
 				default:
-					index--;
+					//					index--;
 					return null;
 			}
 		}
@@ -159,16 +211,25 @@ public class Recur {
 	public static String executeG(String[][] grammar, List<String> list) {
 		String ret = null;
 		for (String[] g : grammar) {
-			//			System.out.println("---try " + showG(g) + " ing");
+//			System.out.println("---try " + showG(g) + " ing");
 			ret = catString(g, list);
-			//			System.out.println("---result " + ret);
+//			System.out.println("---result " + ret);
 			if (ret == null) {
-				//				System.out.println("!!! " + showG(g) + " not work");
+//				System.out.println("!!! " + showG(g) + " not work");
 				continue;
 			}
 			return ret;
 		}
 		return null;
+	}
+
+	public static void recurIndex(String[] grammar, int ii) {
+		for (int i = 0; i < ii; i++) {
+			if (!isVN(grammar[i])) {
+//				System.out.println("RRRecur"+grammar[i]+index);
+				index--;
+			}
+		}
 	}
 
 	public static String catString(String[] grammar, List<String> list) {
@@ -177,7 +238,13 @@ public class Recur {
 			try {
 				String s = executeV(grammar[i], list, list.size());
 				if (s == null) {
+					recurIndex(grammar, i);
 					return null;
+				} else {
+					if (!isVN(grammar[i])) {
+//						System.out.println("???grammar" + grammar[i]+index);
+						index++;
+					}
 				}
 				ret += s;
 			} catch (Exception e) {
@@ -235,14 +302,19 @@ public class Recur {
 	public static String isAddExp(List<String> list) {
 		String[][] grammar = {{V.MulExp, V.AddExpPlus}};
 		String s = executeG(grammar, list);
-		//		System.out.println("isAddExp " + s);
+//		System.out.println("isAddExp " + s);
 		return getPlus(s);
 	}
 
 	public static String isAddExpPlus(List<String> list) {
 		String[][] grammar = {{V.PLUSPLUS, V.MulExp, V.AddExpPlus}, {V.MINUSMINUS, V.MulExp, V.AddExpPlus}, {V.EPS}};
 		String s = executeG(grammar, list);
+		//		System.out.println("index" + index);
 		//		System.out.println("isAddExpPlus " + s);
+		//		if (s == null) {
+		//			index--;
+		//			return null;
+		//		}
 		return s;
 	}
 
@@ -319,6 +391,9 @@ public class Recur {
 		try {
 			if (s.contains("++")) {
 				String[] nums = s.split("\\+\\+");
+				if (nums.length == 1) {
+					return null;
+				}
 				for (int i = 0; i < nums.length; i++) {
 					if (nums[i].contains("--")) {
 						nums[i] = getPlus(nums[i]);
@@ -334,6 +409,9 @@ public class Recur {
 				return String.valueOf(result);
 			} else if (s.contains("--")) {
 				String[] nums = s.split("--");
+				if (nums.length == 1) {
+					return null;
+				}
 				for (int i = 0; i < nums.length; i++) {
 					if (nums[i].contains("++")) {
 						nums[i] = getPlus(nums[i]);
@@ -417,11 +495,13 @@ public class Recur {
 	}
 
 	public static String isNumber(List<String> list) {
-		String tmp = list.get(index++);
+		//		String tmp = list.get(index++);
+		String tmp = list.get(index);
+		//		System.out.println("isNumber "+tmp);
 		try {
 			Integer.parseInt(tmp);
 		} catch (NumberFormatException e) {
-			index--;
+			//			index--;
 			return null;
 		}
 		//		return "i32 " + tmp;

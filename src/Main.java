@@ -33,11 +33,11 @@ public class Main {
 			exit(-1);
 		}
 
-		//		System.out.println("----");
-		//		for (String s : out) {
-		//			System.out.println(s);
-		//		}
-		//		System.out.println("----");
+//				System.out.println("----");
+//				for (String s : out) {
+//					System.out.println(s);
+//				}
+//				System.out.println("----");
 
 		//		String res1 = Lab1.getIntMain(out);
 		//		if(res1.equals("err")){
