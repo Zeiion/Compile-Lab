@@ -118,7 +118,7 @@ public class Recur {
 				case V.MAIN:
 					return "@main";
 				case V.RETURN:
-					return "\tret ";
+					return "\tret i32 ";
 				case V.SBL:
 					return "(";
 				case V.SBR:
@@ -229,7 +229,6 @@ public class Recur {
 	public static String isExp(List<String> list) {
 		String[][] grammar = {{V.AddExp}};
 		String s = executeG(grammar, list);
-		//		System.out.println("isExp "+s);
 		return s;
 	}
 
