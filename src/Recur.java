@@ -190,6 +190,9 @@ public class Recur {
 	public static String isCompUnit(List<String> list) {
 		String[] grammar = {V.FuncDef};
 		String s = catString(grammar, list);
+		if(s == null){
+			System.exit(-1);
+		}
 		if (index == list.size()) {
 			return s;
 		} else {
