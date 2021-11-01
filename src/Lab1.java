@@ -1,13 +1,10 @@
-import static java.lang.System.exit;
-
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Lab1 {
 
 	public static String ERR = "err";
 	public static String[] keyWords = {"int", "main"};
-	private static char[] ops = {';', '(', ')', '{', '}', '+', '-', '*', '/', '%'};
+	private static char[] ops = {';', '(', ')', '{', '}', '+', '-', '*', '/', '%', '='};
 
 	public static boolean isDigit(char c) {
 		if (c >= '0' && c <= '9') {
@@ -114,7 +111,9 @@ public class Lab1 {
 						//
 						out.add(Integer.valueOf(tmpDigit, 8).toString());
 					} else {
-						System.exit(-1);
+						out.add("0");
+						continue;
+						//						System.exit(-1);
 					}
 				} else {
 					while (isDigit(line.charAt(i))) {
