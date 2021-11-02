@@ -3,6 +3,9 @@ import java.util.List;
 public class Recur {
 	private static int index = 0;
 
+	/**
+	 * 文法识别->执行对应函数
+	 * */
 	public static String executeV(String s, List<String> list, int size) {
 		try {
 			switch (s) {
@@ -53,6 +56,8 @@ public class Recur {
 				case V.HexDigit:
 					return isHexDigit(list);
 				//
+				//
+				//
 				case V.EPS:
 					//					System.out.println("index"+index+"epseps");
 					return "";
@@ -88,6 +93,45 @@ public class Recur {
 					return isVT(list, V.DIV);
 				case V.MOD:
 					return isVT(list, V.MOD);
+					//
+				//
+				//
+				case V.Decl:
+					return isDecl(list);
+				case V.ConstDecl:
+					return isConstDecl(list);
+				case V.ConstDefs:
+					return isConstDefs(list);
+				case V.BType:
+					return isBType(list);
+				case V.ConstDef:
+					return isConstDef(list);
+				case V.ConstInitVal:
+					return isConstInitVal(list);
+				case V.ConstExp:
+					return isConstExp(list);
+				case V.VarDecl:
+					return isVarDecl(list);
+				case V.VarDefs:
+					return isVarDefs((list));
+				case V.VarDef:
+					return isVarDef(list);
+				case V.InitVal:
+					return isInitVal((list));
+				case V.BlockItem:
+					return isBlockItem(list);
+				case V.BlockItems:
+					return isBlockItems(list);
+				case V.LVal:
+					return isLVal(list);
+				case V.FuncRParams:
+					return isFuncRParams(list);
+				case V.Exps:
+					return isExps(list);
+				case V.COMMA:
+					return isVT(list,V.COMMA);
+				case V.EQUAL:
+					return isVT(list,V.EQUAL);
 			}
 		} catch (Exception e) {
 			//			System.out.println("Exception " + e);
@@ -192,6 +236,11 @@ public class Recur {
 					return "/";
 				case V.MOD:
 					return "%";
+					//
+				case V.EQUAL:
+					return " = ";
+				case V.COMMA:
+					return ", ";
 				default:
 					//					index--;
 					return null;
@@ -284,13 +333,98 @@ public class Recur {
 	}
 
 	public static String isBlock(List<String> list) {
-		String[] grammar = {V.LBL, V.Stmt, V.LBR};
+		String[] grammar = {V.LBL, V.BlockItems, V.LBR};
 		return catString(grammar, list);
 	}
 
+	public static String isBlockItems(List<String> list) {
+		String[][] grammar = {{V.Decl,V.BlockItems},{V.Stmt,V.BlockItems},{V.BlockItem},{V.EPS}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isBlockItem(List<String> list) {
+		String[][] grammar = {{V.Decl},{V.Stmt}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isDecl(List<String> list) {
+		String[][] grammar = {{V.ConstDecl},{V.VarDecl}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isConstDecl(List<String> list) {
+		String[][] grammar = {{V.CONST,V.BType,V.ConstDef,V.ConstDefs,V.SEMICOLON}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isConstDefs(List<String> list) {
+		String[][] grammar = {{V.COMMA,V.ConstDef},{V.COMMA,V.ConstDef,V.ConstDefs},{V.EPS}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isConstDef(List<String> list) {
+		String[][] grammar = {{V.Ident,V.EQUAL,V.ConstInitVal}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isBType(List<String> list) {
+		String[][] grammar = {{V.INT}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isConstInitVal(List<String> list) {
+		String[][] grammar = {{V.ConstExp}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isConstExp(List<String> list) {
+		String[][] grammar = {{V.AddExp}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isVarDecl(List<String> list) {
+		String[][] grammar = {{V.BType,V.VarDef,V.VarDefs,V.SEMICOLON}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isVarDefs(List<String> list) {
+		String[][] grammar = {{V.COMMA,V.VarDef},{V.COMMA,V.VarDef,V.VarDefs},{V.EPS}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isVarDef(List<String> list) {
+		String[][] grammar = {{V.Ident},{V.Ident,V.EQUAL,V.InitVal}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isInitVal(List<String> list) {
+		String[][] grammar = {{V.Exp}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
 	public static String isStmt(List<String> list) {
-		String[] grammar = {V.RETURN, V.Exp, V.SEMICOLON};
-		return catString(grammar, list);
+		String[][] grammar = {{V.LVal,V.EQUAL,V.Exp,V.SEMICOLON},{V.SEMICOLON},{V.Exp,V.SEMICOLON},{V.RETURN, V.Exp, V.SEMICOLON}};
+		String s = executeG(grammar, list);
+		return s;
+	}
+
+	public static String isLVal(List<String> list) {
+		String[][] grammar = {{V.Ident}};
+		String s = executeG(grammar, list);
+		return s;
 	}
 
 	public static String isExp(List<String> list) {
@@ -316,6 +450,123 @@ public class Recur {
 		//			return null;
 		//		}
 		return s;
+	}
+
+	public static String isMulExp(List<String> list) {
+		String[][] grammar = {{V.UnaryExp, V.MulExpPlus}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isME " + s);
+		return getMul(s);
+	}
+
+	public static String isMulExpPlus(List<String> list) {
+		String[][] grammar =
+			{{V.MUL, V.UnaryExp, V.MulExpPlus}, {V.DIV, V.UnaryExp, V.MulExpPlus}, {V.MOD, V.UnaryExp, V.MulExpPlus},
+				{V.EPS}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isMEP " + s);
+		return s;
+	}
+
+	public static String isUnaryExp(List<String> list) {
+		String[][] grammar = {{V.PrimaryExp}, {V.Ident,V.SBL,V.SBR}, {V.Ident,V.SBL,V.FuncRParams,V.SBR},{V.UnaryOp, V.UnaryExp}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isUnaryExp " + s);
+		if (s == null) {
+			return null;
+		}
+		int flag = 1;
+		String ss = "";
+		for (int i = 0; i < s.length(); i++) {
+			if (s.charAt(i) == '-') {
+				flag = -flag;
+			} else if (s.charAt(i) == '+') {
+				continue;
+			} else {
+				ss += s.charAt(i);
+			}
+		}
+		return ss.equals("0") ? "0" : flag > 0 ? ss : "-" + ss;
+	}
+
+	public static String isFuncRParams(List<String> list) {
+		String[][] grammar = {{V.Exp,V.Exps}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isUnaryExp " + s);
+		return s;
+	}
+
+	public static String isExps(List<String> list) {
+		String[][] grammar = {{V.SEMICOLON,V.Exp},{V.SEMICOLON,V.Exps},{V.EPS}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isUnaryExp " + s);
+		return s;
+	}
+
+	public static String isPrimaryExp(List<String> list) {
+		String[][] grammar = {{V.SBL, V.Exp, V.SBR}, {V.Number}};
+		String s = executeG(grammar, list);
+		if (s == null) {
+			return null;
+		}
+		if (s.charAt(0) == '(' && s.charAt(s.length() - 1) == ')') {
+			return s.substring(1, s.length() - 1);
+		}
+		//		System.out.println("isPrimaryExp " + s);
+		return s;
+	}
+
+	public static String isUnaryOp(List<String> list) {
+		String[][] grammar = {{V.PLUS}, {V.MINUS}};
+		String s = executeG(grammar, list);
+		//		System.out.println("isUnaryOp " + s);
+		return s;
+	}
+
+	public static String isNumber(List<String> list) {
+		//		String tmp = list.get(index++);
+		String tmp = list.get(index);
+		//		System.out.println("isNumber "+tmp);
+		try {
+			Integer.parseInt(tmp);
+		} catch (NumberFormatException e) {
+			//			index--;
+			return null;
+		}
+		//		return "i32 " + tmp;
+		return tmp;
+	}
+
+	public static String isDecConst(List<String> list) {
+		return "";
+	}
+
+	public static String isOctConst(List<String> list) {
+		return "";
+	}
+
+	public static String isHexConst(List<String> list) {
+		return "";
+	}
+
+	public static String isNoneZeroDigit(List<String> list) {
+		return "";
+	}
+
+	public static String isDigit(List<String> list) {
+		return "";
+	}
+
+	public static String isOctDigit(List<String> list) {
+		return "";
+	}
+
+	public static String isHexPre(List<String> list) {
+		return "";
+	}
+
+	public static String isHexDigit(List<String> list) {
+		return "";
 	}
 
 	public static String getMul(String s) {
@@ -435,108 +686,5 @@ public class Recur {
 			return null;
 		}
 		return s;
-	}
-
-	public static String isMulExp(List<String> list) {
-		String[][] grammar = {{V.UnaryExp, V.MulExpPlus}};
-		String s = executeG(grammar, list);
-		//		System.out.println("isME " + s);
-		return getMul(s);
-	}
-
-	public static String isMulExpPlus(List<String> list) {
-		String[][] grammar =
-			{{V.MUL, V.UnaryExp, V.MulExpPlus}, {V.DIV, V.UnaryExp, V.MulExpPlus}, {V.MOD, V.UnaryExp, V.MulExpPlus},
-				{V.EPS}};
-		String s = executeG(grammar, list);
-		//		System.out.println("isMEP " + s);
-		return s;
-	}
-
-	public static String isUnaryExp(List<String> list) {
-		String[][] grammar = {{V.PrimaryExp}, {V.UnaryOp, V.UnaryExp}};
-		String s = executeG(grammar, list);
-		//		System.out.println("isUnaryExp " + s);
-		if (s == null) {
-			return null;
-		}
-		int flag = 1;
-		String ss = "";
-		for (int i = 0; i < s.length(); i++) {
-			if (s.charAt(i) == '-') {
-				flag = -flag;
-			} else if (s.charAt(i) == '+') {
-				continue;
-			} else {
-				ss += s.charAt(i);
-			}
-		}
-		return ss.equals("0") ? "0" : flag > 0 ? ss : "-" + ss;
-	}
-
-	public static String isPrimaryExp(List<String> list) {
-		String[][] grammar = {{V.SBL, V.Exp, V.SBR}, {V.Number}};
-		String s = executeG(grammar, list);
-		if (s == null) {
-			return null;
-		}
-		if (s.charAt(0) == '(' && s.charAt(s.length() - 1) == ')') {
-			return s.substring(1, s.length() - 1);
-		}
-		//		System.out.println("isPrimaryExp " + s);
-		return s;
-	}
-
-	public static String isUnaryOp(List<String> list) {
-		String[][] grammar = {{V.PLUS}, {V.MINUS}};
-		String s = executeG(grammar, list);
-		//		System.out.println("isUnaryOp " + s);
-		return s;
-	}
-
-	public static String isNumber(List<String> list) {
-		//		String tmp = list.get(index++);
-		String tmp = list.get(index);
-		//		System.out.println("isNumber "+tmp);
-		try {
-			Integer.parseInt(tmp);
-		} catch (NumberFormatException e) {
-			//			index--;
-			return null;
-		}
-		//		return "i32 " + tmp;
-		return tmp;
-	}
-
-	public static String isDecConst(List<String> list) {
-		return "";
-	}
-
-	public static String isOctConst(List<String> list) {
-		return "";
-	}
-
-	public static String isHexConst(List<String> list) {
-		return "";
-	}
-
-	public static String isNoneZeroDigit(List<String> list) {
-		return "";
-	}
-
-	public static String isDigit(List<String> list) {
-		return "";
-	}
-
-	public static String isOctDigit(List<String> list) {
-		return "";
-	}
-
-	public static String isHexPre(List<String> list) {
-		return "";
-	}
-
-	public static String isHexDigit(List<String> list) {
-		return "";
 	}
 }
