@@ -23,17 +23,19 @@ stmt         : lVal '=' exp ';'
 exp          : addExp;
 cond         : lOrExp ;// [new]
 lVal         : Ident;
-primaryExp   : '(' exp ')'
-                | lVal
-                | Number;
+primaryExp   : '(' exp ')' # primaryExp1
+                | lVal # primaryExp2
+                | Number # primaryExp3
+                ;
 addExp       : mulExp
                 | addExp ('+' | '−') mulExp;
 mulExp       : unaryExp
                 | mulExp ('*' | '/' | '%') unaryExp;
 
-unaryExp     : Ident '(' funcRParams? ')'
-                | primaryExp
-                | unaryOp unaryExp;
+unaryExp     : Ident '(' funcRParams? ')' # calcResES
+                | primaryExp # normResES
+                | unaryOp unaryExp # symbolResES
+                ;
 unaryOp      : '+' | '-' | '!'  ;// 保证 '!' 只出现在 Cond 中 [changed]
 funcRParams  : exp (',' exp)*;
 relExp       : addExp
@@ -45,8 +47,9 @@ lAndExp      : eqExp
 lOrExp       : lAndExp
                 | lOrExp '||' lAndExp;  // [new]
 
-//fragment FuncType: 'int';
-BType : 'int';
+fragment INT: 'int';
+BType : INT;
+FuncType: INT;
 Ident : Nondigit (Nondigit | Digit)*;
 Number : DecimalConst | OctalConst | HexaDecimalConst;
 fragment DecimalConst : '0' | [1-9] Digit*;

@@ -219,13 +219,37 @@ public class HelloBaseListener implements HelloListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrimaryExp(HelloParser.PrimaryExpContext ctx) { }
+	@Override public void enterPrimaryExp1(HelloParser.PrimaryExp1Context ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrimaryExp(HelloParser.PrimaryExpContext ctx) { }
+	@Override public void exitPrimaryExp1(HelloParser.PrimaryExp1Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPrimaryExp2(HelloParser.PrimaryExp2Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPrimaryExp2(HelloParser.PrimaryExp2Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPrimaryExp3(HelloParser.PrimaryExp3Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPrimaryExp3(HelloParser.PrimaryExp3Context ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -255,13 +279,37 @@ public class HelloBaseListener implements HelloListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterUnaryExp(HelloParser.UnaryExpContext ctx) { }
+	@Override public void enterCalcResES(HelloParser.CalcResESContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUnaryExp(HelloParser.UnaryExpContext ctx) { }
+	@Override public void exitCalcResES(HelloParser.CalcResESContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNormResES(HelloParser.NormResESContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNormResES(HelloParser.NormResESContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSymbolResES(HelloParser.SymbolResESContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSymbolResES(HelloParser.SymbolResESContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

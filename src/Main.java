@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class Main {
+
     public static void main(String[] args) throws Exception {
         try{
             // 读取标准输入

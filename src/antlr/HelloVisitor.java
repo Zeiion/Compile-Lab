@@ -112,11 +112,26 @@ public interface HelloVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLVal(HelloParser.LValContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link HelloParser#primaryExp}.
+	 * Visit a parse tree produced by the {@code primaryExp1}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPrimaryExp(HelloParser.PrimaryExpContext ctx);
+	T visitPrimaryExp1(HelloParser.PrimaryExp1Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code primaryExp2}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrimaryExp2(HelloParser.PrimaryExp2Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code primaryExp3}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrimaryExp3(HelloParser.PrimaryExp3Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link HelloParser#addExp}.
 	 * @param ctx the parse tree
@@ -130,11 +145,26 @@ public interface HelloVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMulExp(HelloParser.MulExpContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link HelloParser#unaryExp}.
+	 * Visit a parse tree produced by the {@code calcResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitUnaryExp(HelloParser.UnaryExpContext ctx);
+	T visitCalcResES(HelloParser.CalcResESContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code normResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNormResES(HelloParser.NormResESContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code symbolResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSymbolResES(HelloParser.SymbolResESContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link HelloParser#unaryOp}.
 	 * @param ctx the parse tree

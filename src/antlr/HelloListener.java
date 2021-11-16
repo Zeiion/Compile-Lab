@@ -177,15 +177,41 @@ public interface HelloListener extends ParseTreeListener {
 	 */
 	void exitLVal(HelloParser.LValContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link HelloParser#primaryExp}.
+	 * Enter a parse tree produced by the {@code primaryExp1}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
 	 * @param ctx the parse tree
 	 */
-	void enterPrimaryExp(HelloParser.PrimaryExpContext ctx);
+	void enterPrimaryExp1(HelloParser.PrimaryExp1Context ctx);
 	/**
-	 * Exit a parse tree produced by {@link HelloParser#primaryExp}.
+	 * Exit a parse tree produced by the {@code primaryExp1}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
 	 * @param ctx the parse tree
 	 */
-	void exitPrimaryExp(HelloParser.PrimaryExpContext ctx);
+	void exitPrimaryExp1(HelloParser.PrimaryExp1Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code primaryExp2}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void enterPrimaryExp2(HelloParser.PrimaryExp2Context ctx);
+	/**
+	 * Exit a parse tree produced by the {@code primaryExp2}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void exitPrimaryExp2(HelloParser.PrimaryExp2Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code primaryExp3}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void enterPrimaryExp3(HelloParser.PrimaryExp3Context ctx);
+	/**
+	 * Exit a parse tree produced by the {@code primaryExp3}
+	 * labeled alternative in {@link HelloParser#primaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void exitPrimaryExp3(HelloParser.PrimaryExp3Context ctx);
 	/**
 	 * Enter a parse tree produced by {@link HelloParser#addExp}.
 	 * @param ctx the parse tree
@@ -207,15 +233,41 @@ public interface HelloListener extends ParseTreeListener {
 	 */
 	void exitMulExp(HelloParser.MulExpContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link HelloParser#unaryExp}.
+	 * Enter a parse tree produced by the {@code calcResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
 	 * @param ctx the parse tree
 	 */
-	void enterUnaryExp(HelloParser.UnaryExpContext ctx);
+	void enterCalcResES(HelloParser.CalcResESContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link HelloParser#unaryExp}.
+	 * Exit a parse tree produced by the {@code calcResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
 	 * @param ctx the parse tree
 	 */
-	void exitUnaryExp(HelloParser.UnaryExpContext ctx);
+	void exitCalcResES(HelloParser.CalcResESContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code normResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void enterNormResES(HelloParser.NormResESContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code normResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void exitNormResES(HelloParser.NormResESContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code symbolResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void enterSymbolResES(HelloParser.SymbolResESContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code symbolResES}
+	 * labeled alternative in {@link HelloParser#unaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void exitSymbolResES(HelloParser.SymbolResESContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link HelloParser#unaryOp}.
 	 * @param ctx the parse tree

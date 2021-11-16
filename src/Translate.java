@@ -1,63 +1,110 @@
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Translate extends HelloBaseListener {
 
+    public String output = "";
+    public Map<String, String> vars = new HashMap<>();
+    public ParseTreeProperty<String> strings = new ParseTreeProperty<>();
+
+    public static void sout(String s){
+        System.out.print(s);
+    }
+    public static void debugSout(String s){
+//        System.out.println(s);
+    }
        
     @Override public void exitHello(HelloParser.HelloContext ctx) { }
 
-    @Override public void exitCompUnit(HelloParser.CompUnitContext ctx) { }
+    @Override public void exitFuncDef(HelloParser.FuncDefContext ctx) {
+        sout("define dso_local i32 @main(){\n\t"+ strings.get(ctx.block()) +"}");
+    }
 
-    @Override public void exitDecl(HelloParser.DeclContext ctx) { }
-       
-    @Override public void exitConstDecl(HelloParser.ConstDeclContext ctx) { }
-       
-    @Override public void exitConstDef(HelloParser.ConstDefContext ctx) { }
-       
-    @Override public void exitConstInitVal(HelloParser.ConstInitValContext ctx) { }
-
-    @Override public void exitConstExp(HelloParser.ConstExpContext ctx) { }
-       
-    @Override public void exitVarDecl(HelloParser.VarDeclContext ctx) { }
-       
-    @Override public void exitVarDef(HelloParser.VarDefContext ctx) { }
-       
-    @Override public void exitInitVal(HelloParser.InitValContext ctx) { }
-
-    @Override public void exitFuncDef(HelloParser.FuncDefContext ctx) { }
-
-    @Override public void exitBlock(HelloParser.BlockContext ctx) { }
+    @Override public void exitBlock(HelloParser.BlockContext ctx) {
+        String tmp = "";
+        for(HelloParser.BlockItemContext i: ctx.blockItem()){
+            tmp+=strings.get(i.stmt())+'\n';
+        }
+        strings.put(ctx,tmp);
+    }
 
     @Override public void exitBlockItem(HelloParser.BlockItemContext ctx) { }
        
-    @Override public void exitStmt(HelloParser.StmtContext ctx) { }
-       
-    @Override public void exitExp(HelloParser.ExpContext ctx) { }
-       
-    @Override public void exitCond(HelloParser.CondContext ctx) { }
-       
-    @Override public void exitLVal(HelloParser.LValContext ctx) { }
+    @Override public void exitStmt(HelloParser.StmtContext ctx) {
+        strings.put(ctx,"ret i32 "+ strings.get(ctx.exp()));
+    }
+    @Override public void exitExp(HelloParser.ExpContext ctx) {
+        String tmp = strings.get(ctx.addExp());
+        strings.put(ctx,tmp);
+        debugSout("exp"+tmp);
+    }
+    @Override public void exitAddExp(HelloParser.AddExpContext ctx) {
+        String tmp = strings.get(ctx.mulExp());
+        strings.put(ctx,tmp);
+        debugSout("add exp"+tmp);
+    }
+    @Override public void exitMulExp(HelloParser.MulExpContext ctx) {
+        String tmp = "";
+        if(ctx.getChildCount()==1){
+            tmp = strings.get(ctx.unaryExp());
+        }else{
 
-    @Override public void exitPrimaryExp(HelloParser.PrimaryExpContext ctx) { }
-       
-    @Override public void exitAddExp(HelloParser.AddExpContext ctx) { }
-       
-    @Override public void exitMulExp(HelloParser.MulExpContext ctx) { }
+        }
+        debugSout("mul exp"+ tmp);
+        strings.put(ctx,tmp);
+    }
 
-    @Override public void exitUnaryExp(HelloParser.UnaryExpContext ctx) { }
-       
-    @Override public void exitUnaryOp(HelloParser.UnaryOpContext ctx) { }
-       
-    @Override public void exitFuncRParams(HelloParser.FuncRParamsContext ctx) { }
-       
-    @Override public void exitRelExp(HelloParser.RelExpContext ctx) { }
-       
-    @Override public void exitEqExp(HelloParser.EqExpContext ctx) { }
-       
-    @Override public void exitLAndExp(HelloParser.LAndExpContext ctx) { }
 
-    @Override public void exitLOrExp(HelloParser.LOrExpContext ctx) { }
+    // unaryExp 表达式计算
+    @Override public void exitCalcResES(HelloParser.CalcResESContext ctx) {
+
+    }
+    @Override public void exitNormResES(HelloParser.NormResESContext ctx) {
+        String tmp = strings.get(ctx.primaryExp());
+        strings.put(ctx,tmp);
+        debugSout("exit n es"+tmp);
+    }
+    @Override public void exitSymbolResES(HelloParser.SymbolResESContext ctx) {
+        int tmp = Integer.parseInt(strings.get(ctx.unaryExp()));
+        String symbol = ctx.unaryOp().getText();
+        switch (symbol){
+            case "+":
+                break;
+            case "-":
+                tmp = -tmp;
+                break;
+            case "!":
+                break;
+        }
+        debugSout("tmp is "+tmp);
+        strings.put(ctx,tmp+"");
+    }
+
+    @Override public void exitPrimaryExp1(HelloParser.PrimaryExp1Context ctx) {
+        String tmp = strings.get(ctx.exp());
+        strings.put(ctx,tmp);
+        debugSout("p e 1 "+tmp);
+    }
+
+    @Override public void exitPrimaryExp2(HelloParser.PrimaryExp2Context ctx) { }
+
+    @Override public void exitPrimaryExp3(HelloParser.PrimaryExp3Context ctx) {
+        debugSout("----");
+        debugSout(ctx.Number()+"");
+        int tmp = 0;
+        String number = ctx.Number().toString();
+        if(number.startsWith("0x")||number.startsWith("0X")){
+            tmp = Integer.valueOf(number,16);
+        }else if(number.startsWith("0")){
+            tmp = Integer.valueOf(number,8);
+        }
+        strings.put(ctx,tmp+"");
+    }
 
 
     @Override public void enterEveryRule(ParserRuleContext ctx) { }
@@ -67,6 +114,5 @@ public class Translate extends HelloBaseListener {
     @Override public void visitTerminal(TerminalNode node) { }
        
     @Override public void visitErrorNode(ErrorNode node) {
-        System.out.println(node);
     }
 }
