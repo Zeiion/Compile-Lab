@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Lab1 {
 
 	public static String ERR = "err";
-	public static String[] keyWords = {"int", "main"};
+	public static String[] keyWords = {"int", "return"};
 	private static char[] ops = {';', '(', ')', '{', '}', '+', '-', '*', '/', '%', '='};
 
 	public static boolean isDigit(char c) {
@@ -133,7 +133,7 @@ public class Lab1 {
 				continue;
 			} else if (isLetter(line.charAt(i))) {
 				StringBuilder tmpLetter = new StringBuilder();
-				while (isLetter(line.charAt(i))) {
+				while (isLetter(line.charAt(i))||isDigit(line.charAt(i))) {
 					tmpLetter.append(line.charAt(i));
 					if (i + 1 < len) {
 						i++;

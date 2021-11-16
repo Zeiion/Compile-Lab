@@ -34,8 +34,9 @@ public class Main {
 		}
 
 		System.out.println("----");
+		int i = 0;
 		for (String s : out) {
-			System.out.println(s);
+			System.out.println((i++) + " " + s);
 		}
 		System.out.println("----");
 
@@ -46,7 +47,7 @@ public class Main {
 		//			System.out.println(res1);
 		//			exit(0);
 		//		}
-		System.out.println(Recur.isCompUnit(out));
+		System.out.println(Recur.isCompUnit(out, 0));
 		exit(0);
 	}
 }

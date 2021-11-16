@@ -2,13 +2,15 @@ import java.util.Scanner;
 
 /**
  * V中有所有VN/VT的定义
-*/
+ */
 public class V {
 	//VN
 	public static final String CompUnit = "CompUnit";
 	public static final String FuncDef = "FuncDef";
 	public static final String FuncType = "FuncType";
 	public static final String Ident = "Ident";
+	public static final String IdentDef = "IdentDef";
+	public static final String IdentPlus = "IdentPlus";
 	public static final String Block = "Block";
 	public static final String BlockItems = "BlockItems";
 	public static final String BlockItem = "BlockItem";
@@ -23,8 +25,6 @@ public class V {
 	public static final String VarDef = "VarDef";
 	public static final String VarDefs = "VarDefs";
 	public static final String InitVal = "InitVal";
-
-
 
 	public static final String Stmt = "Stmt";
 	public static final String LVal = "LVal";
@@ -43,6 +43,7 @@ public class V {
 	public static final String OctConst = "OctConst";
 	public static final String HexConst = "HexConst";
 	public static final String NoneZeroDigit = "NoneZeroDigit";
+	public static final String NoneDigit = "NoneDigit";
 	public static final String Digit = "Digit";
 	public static final String OctDigit = "OctDigit";
 	public static final String HexDigit = "HexDigit";
