@@ -102,6 +102,8 @@ public class Translate extends HelloBaseListener {
             tmp = Integer.valueOf(number,16);
         }else if(number.startsWith("0")){
             tmp = Integer.valueOf(number,8);
+        }else{
+            tmp = Integer.parseInt(number);
         }
         strings.put(ctx,tmp+"");
     }
