@@ -1,4 +1,5 @@
 FROM openjdk:14
 COPY . /myapp/
-WORKDIR /myapp/
-RUN javac -cp src/lib/antlr-4.9.2-complete.jar:. src/Main.java -d dst/
+WORKDIR /myapp/src
+RUN javac -cp ./antlr-4.9.2-complete.jar:. ./Main.java -d dst/
+WORKDIR /myapp/src/dst
