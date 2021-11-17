@@ -88,11 +88,40 @@ public interface HelloVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlockItem(HelloParser.BlockItemContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link HelloParser#stmt}.
+	 * Visit a parse tree produced by the {@code stmt1}
+	 * labeled alternative in {@link HelloParser#stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStmt(HelloParser.StmtContext ctx);
+	T visitStmt1(HelloParser.Stmt1Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code stmt2}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStmt2(HelloParser.Stmt2Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code stmt3}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStmt3(HelloParser.Stmt3Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code stmt4}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStmt4(HelloParser.Stmt4Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code stmt5}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStmt5(HelloParser.Stmt5Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link HelloParser#exp}.
 	 * @param ctx the parse tree

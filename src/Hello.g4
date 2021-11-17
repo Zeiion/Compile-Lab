@@ -15,11 +15,12 @@ initVal      : exp;
 funcDef      : BType Ident '(' ')' block; // 保证当前 Ident 只为 "main"
 block        : '{' blockItem* '}';
 blockItem    : decl | stmt;
-stmt         : lVal '=' exp ';'
-                | block
-                | exp? ';'
-                | 'if' '(' cond ')' stmt ('else' stmt)?
-                | 'return' exp ';'; // [changed]
+stmt         : lVal '=' exp ';' # stmt1
+                | block # stmt2
+                | exp? ';' # stmt3
+                | 'if' '(' cond ')' stmt ('else' stmt)? # stmt4
+                | 'return' exp ';' # stmt5
+                ; // [changed]
 exp          : addExp;
 cond         : lOrExp ;// [new]
 lVal         : Ident;

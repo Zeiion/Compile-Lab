@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -7,7 +8,7 @@ public class Translate extends HelloBaseListener {
 
 	public String output = "";
 	public int index = 0;
-	//    public HashMap<String, Integer> indexMap = new HashMap<>();
+	public HashMap<String, Integer> varIndexMap = new HashMap<>();
 	public static ParseTreeProperty<String> result = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Integer> location = new ParseTreeProperty<>();
 
@@ -38,15 +39,70 @@ public class Translate extends HelloBaseListener {
 	@Override public void exitBlockItem(HelloParser.BlockItemContext ctx) {
 	}
 
-	@Override public void exitStmt(HelloParser.StmtContext ctx) {
+	//  lVal '=' exp ';' # stmt1
+	@Override public void exitStmt1(HelloParser.Stmt1Context ctx) {
+		int tmpIndex = location.get(ctx.exp());
+		int tmpTarget = location.get(ctx.lVal());
+		output += "%" + (++index) + " = load i32, i32* %" + tmpIndex + ", align 4\n\t";
+		output += "store i32 %" + index + ", i32* %" + tmpTarget + ",align 4\n\t";
+	}
+
+	//	'return' exp ';' # stmt5
+	@Override public void exitStmt5(HelloParser.Stmt5Context ctx) {
 		result.put(ctx, "ret i32 %" + location.get(ctx.exp()));
 		output += "%" + (++index) + " = load i32, i32* %" + location.get(ctx.exp()) + ", align 4\n\t";
 		output += "ret i32 %" + index + "\n";
 	}
 
+	//	// 赋值语句，向后看齐
+	//	@Override public void exitVarDecl(HelloParser.VarDeclContext ctx) {
+	//
+	//	}
+	//
+	//	@Override public void exitConstDecl(HelloParser.ConstDeclContext ctx) {
+	//	}
+
+	/**
+	 * Ident | Ident '=' initVal;
+	 */
+	@Override public void exitVarDef(HelloParser.VarDefContext ctx) {
+		String tmpVar = ctx.Ident().getText();
+		if (ctx.getChildCount() == 1) {
+			//Ident
+			output += "%" + (++index) + " = alloca i32, align 4\n\t";
+			varIndexMap.put(tmpVar, index);
+		} else {
+			//Ident = initVal
+			output += "%" + (++index) + " = load i32, i32* %" + location.get(ctx.initVal()) + ", align 4\n\t";
+			output += "%" + (++index) + " = alloca i32, align 4\n\t";
+			varIndexMap.put(tmpVar, index);
+			output += "store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t";
+		}
+	}
+
+	@Override public void exitConstDef(HelloParser.ConstDefContext ctx) {
+		String tmpVar = ctx.Ident().getText();
+		output += "%" + (++index) + " = load i32, i32* %" + location.get(ctx.constInitVal()) + ", align 4\n\t";
+		output += "%" + (++index) + " = alloca i32, align 4\n\t";
+		varIndexMap.put(tmpVar, index);
+		output += "store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t";
+	}
+
+	@Override public void exitInitVal(HelloParser.InitValContext ctx) {
+		location.put(ctx, location.get(ctx.exp()));
+	}
+
+	@Override public void exitConstInitVal(HelloParser.ConstInitValContext ctx) {
+		location.put(ctx, location.get(ctx.constExp()));
+	}
+
 	@Override public void exitExp(HelloParser.ExpContext ctx) {
 		location.put(ctx, location.get(ctx.addExp()));
 		//        result.put(ctx,tmp);
+	}
+
+	@Override public void exitConstExp(HelloParser.ConstExpContext ctx) {
+		location.put(ctx, location.get(ctx.addExp()));
 	}
 
 	/* mulExp */
@@ -171,6 +227,7 @@ public class Translate extends HelloBaseListener {
 	}
 
 	@Override public void exitPrimaryExp2(HelloParser.PrimaryExp2Context ctx) {
+		location.put(ctx, location.get(ctx.lVal()));
 	}
 
 	@Override public void exitPrimaryExp3(HelloParser.PrimaryExp3Context ctx) {
@@ -189,6 +246,11 @@ public class Translate extends HelloBaseListener {
 		location.put(ctx, index);
 		result.put(ctx, tmp + "");
 		debugSout(ctx, ctx.Number());
+	}
+
+	//Ident
+	@Override public void exitLVal(HelloParser.LValContext ctx) {
+		location.put(ctx, varIndexMap.get(ctx.Ident().getText()));
 	}
 
 	@Override public void enterEveryRule(ParserRuleContext ctx) {

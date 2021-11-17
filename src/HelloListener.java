@@ -137,15 +137,65 @@ public interface HelloListener extends ParseTreeListener {
 	 */
 	void exitBlockItem(HelloParser.BlockItemContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link HelloParser#stmt}.
+	 * Enter a parse tree produced by the {@code stmt1}
+	 * labeled alternative in {@link HelloParser#stmt}.
 	 * @param ctx the parse tree
 	 */
-	void enterStmt(HelloParser.StmtContext ctx);
+	void enterStmt1(HelloParser.Stmt1Context ctx);
 	/**
-	 * Exit a parse tree produced by {@link HelloParser#stmt}.
+	 * Exit a parse tree produced by the {@code stmt1}
+	 * labeled alternative in {@link HelloParser#stmt}.
 	 * @param ctx the parse tree
 	 */
-	void exitStmt(HelloParser.StmtContext ctx);
+	void exitStmt1(HelloParser.Stmt1Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code stmt2}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterStmt2(HelloParser.Stmt2Context ctx);
+	/**
+	 * Exit a parse tree produced by the {@code stmt2}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitStmt2(HelloParser.Stmt2Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code stmt3}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterStmt3(HelloParser.Stmt3Context ctx);
+	/**
+	 * Exit a parse tree produced by the {@code stmt3}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitStmt3(HelloParser.Stmt3Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code stmt4}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterStmt4(HelloParser.Stmt4Context ctx);
+	/**
+	 * Exit a parse tree produced by the {@code stmt4}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitStmt4(HelloParser.Stmt4Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code stmt5}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterStmt5(HelloParser.Stmt5Context ctx);
+	/**
+	 * Exit a parse tree produced by the {@code stmt5}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitStmt5(HelloParser.Stmt5Context ctx);
 	/**
 	 * Enter a parse tree produced by {@link HelloParser#exp}.
 	 * @param ctx the parse tree
