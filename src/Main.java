@@ -19,6 +19,7 @@ public class Main {
 			// 语法分析器
 			HelloParser parser = new HelloParser(tokens);
 
+			//error 处理
 			parser.setErrorHandler(new ErrorStrategy());
 
 			// 针对hello规则开始语法分析
