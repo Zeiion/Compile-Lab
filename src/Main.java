@@ -30,5 +30,6 @@ public class Main {
 		} catch (Exception e) {
 			System.exit(-1);
 		}
+		System.exit(0);
 	}
 }
