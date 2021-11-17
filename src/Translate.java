@@ -17,7 +17,7 @@ public class Translate extends HelloBaseListener {
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
-		System.out.println(ctx.getClass() + " " + location.get(ctx));
+		//		System.out.println(ctx.getClass() + " " + location.get(ctx));
 	}
 
 	@Override public void exitHello(HelloParser.HelloContext ctx) {
