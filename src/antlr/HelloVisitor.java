@@ -1,4 +1,4 @@
-// Generated from /home/zeiion/IdeaProjects/compile-antlr/src/Hello.g4 by ANTLR 4.9.2
+// Generated from /home/zeiion/桌面/lab/Compile-Lab/src/Hello.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -133,17 +133,33 @@ public interface HelloVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrimaryExp3(HelloParser.PrimaryExp3Context ctx);
 	/**
-	 * Visit a parse tree produced by {@link HelloParser#addExp}.
+	 * Visit a parse tree produced by the {@code addExp2}
+	 * labeled alternative in {@link HelloParser#addExp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAddExp(HelloParser.AddExpContext ctx);
+	T visitAddExp2(HelloParser.AddExp2Context ctx);
 	/**
-	 * Visit a parse tree produced by {@link HelloParser#mulExp}.
+	 * Visit a parse tree produced by the {@code addExp1}
+	 * labeled alternative in {@link HelloParser#addExp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMulExp(HelloParser.MulExpContext ctx);
+	T visitAddExp1(HelloParser.AddExp1Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code mulExp2}
+	 * labeled alternative in {@link HelloParser#mulExp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMulExp2(HelloParser.MulExp2Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code mulExp1}
+	 * labeled alternative in {@link HelloParser#mulExp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMulExp1(HelloParser.MulExp1Context ctx);
 	/**
 	 * Visit a parse tree produced by the {@code calcResES}
 	 * labeled alternative in {@link HelloParser#unaryExp}.

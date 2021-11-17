@@ -1,4 +1,4 @@
-// Generated from /home/zeiion/IdeaProjects/compile-antlr/src/Hello.g4 by ANTLR 4.9.2
+// Generated from /home/zeiion/桌面/lab/Compile-Lab/src/Hello.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class HelloParser extends Parser {
 	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
 
+	ErrorStrategy _err = new ErrorStrategy();
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
@@ -19,8 +20,8 @@ public class HelloParser extends Parser {
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, T__10=11, T__11=12, T__12=13, T__13=14, T__14=15, T__15=16, T__16=17, 
 		T__17=18, T__18=19, T__19=20, T__20=21, T__21=22, T__22=23, T__23=24, 
-		T__24=25, T__25=26, BType=27, FuncType=28, Ident=29, Number=30, LINE_COMMENT=31, 
-		COMMENT=32, WS=33;
+		T__24=25, BType=26, FuncType=27, Ident=28, Number=29, LINE_COMMENT=30, 
+		COMMENT=31, WS=32;
 	public static final int
 		RULE_hello = 0, RULE_compUnit = 1, RULE_decl = 2, RULE_constDecl = 3, 
 		RULE_constDef = 4, RULE_constInitVal = 5, RULE_constExp = 6, RULE_varDecl = 7, 
@@ -42,8 +43,8 @@ public class HelloParser extends Parser {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, "'const'", "','", "';'", "'='", "'('", "')'", "'{'", "'}'", "'if'", 
-			"'else'", "'return'", "'+'", "'\u2212'", "'*'", "'/'", "'%'", "'-'", 
-			"'!'", "'<'", "'>'", "'<='", "'>='", "'=='", "'!='", "'&&'", "'||'"
+			"'else'", "'return'", "'+'", "'-'", "'*'", "'/'", "'%'", "'!'", "'<'", 
+			"'>'", "'<='", "'>='", "'=='", "'!='", "'&&'", "'||'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -51,8 +52,8 @@ public class HelloParser extends Parser {
 		return new String[] {
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, null, null, null, 
-			null, null, null, "BType", "FuncType", "Ident", "Number", "LINE_COMMENT", 
-			"COMMENT", "WS"
+			null, null, "BType", "FuncType", "Ident", "Number", "LINE_COMMENT", "COMMENT", 
+			"WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -141,8 +142,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -185,8 +186,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -225,7 +226,7 @@ public class HelloParser extends Parser {
 		enterRule(_localctx, 4, RULE_decl);
 		try {
 			setState(60);
-			_errHandler.sync(this);
+			_err.sync(this);
 			switch (_input.LA(1)) {
 			case T__0:
 				enterOuterAlt(_localctx, 1);
@@ -247,8 +248,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -297,7 +298,7 @@ public class HelloParser extends Parser {
 			setState(64);
 			constDef();
 			setState(69);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__1) {
 				{
@@ -309,7 +310,7 @@ public class HelloParser extends Parser {
 				}
 				}
 				setState(71);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_la = _input.LA(1);
 			}
 			setState(72);
@@ -318,8 +319,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -367,8 +368,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -411,8 +412,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -455,8 +456,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -503,7 +504,7 @@ public class HelloParser extends Parser {
 			setState(83);
 			varDef();
 			setState(88);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__1) {
 				{
@@ -515,7 +516,7 @@ public class HelloParser extends Parser {
 				}
 				}
 				setState(90);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_la = _input.LA(1);
 			}
 			setState(91);
@@ -524,8 +525,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -562,7 +563,7 @@ public class HelloParser extends Parser {
 		enterRule(_localctx, 16, RULE_varDef);
 		try {
 			setState(97);
-			_errHandler.sync(this);
+			_err.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -586,8 +587,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -630,8 +631,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -684,8 +685,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -729,9 +730,9 @@ public class HelloParser extends Parser {
 			setState(107);
 			match(T__6);
 			setState(111);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__2) | (1L << T__4) | (1L << T__6) | (1L << T__8) | (1L << T__10) | (1L << T__11) | (1L << T__16) | (1L << T__17) | (1L << BType) | (1L << Ident) | (1L << Number))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__2) | (1L << T__4) | (1L << T__6) | (1L << T__8) | (1L << T__10) | (1L << T__11) | (1L << T__12) | (1L << T__16) | (1L << BType) | (1L << Ident) | (1L << Number))) != 0)) {
 				{
 				{
 				setState(108);
@@ -739,7 +740,7 @@ public class HelloParser extends Parser {
 				}
 				}
 				setState(113);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_la = _input.LA(1);
 			}
 			setState(114);
@@ -748,8 +749,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -788,7 +789,7 @@ public class HelloParser extends Parser {
 		enterRule(_localctx, 24, RULE_blockItem);
 		try {
 			setState(118);
-			_errHandler.sync(this);
+			_err.sync(this);
 			switch (_input.LA(1)) {
 			case T__0:
 			case BType:
@@ -804,8 +805,8 @@ public class HelloParser extends Parser {
 			case T__8:
 			case T__10:
 			case T__11:
+			case T__12:
 			case T__16:
-			case T__17:
 			case Ident:
 			case Number:
 				enterOuterAlt(_localctx, 2);
@@ -820,8 +821,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -873,7 +874,7 @@ public class HelloParser extends Parser {
 		int _la;
 		try {
 			setState(143);
-			_errHandler.sync(this);
+			_err.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,8,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -899,9 +900,9 @@ public class HelloParser extends Parser {
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(127);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__4) | (1L << T__11) | (1L << T__16) | (1L << T__17) | (1L << Ident) | (1L << Number))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__4) | (1L << T__11) | (1L << T__12) | (1L << T__16) | (1L << Ident) | (1L << Number))) != 0)) {
 					{
 					setState(126);
 					exp();
@@ -926,7 +927,7 @@ public class HelloParser extends Parser {
 				setState(134);
 				stmt();
 				setState(137);
-				_errHandler.sync(this);
+				_err.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
 				case 1:
 					{
@@ -954,8 +955,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -998,8 +999,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -1042,8 +1043,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -1084,8 +1085,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -1165,7 +1166,7 @@ public class HelloParser extends Parser {
 		enterRule(_localctx, 34, RULE_primaryExp);
 		try {
 			setState(157);
-			_errHandler.sync(this);
+			_err.sync(this);
 			switch (_input.LA(1)) {
 			case T__4:
 				_localctx = new PrimaryExp1Context(_localctx);
@@ -1201,8 +1202,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -1211,27 +1212,54 @@ public class HelloParser extends Parser {
 	}
 
 	public static class AddExpContext extends ParserRuleContext {
-		public MulExpContext mulExp() {
-			return getRuleContext(MulExpContext.class,0);
-		}
-		public AddExpContext addExp() {
-			return getRuleContext(AddExpContext.class,0);
-		}
 		public AddExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_addExp; }
+	 
+		public AddExpContext() { }
+		public void copyFrom(AddExpContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class AddExp2Context extends AddExpContext {
+		public AddExpContext addExp() {
+			return getRuleContext(AddExpContext.class,0);
+		}
+		public MulExpContext mulExp() {
+			return getRuleContext(MulExpContext.class,0);
+		}
+		public AddExp2Context(AddExpContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterAddExp(this);
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterAddExp2(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitAddExp(this);
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitAddExp2(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitAddExp(this);
+			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitAddExp2(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class AddExp1Context extends AddExpContext {
+		public MulExpContext mulExp() {
+			return getRuleContext(MulExpContext.class,0);
+		}
+		public AddExp1Context(AddExpContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterAddExp1(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitAddExp1(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitAddExp1(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1253,12 +1281,16 @@ public class HelloParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			{
+			_localctx = new AddExp1Context(_localctx);
+			_ctx = _localctx;
+			_prevctx = _localctx;
+
 			setState(160);
 			mulExp(0);
 			}
 			_ctx.stop = _input.LT(-1);
 			setState(167);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,10,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
@@ -1266,18 +1298,18 @@ public class HelloParser extends Parser {
 					_prevctx = _localctx;
 					{
 					{
-					_localctx = new AddExpContext(_parentctx, _parentState);
+					_localctx = new AddExp2Context(new AddExpContext(_parentctx, _parentState));
 					pushNewRecursionContext(_localctx, _startState, RULE_addExp);
 					setState(162);
 					if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 					setState(163);
 					_la = _input.LA(1);
 					if ( !(_la==T__11 || _la==T__12) ) {
-					_errHandler.recoverInline(this);
+					_err.recoverInline(this);
 					}
 					else {
 						if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-						_errHandler.reportMatch(this);
+						_err.reportMatch(this);
 						consume();
 					}
 					setState(164);
@@ -1286,15 +1318,15 @@ public class HelloParser extends Parser {
 					} 
 				}
 				setState(169);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,10,_ctx);
 			}
 			}
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			unrollRecursionContexts(_parentctx);
@@ -1303,27 +1335,54 @@ public class HelloParser extends Parser {
 	}
 
 	public static class MulExpContext extends ParserRuleContext {
-		public UnaryExpContext unaryExp() {
-			return getRuleContext(UnaryExpContext.class,0);
-		}
-		public MulExpContext mulExp() {
-			return getRuleContext(MulExpContext.class,0);
-		}
 		public MulExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_mulExp; }
+	 
+		public MulExpContext() { }
+		public void copyFrom(MulExpContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class MulExp2Context extends MulExpContext {
+		public MulExpContext mulExp() {
+			return getRuleContext(MulExpContext.class,0);
+		}
+		public UnaryExpContext unaryExp() {
+			return getRuleContext(UnaryExpContext.class,0);
+		}
+		public MulExp2Context(MulExpContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterMulExp(this);
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterMulExp2(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitMulExp(this);
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitMulExp2(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitMulExp(this);
+			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitMulExp2(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class MulExp1Context extends MulExpContext {
+		public UnaryExpContext unaryExp() {
+			return getRuleContext(UnaryExpContext.class,0);
+		}
+		public MulExp1Context(MulExpContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterMulExp1(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitMulExp1(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitMulExp1(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1345,12 +1404,16 @@ public class HelloParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			{
+			_localctx = new MulExp1Context(_localctx);
+			_ctx = _localctx;
+			_prevctx = _localctx;
+
 			setState(171);
 			unaryExp();
 			}
 			_ctx.stop = _input.LT(-1);
 			setState(178);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,11,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
@@ -1358,18 +1421,18 @@ public class HelloParser extends Parser {
 					_prevctx = _localctx;
 					{
 					{
-					_localctx = new MulExpContext(_parentctx, _parentState);
+					_localctx = new MulExp2Context(new MulExpContext(_parentctx, _parentState));
 					pushNewRecursionContext(_localctx, _startState, RULE_mulExp);
 					setState(173);
 					if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 					setState(174);
 					_la = _input.LA(1);
 					if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__13) | (1L << T__14) | (1L << T__15))) != 0)) ) {
-					_errHandler.recoverInline(this);
+					_err.recoverInline(this);
 					}
 					else {
 						if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-						_errHandler.reportMatch(this);
+						_err.reportMatch(this);
 						consume();
 					}
 					setState(175);
@@ -1378,15 +1441,15 @@ public class HelloParser extends Parser {
 					} 
 				}
 				setState(180);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,11,_ctx);
 			}
 			}
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			unrollRecursionContexts(_parentctx);
@@ -1473,7 +1536,7 @@ public class HelloParser extends Parser {
 		int _la;
 		try {
 			setState(191);
-			_errHandler.sync(this);
+			_err.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,13,_ctx) ) {
 			case 1:
 				_localctx = new CalcResESContext(_localctx);
@@ -1484,9 +1547,9 @@ public class HelloParser extends Parser {
 				setState(182);
 				match(T__4);
 				setState(184);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__4) | (1L << T__11) | (1L << T__16) | (1L << T__17) | (1L << Ident) | (1L << Number))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__4) | (1L << T__11) | (1L << T__12) | (1L << T__16) | (1L << Ident) | (1L << Number))) != 0)) {
 					{
 					setState(183);
 					funcRParams();
@@ -1519,8 +1582,8 @@ public class HelloParser extends Parser {
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -1557,20 +1620,20 @@ public class HelloParser extends Parser {
 			{
 			setState(193);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__11) | (1L << T__16) | (1L << T__17))) != 0)) ) {
-			_errHandler.recoverInline(this);
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__11) | (1L << T__12) | (1L << T__16))) != 0)) ) {
+			_err.recoverInline(this);
 			}
 			else {
 				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-				_errHandler.reportMatch(this);
+				_err.reportMatch(this);
 				consume();
 			}
 			}
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -1614,7 +1677,7 @@ public class HelloParser extends Parser {
 			setState(195);
 			exp();
 			setState(200);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__1) {
 				{
@@ -1626,15 +1689,15 @@ public class HelloParser extends Parser {
 				}
 				}
 				setState(202);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_la = _input.LA(1);
 			}
 			}
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			exitRule();
@@ -1690,7 +1753,7 @@ public class HelloParser extends Parser {
 			}
 			_ctx.stop = _input.LT(-1);
 			setState(211);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,15,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
@@ -1704,12 +1767,12 @@ public class HelloParser extends Parser {
 					if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 					setState(207);
 					_la = _input.LA(1);
-					if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21))) != 0)) ) {
-					_errHandler.recoverInline(this);
+					if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20))) != 0)) ) {
+					_err.recoverInline(this);
 					}
 					else {
 						if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-						_errHandler.reportMatch(this);
+						_err.reportMatch(this);
 						consume();
 					}
 					setState(208);
@@ -1718,15 +1781,15 @@ public class HelloParser extends Parser {
 					} 
 				}
 				setState(213);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,15,_ctx);
 			}
 			}
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			unrollRecursionContexts(_parentctx);
@@ -1782,7 +1845,7 @@ public class HelloParser extends Parser {
 			}
 			_ctx.stop = _input.LT(-1);
 			setState(222);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,16,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
@@ -1796,12 +1859,12 @@ public class HelloParser extends Parser {
 					if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 					setState(218);
 					_la = _input.LA(1);
-					if ( !(_la==T__22 || _la==T__23) ) {
-					_errHandler.recoverInline(this);
+					if ( !(_la==T__21 || _la==T__22) ) {
+					_err.recoverInline(this);
 					}
 					else {
 						if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
-						_errHandler.reportMatch(this);
+						_err.reportMatch(this);
 						consume();
 					}
 					setState(219);
@@ -1810,15 +1873,15 @@ public class HelloParser extends Parser {
 					} 
 				}
 				setState(224);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,16,_ctx);
 			}
 			}
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			unrollRecursionContexts(_parentctx);
@@ -1873,7 +1936,7 @@ public class HelloParser extends Parser {
 			}
 			_ctx.stop = _input.LT(-1);
 			setState(233);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,17,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
@@ -1886,22 +1949,22 @@ public class HelloParser extends Parser {
 					setState(228);
 					if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 					setState(229);
-					match(T__24);
+					match(T__23);
 					setState(230);
 					eqExp(0);
 					}
 					} 
 				}
 				setState(235);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,17,_ctx);
 			}
 			}
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			unrollRecursionContexts(_parentctx);
@@ -1956,7 +2019,7 @@ public class HelloParser extends Parser {
 			}
 			_ctx.stop = _input.LT(-1);
 			setState(244);
-			_errHandler.sync(this);
+			_err.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,18,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
@@ -1969,22 +2032,22 @@ public class HelloParser extends Parser {
 					setState(239);
 					if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 					setState(240);
-					match(T__25);
+					match(T__24);
 					setState(241);
 					lAndExp(0);
 					}
 					} 
 				}
 				setState(246);
-				_errHandler.sync(this);
+				_err.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,18,_ctx);
 			}
 			}
 		}
 		catch (RecognitionException re) {
 			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
+			_err.reportError(this, re);
+			_err.recover(this, re);
 		}
 		finally {
 			unrollRecursionContexts(_parentctx);
@@ -2053,7 +2116,7 @@ public class HelloParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3#\u00fa\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\"\u00fa\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -2074,21 +2137,21 @@ public class HelloParser extends Parser {
 		"\7\33\u00ea\n\33\f\33\16\33\u00ed\13\33\3\34\3\34\3\34\3\34\3\34\3\34"+
 		"\7\34\u00f5\n\34\f\34\16\34\u00f8\13\34\3\34\2\b&(\60\62\64\66\35\2\4"+
 		"\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\66\2\7\3\2\16\17"+
-		"\3\2\20\22\4\2\16\16\23\24\3\2\25\30\3\2\31\32\2\u00f6\28\3\2\2\2\4:\3"+
+		"\3\2\20\22\4\2\16\17\23\23\3\2\24\27\3\2\30\31\2\u00f6\28\3\2\2\2\4:\3"+
 		"\2\2\2\6>\3\2\2\2\b@\3\2\2\2\nL\3\2\2\2\fP\3\2\2\2\16R\3\2\2\2\20T\3\2"+
 		"\2\2\22c\3\2\2\2\24e\3\2\2\2\26g\3\2\2\2\30m\3\2\2\2\32x\3\2\2\2\34\u0091"+
 		"\3\2\2\2\36\u0093\3\2\2\2 \u0095\3\2\2\2\"\u0097\3\2\2\2$\u009f\3\2\2"+
 		"\2&\u00a1\3\2\2\2(\u00ac\3\2\2\2*\u00c1\3\2\2\2,\u00c3\3\2\2\2.\u00c5"+
 		"\3\2\2\2\60\u00cd\3\2\2\2\62\u00d8\3\2\2\2\64\u00e3\3\2\2\2\66\u00ee\3"+
 		"\2\2\289\5\4\3\29\3\3\2\2\2:;\5\26\f\2;\5\3\2\2\2<?\5\b\5\2=?\5\20\t\2"+
-		"><\3\2\2\2>=\3\2\2\2?\7\3\2\2\2@A\7\3\2\2AB\7\35\2\2BG\5\n\6\2CD\7\4\2"+
+		"><\3\2\2\2>=\3\2\2\2?\7\3\2\2\2@A\7\3\2\2AB\7\34\2\2BG\5\n\6\2CD\7\4\2"+
 		"\2DF\5\n\6\2EC\3\2\2\2FI\3\2\2\2GE\3\2\2\2GH\3\2\2\2HJ\3\2\2\2IG\3\2\2"+
-		"\2JK\7\5\2\2K\t\3\2\2\2LM\7\37\2\2MN\7\6\2\2NO\5\f\7\2O\13\3\2\2\2PQ\5"+
-		"\16\b\2Q\r\3\2\2\2RS\5&\24\2S\17\3\2\2\2TU\7\35\2\2UZ\5\22\n\2VW\7\4\2"+
+		"\2JK\7\5\2\2K\t\3\2\2\2LM\7\36\2\2MN\7\6\2\2NO\5\f\7\2O\13\3\2\2\2PQ\5"+
+		"\16\b\2Q\r\3\2\2\2RS\5&\24\2S\17\3\2\2\2TU\7\34\2\2UZ\5\22\n\2VW\7\4\2"+
 		"\2WY\5\22\n\2XV\3\2\2\2Y\\\3\2\2\2ZX\3\2\2\2Z[\3\2\2\2[]\3\2\2\2\\Z\3"+
-		"\2\2\2]^\7\5\2\2^\21\3\2\2\2_d\7\37\2\2`a\7\37\2\2ab\7\6\2\2bd\5\24\13"+
-		"\2c_\3\2\2\2c`\3\2\2\2d\23\3\2\2\2ef\5\36\20\2f\25\3\2\2\2gh\7\35\2\2"+
-		"hi\7\37\2\2ij\7\7\2\2jk\7\b\2\2kl\5\30\r\2l\27\3\2\2\2mq\7\t\2\2np\5\32"+
+		"\2\2\2]^\7\5\2\2^\21\3\2\2\2_d\7\36\2\2`a\7\36\2\2ab\7\6\2\2bd\5\24\13"+
+		"\2c_\3\2\2\2c`\3\2\2\2d\23\3\2\2\2ef\5\36\20\2f\25\3\2\2\2gh\7\34\2\2"+
+		"hi\7\36\2\2ij\7\7\2\2jk\7\b\2\2kl\5\30\r\2l\27\3\2\2\2mq\7\t\2\2np\5\32"+
 		"\16\2on\3\2\2\2ps\3\2\2\2qo\3\2\2\2qr\3\2\2\2rt\3\2\2\2sq\3\2\2\2tu\7"+
 		"\n\2\2u\31\3\2\2\2vy\5\6\4\2wy\5\34\17\2xv\3\2\2\2xw\3\2\2\2y\33\3\2\2"+
 		"\2z{\5\"\22\2{|\7\6\2\2|}\5\36\20\2}~\7\5\2\2~\u0092\3\2\2\2\177\u0092"+
@@ -2100,17 +2163,17 @@ public class HelloParser extends Parser {
 		"\20\2\u008f\u0090\7\5\2\2\u0090\u0092\3\2\2\2\u0091z\3\2\2\2\u0091\177"+
 		"\3\2\2\2\u0091\u0081\3\2\2\2\u0091\u0084\3\2\2\2\u0091\u008d\3\2\2\2\u0092"+
 		"\35\3\2\2\2\u0093\u0094\5&\24\2\u0094\37\3\2\2\2\u0095\u0096\5\66\34\2"+
-		"\u0096!\3\2\2\2\u0097\u0098\7\37\2\2\u0098#\3\2\2\2\u0099\u009a\7\7\2"+
+		"\u0096!\3\2\2\2\u0097\u0098\7\36\2\2\u0098#\3\2\2\2\u0099\u009a\7\7\2"+
 		"\2\u009a\u009b\5\36\20\2\u009b\u009c\7\b\2\2\u009c\u00a0\3\2\2\2\u009d"+
-		"\u00a0\5\"\22\2\u009e\u00a0\7 \2\2\u009f\u0099\3\2\2\2\u009f\u009d\3\2"+
-		"\2\2\u009f\u009e\3\2\2\2\u00a0%\3\2\2\2\u00a1\u00a2\b\24\1\2\u00a2\u00a3"+
+		"\u00a0\5\"\22\2\u009e\u00a0\7\37\2\2\u009f\u0099\3\2\2\2\u009f\u009d\3"+
+		"\2\2\2\u009f\u009e\3\2\2\2\u00a0%\3\2\2\2\u00a1\u00a2\b\24\1\2\u00a2\u00a3"+
 		"\5(\25\2\u00a3\u00a9\3\2\2\2\u00a4\u00a5\f\3\2\2\u00a5\u00a6\t\2\2\2\u00a6"+
 		"\u00a8\5(\25\2\u00a7\u00a4\3\2\2\2\u00a8\u00ab\3\2\2\2\u00a9\u00a7\3\2"+
 		"\2\2\u00a9\u00aa\3\2\2\2\u00aa\'\3\2\2\2\u00ab\u00a9\3\2\2\2\u00ac\u00ad"+
 		"\b\25\1\2\u00ad\u00ae\5*\26\2\u00ae\u00b4\3\2\2\2\u00af\u00b0\f\3\2\2"+
 		"\u00b0\u00b1\t\3\2\2\u00b1\u00b3\5*\26\2\u00b2\u00af\3\2\2\2\u00b3\u00b6"+
 		"\3\2\2\2\u00b4\u00b2\3\2\2\2\u00b4\u00b5\3\2\2\2\u00b5)\3\2\2\2\u00b6"+
-		"\u00b4\3\2\2\2\u00b7\u00b8\7\37\2\2\u00b8\u00ba\7\7\2\2\u00b9\u00bb\5"+
+		"\u00b4\3\2\2\2\u00b7\u00b8\7\36\2\2\u00b8\u00ba\7\7\2\2\u00b9\u00bb\5"+
 		".\30\2\u00ba\u00b9\3\2\2\2\u00ba\u00bb\3\2\2\2\u00bb\u00bc\3\2\2\2\u00bc"+
 		"\u00c2\7\b\2\2\u00bd\u00c2\5$\23\2\u00be\u00bf\5,\27\2\u00bf\u00c0\5*"+
 		"\26\2\u00c0\u00c2\3\2\2\2\u00c1\u00b7\3\2\2\2\u00c1\u00bd\3\2\2\2\u00c1"+
@@ -2125,11 +2188,11 @@ public class HelloParser extends Parser {
 		"\u00dd\t\6\2\2\u00dd\u00df\5\60\31\2\u00de\u00db\3\2\2\2\u00df\u00e2\3"+
 		"\2\2\2\u00e0\u00de\3\2\2\2\u00e0\u00e1\3\2\2\2\u00e1\63\3\2\2\2\u00e2"+
 		"\u00e0\3\2\2\2\u00e3\u00e4\b\33\1\2\u00e4\u00e5\5\62\32\2\u00e5\u00eb"+
-		"\3\2\2\2\u00e6\u00e7\f\3\2\2\u00e7\u00e8\7\33\2\2\u00e8\u00ea\5\62\32"+
+		"\3\2\2\2\u00e6\u00e7\f\3\2\2\u00e7\u00e8\7\32\2\2\u00e8\u00ea\5\62\32"+
 		"\2\u00e9\u00e6\3\2\2\2\u00ea\u00ed\3\2\2\2\u00eb\u00e9\3\2\2\2\u00eb\u00ec"+
 		"\3\2\2\2\u00ec\65\3\2\2\2\u00ed\u00eb\3\2\2\2\u00ee\u00ef\b\34\1\2\u00ef"+
 		"\u00f0\5\64\33\2\u00f0\u00f6\3\2\2\2\u00f1\u00f2\f\3\2\2\u00f2\u00f3\7"+
-		"\34\2\2\u00f3\u00f5\5\64\33\2\u00f4\u00f1\3\2\2\2\u00f5\u00f8\3\2\2\2"+
+		"\33\2\2\u00f3\u00f5\5\64\33\2\u00f4\u00f1\3\2\2\2\u00f5\u00f8\3\2\2\2"+
 		"\u00f6\u00f4\3\2\2\2\u00f6\u00f7\3\2\2\2\u00f7\67\3\2\2\2\u00f8\u00f6"+
 		"\3\2\2\2\25>GZcqx\u0081\u008b\u0091\u009f\u00a9\u00b4\u00ba\u00c1\u00ca"+
 		"\u00d5\u00e0\u00eb\u00f6";

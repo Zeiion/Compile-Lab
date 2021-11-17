@@ -1,4 +1,4 @@
-// Generated from /home/zeiion/IdeaProjects/compile-antlr/src/Hello.g4 by ANTLR 4.9.2
+// Generated from /home/zeiion/桌面/lab/Compile-Lab/src/Hello.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
@@ -156,14 +156,28 @@ public class HelloBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAddExp(HelloParser.AddExpContext ctx) { return visitChildren(ctx); }
+	@Override public T visitAddExp2(HelloParser.AddExp2Context ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitMulExp(HelloParser.MulExpContext ctx) { return visitChildren(ctx); }
+	@Override public T visitAddExp1(HelloParser.AddExp1Context ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitMulExp2(HelloParser.MulExp2Context ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitMulExp1(HelloParser.MulExp1Context ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -27,11 +27,11 @@ primaryExp   : '(' exp ')' # primaryExp1
                 | lVal # primaryExp2
                 | Number # primaryExp3
                 ;
-addExp       : mulExp
-                | addExp ('+' | '−') mulExp;
-mulExp       : unaryExp
-                | mulExp ('*' | '/' | '%') unaryExp;
-
+addExp       : mulExp # addExp1
+                | addExp ('+' | '-') mulExp  # addExp2;
+mulExp       : unaryExp # mulExp1
+                | mulExp ('*' | '/' | '%') unaryExp # mulExp2
+                ;
 unaryExp     : Ident '(' funcRParams? ')' # calcResES
                 | primaryExp # normResES
                 | unaryOp unaryExp # symbolResES
