@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Translate extends HelloBaseListener {
-
+	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n";
 	public String output = "";
 	public int index = 0;
 	public HashMap<String, Integer> varIndexMap = new HashMap<>();
@@ -17,7 +17,7 @@ public class Translate extends HelloBaseListener {
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
-		//        System.out.println(ctx.getClass() + " " + location.get(ctx));
+		System.out.println(ctx.getClass() + " " + location.get(ctx));
 	}
 
 	@Override public void exitHello(HelloParser.HelloContext ctx) {
@@ -25,6 +25,7 @@ public class Translate extends HelloBaseListener {
 
 	@Override public void exitFuncDef(HelloParser.FuncDefContext ctx) {
 		//        sout("define dso_local i32 @main(){\n\t"+ result.get(ctx.block()) +"}");
+		sout(prefix);
 		sout("define dso_local i32 @main(){\n\t" + output + "}");
 	}
 
@@ -176,10 +177,26 @@ public class Translate extends HelloBaseListener {
 		result.put(ctx, tmp);
 	}
 
+	// 函数
+	@Override public void exitFuncRParams(HelloParser.FuncRParamsContext ctx) {
+		//TODO 暂且这样
+		location.put(ctx, location.get(ctx.exp(0)));
+	}
+
 	/* unaryExp
 	 *  表达式计算 要求是保存地址
 	 * */
 	@Override public void exitCalcResES(HelloParser.CalcResESContext ctx) {
+		if (ctx.getChildCount() == 3) {
+			//Ident '(' ')' # calcResES
+			output += "%" + (++index) + " = call i32 @" + ctx.Ident() + "()\n\t";
+			location.put(ctx, index);
+		} else {
+			//Ident '(' funcRParams ')' # calcResES
+			output += "call void @" + ctx.Ident() + "(i32 %" + location.get(ctx.funcRParams()) + ")\n\t";
+			// TODO 好像用不到
+			location.put(ctx, index);
+		}
 	}
 
 	@Override public void exitNormResES(HelloParser.NormResESContext ctx) {
@@ -236,7 +253,7 @@ public class Translate extends HelloBaseListener {
 		if (number.startsWith("0x") || number.startsWith("0X")) {
 			tmp = Integer.valueOf(number.substring(2), 16);
 		} else if (number.startsWith("0")) {
-			tmp = Integer.valueOf(number.substring(1), 8);
+			tmp = Integer.valueOf(number, 8);
 		} else {
 			tmp = Integer.parseInt(number);
 		}
