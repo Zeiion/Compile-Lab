@@ -190,12 +190,15 @@ public class Translate extends HelloBaseListener {
 		if (ctx.getChildCount() == 3) {
 			//Ident '(' ')' # calcResES
 			output += "%" + (++index) + " = call i32 @" + ctx.Ident() + "()\n\t";
+			output += "%" + (++index) + " = alloca i32, align 4\n\t";
+			output += "store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t";
 			location.put(ctx, index);
 		} else {
 			//Ident '(' funcRParams ')' # calcResES
-			output += "call void @" + ctx.Ident() + "(i32 %" + location.get(ctx.funcRParams()) + ")\n\t";
+			output += "%" + (++index) + " = load i32, i32* %" + location.get(ctx.funcRParams()) + "\n\t";
+			output += "call void @" + ctx.Ident() + "(i32 %" + index + ")\n\t";
 			// TODO 好像用不到
-			location.put(ctx, index);
+			//			location.put(ctx, index);
 		}
 	}
 
