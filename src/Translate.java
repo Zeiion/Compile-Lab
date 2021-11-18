@@ -6,15 +6,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Translate extends HelloBaseListener {
 	// TODO public HashMap<String,> voidMap
-	public String prefix = "declare i32 @getint()\n"
-		+ "declare void @putint(i32)\n"
-		+"declare i32 @getch()\n"
-		+ "declare void @putch(i32)\n"
-		+"declare i32 @getarray(i32*)\n"
-		+ "declare void @putarray(i32, i32*)";
+	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
+		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)";
 	public String output = "";
 	public int index = 0;
-	public HashMap<String, Integer> varIndexMap = new HashMap<>();
+	//	public HashMap<String, Integer> varIndexMap = new HashMap<>();
+	public HashMap<String, Var> varMap = new HashMap<>();
 	public static ParseTreeProperty<String> result = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Integer> location = new ParseTreeProperty<>();
 
@@ -26,30 +23,30 @@ public class Translate extends HelloBaseListener {
 		//		System.out.println(ctx.getClass() + " " + location.get(ctx));
 	}
 
-	public static void checkIdent (HelloParser.CalcResESContext  ctx) throws Exception{
+	public static void checkIdent(HelloParser.CalcResESContext ctx) throws Exception {
 		int count = ctx.getChildCount();
 		String ident = ctx.Ident().getText();
-		switch (ident){
+		switch (ident) {
 			case "putint":
 			case "putch":
 			case "putarray":
 			case "getarray":
-				if(count!=4){
+				if (count != 4) {
 					//Ident '(' funcRParams ')' # calcResES
 					throw new Exception();
 				}
 				// 参数个数
-				int paramsCount = (ctx.funcRParams().getChildCount()+1)/2;
-				switch (ident){
+				int paramsCount = (ctx.funcRParams().getChildCount() + 1) / 2;
+				switch (ident) {
 					case "putint":
 					case "putch":
 					case "getarray":
-						if(paramsCount!=1){
+						if (paramsCount != 1) {
 							throw new Exception();
 						}
 						break;
 					case "putarray":
-						if(paramsCount!=2){
+						if (paramsCount != 2) {
 							throw new Exception();
 						}
 						break;
@@ -57,7 +54,7 @@ public class Translate extends HelloBaseListener {
 				break;
 			case "getint":
 			case "getch":
-				if(count!=3){
+				if (count != 3) {
 					//Ident '(' ')' # calcResES
 					throw new Exception();
 				}
@@ -89,6 +86,11 @@ public class Translate extends HelloBaseListener {
 
 	//  lVal '=' exp ';' # stmt1
 	@Override public void exitStmt1(HelloParser.Stmt1Context ctx) {
+		String ident = ctx.lVal().Ident().getText();
+		if (varMap.get(ident).isConst) {
+			System.out.println(ident + " is const!");
+			System.exit(-1);
+		}
 		int tmpIndex = location.get(ctx.exp());
 		int tmpTarget = location.get(ctx.lVal());
 		output += "%" + (++index) + " = load i32, i32* %" + tmpIndex + ", align 4\n\t";
@@ -118,12 +120,12 @@ public class Translate extends HelloBaseListener {
 		if (ctx.getChildCount() == 1) {
 			//Ident
 			output += "%" + (++index) + " = alloca i32, align 4\n\t";
-			varIndexMap.put(tmpVar, index);
+			varMap.put(tmpVar, new Var(index));
 		} else {
 			//Ident = initVal
 			output += "%" + (++index) + " = load i32, i32* %" + location.get(ctx.initVal()) + ", align 4\n\t";
 			output += "%" + (++index) + " = alloca i32, align 4\n\t";
-			varIndexMap.put(tmpVar, index);
+			varMap.put(tmpVar, new Var(index));
 			output += "store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t";
 		}
 	}
@@ -132,7 +134,7 @@ public class Translate extends HelloBaseListener {
 		String tmpVar = ctx.Ident().getText();
 		output += "%" + (++index) + " = load i32, i32* %" + location.get(ctx.constInitVal()) + ", align 4\n\t";
 		output += "%" + (++index) + " = alloca i32, align 4\n\t";
-		varIndexMap.put(tmpVar, index);
+		varMap.put(tmpVar, new Var(index, true));
 		output += "store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t";
 	}
 
@@ -323,7 +325,7 @@ public class Translate extends HelloBaseListener {
 
 	//Ident
 	@Override public void exitLVal(HelloParser.LValContext ctx) {
-		location.put(ctx, varIndexMap.get(ctx.Ident().getText()));
+		location.put(ctx, varMap.get(ctx.Ident().getText()).index);
 	}
 
 	@Override public void enterEveryRule(ParserRuleContext ctx) {
