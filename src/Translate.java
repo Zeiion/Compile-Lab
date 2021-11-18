@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -93,6 +94,11 @@ public class Translate extends HelloBaseListener {
 		output += "store i32 %" + index + ", i32* %" + tmpTarget + ",align 4\n\t";
 	}
 
+	// 'if' '(' cond ')' stmt ('else' stmt)? # stmt4
+	@Override public void exitStmt4(HelloParser.Stmt4Context ctx) {
+
+	}
+
 	//	'return' exp ';' # stmt5
 	@Override public void exitStmt5(HelloParser.Stmt5Context ctx) {
 		output += "%" + (++index) + " = load i32, i32* %" + location.get(ctx.exp()) + ", align 4\n\t";
@@ -156,35 +162,42 @@ public class Translate extends HelloBaseListener {
 		location.put(ctx, location.get(ctx.addExp()));
 	}
 
+	@Override public void exitRelExp(HelloParser.RelExpContext ctx) {
+		if(ctx.getChildCount() == 1){
+			//AddExp
+			location.put(ctx,location.get(ctx.addExp()));
+		}else{
+			//relExp ('<' | '>' | '<=' | '>=') addExp
+			String symbol = ctx.getChild(1).getText();
+			switch (symbol){
+				case "<":
+					symbol = "slt";
+					break;
+				case ">":
+					break;
+				case "<=":
+					break;
+				case ">=":
+					break;
+			}
+			int index1 = location.get(ctx.relExp());
+			output += "%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t";
+			index1 = index;
+			int index2 = location.get(ctx.addExp());
+			output += "%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t";
+			index2 = index;
+			output += "%" + (++index) + " = icmp "+ symbol+" i32, i32* %" + index1 + ", %"+index2+", align 4\n\t";
+
+		}
+	}
+
 	/* mulExp */
 	@Override public void exitAddExp1(HelloParser.AddExp1Context ctx) {
-		//TODO const 判断他的父节点是否是const文法 如果是就判断子节点是否是const
-//		String ident = ctx.mulExp().getText();
-//		System.out.println("ident mulexp "+ident);
-//		if (ctx.getParent().getClass().equals(HelloParser.ConstExpContext.class)) {
-//			if (!varMap.get(ident).isConst) {
-//				System.out.println(ident + " should be const!");
-//				System.exit(-1);
-//			}
-//		}
 		location.put(ctx, location.get(ctx.mulExp()));
 	}
 
 	/* addExp ('+' | '−') mulExp  # addExp2 */
 	@Override public void exitAddExp2(HelloParser.AddExp2Context ctx) {
-		//TODO const
-//		String ident1 = ctx.addExp().getText();
-//		String ident2 = ctx.mulExp().getText();
-//		if (ctx.getParent().getClass().equals(HelloParser.ConstExpContext.class)) {
-//			if (!varMap.get(ident1).isConst) {
-//				System.out.println(ident1 + " should be const!");
-//				System.exit(-1);
-//			} else if (!varMap.get(ident2).isConst) {
-//				System.out.println(ident2 + " should be const!");
-//				System.exit(-1);
-//			}
-//		}
-
 		//加减法操作
 		int index1 = location.get(ctx.addExp());
 		output += "%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t";

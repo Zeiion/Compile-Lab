@@ -20,9 +20,9 @@ stmt         : lVal '=' exp ';' # stmt1
                 | exp? ';' # stmt3
                 | 'if' '(' cond ')' stmt ('else' stmt)? # stmt4
                 | 'return' exp ';' # stmt5
-                ; // [changed]
+                ;
 exp          : addExp;
-cond         : lOrExp ;// [new]
+cond         : lOrExp ;
 lVal         : Ident;
 primaryExp   : '(' exp ')' # primaryExp1
                 | lVal # primaryExp2
@@ -37,16 +37,16 @@ unaryExp     : Ident '(' funcRParams? ')' # calcResES
                 | primaryExp # normResES
                 | unaryOp unaryExp # symbolResES
                 ;
-unaryOp      : '+' | '-' | '!'  ;// 保证 '!' 只出现在 Cond 中 [changed]
+unaryOp      : '+' | '-' | '!'  ;// 保证 '!' 只出现在 Cond 中
 funcRParams  : exp (',' exp)*;
 relExp       : addExp
-                | relExp ('<' | '>' | '<=' | '>=') addExp;  // [new]
+                | relExp ('<' | '>' | '<=' | '>=') addExp;
 eqExp        : relExp
-                | eqExp ('==' | '!=') relExp;  // [new]
+                | eqExp ('==' | '!=') relExp;
 lAndExp      : eqExp
-                | lAndExp '&&' eqExp;  // [new]
+                | lAndExp '&&' eqExp;
 lOrExp       : lAndExp
-                | lOrExp '||' lAndExp;  // [new]
+                | lOrExp '||' lAndExp;
 
 fragment INT: 'int';
 BType : INT;
