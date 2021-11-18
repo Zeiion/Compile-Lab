@@ -1,7 +1,6 @@
 import java.util.HashMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -14,25 +13,47 @@ public class Translate extends HelloBaseListener {
 	public int index = 0;
 	//	public HashMap<String, Integer> varIndexMap = new HashMap<>();
 	public HashMap<String, Var> varMap = new HashMap<>();
-		public static ParseTreeProperty<String> store = new ParseTreeProperty<>();
+	public static ParseTreeProperty<String> store = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Integer> location = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Boolean> lock = new ParseTreeProperty<>();
+	public static ParseTreeProperty<String> lockStore = new ParseTreeProperty<>();
 
-	public static boolean getLock(ParserRuleContext ctx){
+	public static boolean getLock(ParserRuleContext ctx) {
 		boolean ret;
-		try{
+		try {
 			ret = lock.get(ctx);
-		}catch (NullPointerException e){
+		} catch (NullPointerException e) {
 			return false;
 		}
 		return ret;
 	}
 
-	public static void output(String s,ParserRuleContext ctx){
-		if(getLock(ctx)){
-			System.out.println("lock");
-		}else{
-			output+=s;
+	public static String getLockStore(ParserRuleContext ctx) {
+		String ret = "";
+		try {
+			ret = lockStore.get(ctx);
+		} catch (NullPointerException e) {
+			return "";
+		}
+		return ret;
+	}
+
+	public static int getLocation(ParserRuleContext ctx) {
+		int ret = 0;
+		try {
+			ret = location.get(ctx);
+		} catch (NullPointerException e) {
+			throw new RuntimeException(ctx.getText() + " location get null");
+		}
+		return ret;
+	}
+
+	public static void output(String s, ParserRuleContext ctx) {
+		if (getLock(ctx)) {
+			debugSout(ctx, "lock!");
+			lockStore.put(ctx, getLockStore(ctx) + s);
+		} else {
+			output += s;
 		}
 	}
 
@@ -41,7 +62,7 @@ public class Translate extends HelloBaseListener {
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
-		//		System.out.println(ctx.getClass() + " " + location.get(ctx));
+		System.out.println(ctx.getText() + " " + s);
 	}
 
 	public static void checkIdent(HelloParser.CalcResESContext ctx) throws Exception {
@@ -106,50 +127,117 @@ public class Translate extends HelloBaseListener {
 		if (varMap.get(ident).isConst) {
 			throw new RuntimeException(ident + " is const!");
 		}
-		int tmpIndex = location.get(ctx.exp());
-		int tmpTarget = location.get(ctx.lVal());
+		int tmpIndex = getLocation(ctx.exp());
+		int tmpTarget = getLocation(ctx.lVal());
 		output("%" + (++index) + " = load i32, i32* %" + tmpIndex + ", align 4\n\t", ctx);
 		String tmpSout = "store i32 %" + index + ", i32* %" + tmpTarget + ",align 4\n\t";
-		if(ctx.start.getText().equals("if")){
-			// 如果是if语句下的stmt
-			store.put(ctx,tmpSout);
-		}else{
-			output(tmpSout, ctx);
-		}
+		output(tmpSout, ctx);
 	}
 
 	// 'if' '(' cond ')' stmt ('else' stmt)? # stmt4
 	@Override public void exitStmt4(HelloParser.Stmt4Context ctx) {
-
-		int condIndex = location.get(ctx.cond());
-		output("br i1 %" + (condIndex) + ", label"+(++index)+", label"+(++index)+"\n", ctx);
-		output +=
-				// if
-			"\n"+(index-1)+":                                               ; preds = %0\n\t"
-			+ "store i32 5, i32* %4\n\t"
-			+ "br label %"+(index+1)+"\n"
-				// else
-			+ "\n"+index+":                                               ; preds = %0\n\t"
-			+ "store i32 10, i32* %5\n\t"
-			+ "br label %"+(index+1)+"\n"
-			+ "\n"+(++index)+":                                               ; preds = %11, %10\n\t"
-			+ "%13 = load i32, i32* %4\n\t"
-			+ "call void @putint(i32 %13)\n" + "  ret i32 0";
+		lock.put(ctx, true);
+		int condIndex = getLocation(ctx.cond());
+		output("br i1 %" + (condIndex) + ", label" + (++index) + ", label" + (++index) + "\n", ctx);
+		// if
+		output("\n" + (index - 1) + ":                                               ; preds = %0\n\t"
+			+ "store i32 5, i32* %4\n\t" + "br label %" + (index + 1) + "\n", ctx);
+		//else
+		if (ctx.getChildCount() > 5) {
+			output("\n" + index + ":                                               ; preds = %0\n\t"
+				+ "store i32 10, i32* %5\n\t" + "br label %" + (index + 1) + "\n" + "\n" + (++index)
+				+ ":                                               ; preds = %11, %10\n\t"
+				+ "%13 = load i32, i32* %4\n\t" + "call void @putint(i32 %13)\n" + "  ret i32 0", ctx);
+		}
 	}
 
 	//	'return' exp ';' # stmt5
 	@Override public void exitStmt5(HelloParser.Stmt5Context ctx) {
-		output("%" + (++index) + " = load i32, i32* %" + location.get(ctx.exp()) + ", align 4\n\t", ctx);
+		output("%" + (++index) + " = load i32, i32* %" + getLocation(ctx.exp()) + ", align 4\n\t", ctx);
 		output("ret i32 %" + index + "\n", ctx);
 	}
 
-	//	// 赋值语句，向后看齐
-	//	@Override public void exitVarDecl(HelloParser.VarDeclContext ctx) {
-	//
-	//	}
-	//
-	//	@Override public void exitConstDecl(HelloParser.ConstDeclContext ctx) {
-	//	}
+	@Override public void exitCond(HelloParser.CondContext ctx) {
+	}
+
+	@Override public void exitLOrExp(HelloParser.LOrExpContext ctx) {
+		if (ctx.getChildCount() == 1) {
+			//lAndExp
+		} else {
+			//lOrExp '||' lAndExp
+		}
+	}
+
+	@Override public void exitLAndExp(HelloParser.LAndExpContext ctx) {
+		if (ctx.getChildCount() == 1) {
+			//eqExp
+			location.put(ctx, location.get(ctx.eqExp()));
+		} else {
+			//lAndExp '&&' eqExp
+
+		}
+	}
+
+	@Override public void exitEqExp(HelloParser.EqExpContext ctx) {
+		if (ctx.getChildCount() == 1) {
+			//relExp
+			location.put(ctx, location.get(ctx.relExp()));
+		} else {
+			//eqExp ('==' | '!=') relExp
+			String symbol = ctx.getChild(1).getText();
+			switch (symbol) {
+				case "==":
+					symbol = "eq";
+					break;
+				case "!=":
+					symbol = "ne";
+					break;
+			}
+			int index1 = getLocation(ctx.eqExp());
+			output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
+			index1 = index;
+			int index2 = getLocation(ctx.relExp());
+			output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
+			index2 = index;
+			output("%" + (++index) + " = icmp " + symbol + " i32, i32* %" + index1 + ", %" + index2 + "\n\t", ctx);
+			location.put(ctx, index);
+		}
+	}
+
+	@Override public void exitRelExp(HelloParser.RelExpContext ctx) {
+		if (ctx.getChildCount() == 1) {
+			//AddExp
+			int tmpIndex = getLocation(ctx.addExp());
+			//TODO
+			//output("%" + (++index) + " = icmp ne i32 %" + tmpIndex + ", 0\n\t", ctx);
+			location.put(ctx, tmpIndex);
+		} else {
+			//relExp ('<' | '>' | '<=' | '>=') addExp
+			String symbol = ctx.getChild(1).getText();
+			switch (symbol) {
+				case "<":
+					symbol = "slt";
+					break;
+				case ">":
+					symbol = "sgt";
+					break;
+				case "<=":
+					symbol = "sle";
+					break;
+				case ">=":
+					symbol = "slg";
+					break;
+			}
+			int index1 = getLocation(ctx.relExp());
+			output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
+			index1 = index;
+			int index2 = getLocation(ctx.addExp());
+			output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
+			index2 = index;
+			output("%" + (++index) + " = icmp " + symbol + " i32, i32* %" + index1 + ", %" + index2 + "\n\t", ctx);
+			location.put(ctx, index);
+		}
+	}
 
 	/**
 	 * Ident | Ident '=' initVal;
@@ -162,7 +250,7 @@ public class Translate extends HelloBaseListener {
 			varMap.put(tmpVar, new Var(index));
 		} else {
 			//Ident = initVal
-			output("%" + (++index) + " = load i32, i32* %" + location.get(ctx.initVal()) + ", align 4\n\t", ctx);
+			output("%" + (++index) + " = load i32, i32* %" + getLocation(ctx.initVal()) + ", align 4\n\t", ctx);
 			output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
 			varMap.put(tmpVar, new Var(index));
 			output("store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t", ctx);
@@ -171,23 +259,22 @@ public class Translate extends HelloBaseListener {
 
 	@Override public void exitConstDef(HelloParser.ConstDefContext ctx) {
 		String tmpVar = ctx.Ident().getText();
-		output("%" + (++index) + " = load i32, i32* %" + location.get(ctx.constInitVal()) + ", align 4\n\t", ctx);
+		output("%" + (++index) + " = load i32, i32* %" + getLocation(ctx.constInitVal()) + ", align 4\n\t", ctx);
 		output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
 		varMap.put(tmpVar, new Var(index, true));
 		output("store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t", ctx);
 	}
 
 	@Override public void exitInitVal(HelloParser.InitValContext ctx) {
-		location.put(ctx, location.get(ctx.exp()));
+		location.put(ctx, getLocation(ctx.exp()));
 	}
 
 	@Override public void exitConstInitVal(HelloParser.ConstInitValContext ctx) {
-		location.put(ctx, location.get(ctx.constExp()));
+		location.put(ctx, getLocation(ctx.constExp()));
 	}
 
 	@Override public void exitExp(HelloParser.ExpContext ctx) {
-		location.put(ctx, location.get(ctx.addExp()));
-		//        result.put(ctx,tmp);
+		location.put(ctx, getLocation(ctx.addExp()));
 	}
 
 	@Override public void enterConstExp(HelloParser.ConstExpContext ctx) {
@@ -197,52 +284,21 @@ public class Translate extends HelloBaseListener {
 
 	@Override public void exitConstExp(HelloParser.ConstExpContext ctx) {
 		constMode = false;
-		location.put(ctx, location.get(ctx.addExp()));
-	}
-
-	@Override public void exitRelExp(HelloParser.RelExpContext ctx) {
-		if(ctx.getChildCount() == 1){
-			//AddExp
-			int tmpIndex = location.get(ctx.addExp());
-			output("%" + (++index) + " = icmp ne i32 %"+tmpIndex+", 0\n\t", ctx);
-			location.put(ctx,tmpIndex);
-		}else{
-			//relExp ('<' | '>' | '<=' | '>=') addExp
-			String symbol = ctx.getChild(1).getText();
-			switch (symbol){
-				case "<":
-					symbol = "slt";
-					break;
-				case ">":
-					break;
-				case "<=":
-					break;
-				case ">=":
-					break;
-			}
-			int index1 = location.get(ctx.relExp());
-			output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
-			index1 = index;
-			int index2 = location.get(ctx.addExp());
-			output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
-			index2 = index;
-			output("%" + (++index) + " = icmp "+ symbol+" i32, i32* %" + index1 + ", %"+index2+"\n\t", ctx);
-			location.put(ctx,index);
-		}
+		location.put(ctx, getLocation(ctx.addExp()));
 	}
 
 	/* mulExp */
 	@Override public void exitAddExp1(HelloParser.AddExp1Context ctx) {
-		location.put(ctx, location.get(ctx.mulExp()));
+		location.put(ctx, getLocation(ctx.mulExp()));
 	}
 
 	/* addExp ('+' | '−') mulExp  # addExp2 */
 	@Override public void exitAddExp2(HelloParser.AddExp2Context ctx) {
 		//加减法操作
-		int index1 = location.get(ctx.addExp());
+		int index1 = getLocation(ctx.addExp());
 		output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
 		index1 = index;
-		int index2 = location.get(ctx.mulExp());
+		int index2 = getLocation(ctx.mulExp());
 		output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
 		index2 = index;
 		String symbol = ctx.getChild(1).getText();
@@ -260,18 +316,17 @@ public class Translate extends HelloBaseListener {
 
 	/* unaryExp # mulExp1 */
 	@Override public void exitMulExp1(HelloParser.MulExp1Context ctx) {
-		location.put(ctx, location.get(ctx.unaryExp()));
+		location.put(ctx, getLocation(ctx.unaryExp()));
 	}
 
 	/* mulExp ('*' | '/' | '%') unaryExp # mulExp2 */
 	@Override public void exitMulExp2(HelloParser.MulExp2Context ctx) {
 		String tmp = "";
-		debugSout(ctx, tmp);
 		//TODO S 乘除法
-		int index1 = location.get(ctx.mulExp());
+		int index1 = getLocation(ctx.mulExp());
 		output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
 		index1 = index;
-		int index2 = location.get(ctx.unaryExp());
+		int index2 = getLocation(ctx.unaryExp());
 		output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
 		index2 = index;
 		String symbol = ctx.getChild(1).getText();
@@ -294,7 +349,7 @@ public class Translate extends HelloBaseListener {
 	// 函数
 	@Override public void exitFuncRParams(HelloParser.FuncRParamsContext ctx) {
 		//TODO 暂且这样
-		location.put(ctx, location.get(ctx.exp(0)));
+		location.put(ctx, getLocation(ctx.exp(0)));
 	}
 
 	/* unaryExp
@@ -315,24 +370,21 @@ public class Translate extends HelloBaseListener {
 			location.put(ctx, index);
 		} else {
 			//Ident '(' funcRParams ')' # calcResES
-			output("%" + (++index) + " = load i32, i32* %" + location.get(ctx.funcRParams()) + "\n\t", ctx);
+			output("%" + (++index) + " = load i32, i32* %" + getLocation(ctx.funcRParams()) + "\n\t", ctx);
 			output("call void @" + ctx.Ident() + "(i32 %" + index + ")\n\t", ctx);
 			// TODO 好像用不到
-			//			location.put(ctx, index);
+			location.put(ctx, index);
 		}
 	}
 
 	@Override public void exitNormResES(HelloParser.NormResESContext ctx) {
 		// 保存地址
-		location.put(ctx, location.get(ctx.primaryExp()));
+		location.put(ctx, getLocation(ctx.primaryExp()));
 	}
 
 	@Override public void exitSymbolResES(HelloParser.SymbolResESContext ctx) {
-		//        int tmp = Integer.parseInt(result.get(ctx.unaryExp()));
 		String symbol = ctx.unaryOp().getText();
-		int tmpIndex = location.get(ctx.unaryExp());
-		//        System.out.println("symbol"+tmpIndex+symbol);
-		// TODO S 符号操作
+		int tmpIndex = getLocation(ctx.unaryExp());
 		switch (symbol) {
 			case "+":
 				break;
@@ -347,21 +399,18 @@ public class Translate extends HelloBaseListener {
 			case "!":
 				break;
 		}
-		//        debugSout(ctx,tmp);
 		location.put(ctx, tmpIndex);
-		//        result.put(ctx,tmp+"");
 	}
 
 	/*  PrimaryExp
 	 *   保存地址
 	 * */
 	@Override public void exitPrimaryExp1(HelloParser.PrimaryExp1Context ctx) {
-		location.put(ctx, location.get(ctx.exp()));
-		//        System.out.println("location exp is"+location.get(ctx.exp()));
+		location.put(ctx, getLocation(ctx.exp()));
 	}
 
 	@Override public void exitPrimaryExp2(HelloParser.PrimaryExp2Context ctx) {
-		location.put(ctx, location.get(ctx.lVal()));
+		location.put(ctx, getLocation(ctx.lVal()));
 	}
 
 	@Override public void exitPrimaryExp3(HelloParser.PrimaryExp3Context ctx) {
@@ -378,24 +427,33 @@ public class Translate extends HelloBaseListener {
 		output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
 		output("store i32 " + tmp + ", i32* %" + index + ", align 4" + "\n\t", ctx);
 		location.put(ctx, index);
-		debugSout(ctx, ctx.Number());
 	}
 
 	//Ident
 	@Override public void exitLVal(HelloParser.LValContext ctx) {
 		String ident = ctx.Ident().getText();
-		if(constMode){
-			if(!varMap.get(ident).isConst){
-				throw new RuntimeException(ident+" should be ident");
+		if (constMode) {
+			if (!varMap.get(ident).isConst) {
+				throw new RuntimeException(ident + " should be ident");
 			}
 		}
 		location.put(ctx, varMap.get(ident).index);
 	}
 
 	@Override public void enterEveryRule(ParserRuleContext ctx) {
+		if (getLock(ctx.getParent())) {
+			lock.put(ctx, true);
+		}
 	}
 
 	@Override public void exitEveryRule(ParserRuleContext ctx) {
+		debugSout(ctx, "--debug");
+		lock.put(ctx, false);
+		if (getLock(ctx.getParent())) {
+			lockStore.put(ctx.getParent(), getLockStore(ctx.getParent()) + getLockStore(ctx));
+		} else {
+			output(getLockStore(ctx), ctx);
+		}
 	}
 
 	@Override public void visitTerminal(TerminalNode node) {
