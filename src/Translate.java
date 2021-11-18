@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Translate extends HelloBaseListener {
+	private boolean constMode = false;
 	// TODO public HashMap<String,> voidMap
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
 		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)";
@@ -145,37 +146,44 @@ public class Translate extends HelloBaseListener {
 		//        result.put(ctx,tmp);
 	}
 
+	@Override public void enterConstExp(HelloParser.ConstExpContext ctx) {
+		// 进入const定义，之后的所有lVal都必须是const的，否则报错
+		constMode = true;
+	}
+
 	@Override public void exitConstExp(HelloParser.ConstExpContext ctx) {
+		constMode = false;
 		location.put(ctx, location.get(ctx.addExp()));
 	}
 
 	/* mulExp */
 	@Override public void exitAddExp1(HelloParser.AddExp1Context ctx) {
-		//const
-		String ident = ctx.mulExp().getText();
-		if (ctx.getParent().getClass().equals(HelloParser.ConstExpContext.class)) {
-			if (!varMap.get(ident).isConst) {
-				System.out.println(ident + " should be const!");
-				System.exit(-1);
-			}
-		}
+		//TODO const 判断他的父节点是否是const文法 如果是就判断子节点是否是const
+//		String ident = ctx.mulExp().getText();
+//		System.out.println("ident mulexp "+ident);
+//		if (ctx.getParent().getClass().equals(HelloParser.ConstExpContext.class)) {
+//			if (!varMap.get(ident).isConst) {
+//				System.out.println(ident + " should be const!");
+//				System.exit(-1);
+//			}
+//		}
 		location.put(ctx, location.get(ctx.mulExp()));
 	}
 
 	/* addExp ('+' | '−') mulExp  # addExp2 */
 	@Override public void exitAddExp2(HelloParser.AddExp2Context ctx) {
-		//const
-		String ident1 = ctx.addExp().getText();
-		String ident2 = ctx.mulExp().getText();
-		if (ctx.getParent().getClass().equals(HelloParser.ConstExpContext.class)) {
-			if (!varMap.get(ident1).isConst) {
-				System.out.println(ident1 + " should be const!");
-				System.exit(-1);
-			} else if (!varMap.get(ident2).isConst) {
-				System.out.println(ident2 + " should be const!");
-				System.exit(-1);
-			}
-		}
+		//TODO const
+//		String ident1 = ctx.addExp().getText();
+//		String ident2 = ctx.mulExp().getText();
+//		if (ctx.getParent().getClass().equals(HelloParser.ConstExpContext.class)) {
+//			if (!varMap.get(ident1).isConst) {
+//				System.out.println(ident1 + " should be const!");
+//				System.exit(-1);
+//			} else if (!varMap.get(ident2).isConst) {
+//				System.out.println(ident2 + " should be const!");
+//				System.exit(-1);
+//			}
+//		}
 
 		//加减法操作
 		int index1 = location.get(ctx.addExp());
@@ -323,7 +331,14 @@ public class Translate extends HelloBaseListener {
 
 	//Ident
 	@Override public void exitLVal(HelloParser.LValContext ctx) {
-		location.put(ctx, varMap.get(ctx.Ident().getText()).index);
+		String ident = ctx.Ident().getText();
+		if(constMode){
+			if(!varMap.get(ident).isConst){
+				System.out.println(ident+" should be ident");
+				System.exit(-1);
+			}
+		}
+		location.put(ctx, varMap.get(ident).index);
 	}
 
 	@Override public void enterEveryRule(ParserRuleContext ctx) {
