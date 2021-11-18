@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Translate extends HelloBaseListener {
+	// TODO public HashMap<String,> voidMap
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n"+"declare i32 @getch()\n" + "declare void @putch(i32)\n";
 	public String output = "";
 	public int index = 0;
@@ -18,6 +19,27 @@ public class Translate extends HelloBaseListener {
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
 		//		System.out.println(ctx.getClass() + " " + location.get(ctx));
+	}
+
+	public static void checkIdent (HelloParser.CalcResESContext  ctx) throws Exception{
+		int count = ctx.getChildCount();
+		String ident = ctx.Ident().getText();
+		switch (ident){
+			case "putint":
+			case "putch":
+				if(count!=4){
+					//Ident '(' funcRParams ')' # calcResES
+					throw new Exception();
+				}
+				break;
+			case "getint":
+			case "getch":
+				if(count!=3){
+					//Ident '(' ')' # calcResES
+					throw new Exception();
+				}
+				break;
+		}
 	}
 
 	@Override public void exitHello(HelloParser.HelloContext ctx) {
@@ -187,7 +209,13 @@ public class Translate extends HelloBaseListener {
 	 *  表达式计算 要求是保存地址
 	 * */
 	@Override public void exitCalcResES(HelloParser.CalcResESContext ctx) {
+		try {
+			checkIdent(ctx);
+		} catch (Exception e) {
+			System.exit(-1);
+		}
 		if (ctx.getChildCount() == 3) {
+
 			//Ident '(' ')' # calcResES
 			output += "%" + (++index) + " = call i32 @" + ctx.Ident() + "()\n\t";
 			output += "%" + (++index) + " = alloca i32, align 4\n\t";
