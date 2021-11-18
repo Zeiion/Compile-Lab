@@ -6,7 +6,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Translate extends HelloBaseListener {
 	// TODO public HashMap<String,> voidMap
-	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n"+"declare i32 @getch()\n" + "declare void @putch(i32)\n";
+	public String prefix = "declare i32 @getint()\n"
+		+ "declare void @putint(i32)\n"
+		+"declare i32 @getch()\n"
+		+ "declare void @putch(i32)\n"
+		+"declare i32 @getarray(i32*)\n"
+		+ "declare void @putarray(i32, i32*)";
 	public String output = "";
 	public int index = 0;
 	public HashMap<String, Integer> varIndexMap = new HashMap<>();
@@ -27,9 +32,27 @@ public class Translate extends HelloBaseListener {
 		switch (ident){
 			case "putint":
 			case "putch":
+			case "putarray":
+			case "getarray":
 				if(count!=4){
 					//Ident '(' funcRParams ')' # calcResES
 					throw new Exception();
+				}
+				// 参数个数
+				int paramsCount = (ctx.funcRParams().getChildCount()+1)/2;
+				switch (ident){
+					case "putint":
+					case "putch":
+					case "getarray":
+						if(paramsCount!=1){
+							throw new Exception();
+						}
+						break;
+					case "putarray":
+						if(paramsCount!=2){
+							throw new Exception();
+						}
+						break;
 				}
 				break;
 			case "getint":
