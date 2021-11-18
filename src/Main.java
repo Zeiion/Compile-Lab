@@ -25,10 +25,18 @@ public class Main {
 			// 针对hello规则开始语法分析
 			ParseTree tree = parser.hello();
 
+			// visitor模式
+//			MyVisitor visitor = new MyVisitor();
+//			visitor.visit(tree);
+//			while(!MyVisitor.stack.isEmpty()){
+//				System.out.println(MyVisitor.stack.pop());;
+//			}
+
 			// 遍历语法分析书
-			ParseTreeWalker walker = new ParseTreeWalker();
-			walker.walk(new Translate(), tree);
+			 ParseTreeWalker walker = new ParseTreeWalker();
+			 walker.walk(new Translate(), tree);
 		} catch (Exception e) {
+			System.out.println(e);
 			System.exit(-1);
 		}
 		System.exit(0);
