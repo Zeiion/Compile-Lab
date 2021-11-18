@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Translate extends HelloBaseListener {
-	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n";
+	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n"+"declare i32 @getch()\n" + "declare void @putch(i32)\n";
 	public String output = "";
 	public int index = 0;
 	public HashMap<String, Integer> varIndexMap = new HashMap<>();
