@@ -7,6 +7,6 @@ public class NewLexer extends HelloLexer {
 	}
 
 	@Override public void recover(LexerNoViableAltException e) {
-		throw new RuntimeException();
+		throw new RuntimeException(e);
 	}
 }
