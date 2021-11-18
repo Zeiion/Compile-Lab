@@ -62,6 +62,8 @@ public class Translate extends HelloBaseListener {
 					throw new Exception();
 				}
 				break;
+			default:
+				throw new Exception();
 		}
 	}
 
