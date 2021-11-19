@@ -57,6 +57,59 @@ public class Translate extends HelloBaseListener {
 		}
 	}
 
+	public static String load(int to, int from) {
+		return "%" + to + " = load i32, i32* %" + from + ", align4\n\t";
+	}
+
+	public static String alloca(int to) {
+		return "%" + to + " = alloca i32, align 4";
+	}
+
+	public static String icmp(int to, String symbol, int index1) {
+		//ne 0
+		return "%" + to + " = icmp " + symbol + " i32 %" + index1 + ", 0\n\t";
+	}
+
+	public static String icmp(int to, String symbol, int index1, int index2) {
+		return "%" + to + " = icmp " + symbol + " i32 %" + index1 + ", %" + index2 + "\n\t";
+	}
+
+	public static String br(int judge, int trueLabel, int falseLabel) {
+		return "br i1 %" + judge + ", label %" + trueLabel + ", label %" + falseLabel + "\n\t";
+	}
+
+	public static String store(int from, int to) {
+		return "store i32 %" + from + ", i32* %" + to + ", align 4";
+	}
+
+	public static String store(String value, int to) {
+		return "store i32 %" + value + ", i32* %" + to + ", align 4";
+	}
+
+	public static String call(int to, String ident) {
+		return "%" + to + " = call i32 @" + ident + "()\n\t";
+	}
+
+	public static String call(String ident, int param) {
+		return "call void @" + ident + "(i32 %" + param + ")\n\t";
+	}
+
+	public static String calc(int to, String symbol, int index1, int index2) {
+		return "%" + to + " = " + symbol + " nsw i32 %" + index1 + ", %" + index2 + "\n\t";
+	}
+
+	public static String calc(int to, String symbol, int index1) {
+		return "%" + to + " = " + symbol + " nsw i32 0, %" + index1 + "\n\t";
+	}
+
+	public static String label(int label, String s) {
+		return "\n" + label + ":                                               ; preds = %0\n\t" + s;
+	}
+
+	public static String ret(int retIndex) {
+		return "ret i32 %" + retIndex + "\n";
+	}
+
 	public static void sout(String s) {
 		System.out.print(s);
 	}
@@ -129,8 +182,8 @@ public class Translate extends HelloBaseListener {
 		}
 		int tmpIndex = getLocation(ctx.exp());
 		int tmpTarget = getLocation(ctx.lVal());
-		output("%" + (++index) + " = load i32, i32* %" + tmpIndex + ", align 4\n\t", ctx);
-		String tmpSout = "store i32 %" + index + ", i32* %" + tmpTarget + ",align 4\n\t";
+		output(load(++index, tmpIndex), ctx);
+		String tmpSout = store(index, tmpTarget);
 		output(tmpSout, ctx);
 	}
 
@@ -138,31 +191,31 @@ public class Translate extends HelloBaseListener {
 	@Override public void exitStmt4(HelloParser.Stmt4Context ctx) {
 		lock.put(ctx, true);
 		int condIndex = getLocation(ctx.cond());
-		output("br i1 %" + (condIndex) + ", label" + (++index) + ", label" + (++index) + "\n", ctx);
-		// if
-		output("\n" + (index - 1) + ":                                               ; preds = %0\n\t"
-			+ "store i32 5, i32* %4\n\t" + "br label %" + (index + 1) + "\n", ctx);
-		//else
+		output(br(condIndex, ++index, ++index), ctx);
+		// TODO if
+		output(label(index - 1, store(4, index + 1)), ctx);
+		//TODO else
 		if (ctx.getChildCount() > 5) {
-			output("\n" + index + ":                                               ; preds = %0\n\t"
-				+ "store i32 10, i32* %5\n\t" + "br label %" + (index + 1) + "\n" + "\n" + (++index)
-				+ ":                                               ; preds = %11, %10\n\t"
-				+ "%13 = load i32, i32* %4\n\t" + "call void @putint(i32 %13)\n" + "  ret i32 0", ctx);
+			output(label(index, store(5, index + 1)) + label(++index, load(13, 4)) + (++index) + call("putint", 13)
+				+ "  ret i32 0", ctx);
 		}
 	}
 
 	//	'return' exp ';' # stmt5
 	@Override public void exitStmt5(HelloParser.Stmt5Context ctx) {
-		output("%" + (++index) + " = load i32, i32* %" + getLocation(ctx.exp()) + ", align 4\n\t", ctx);
-		output("ret i32 %" + index + "\n", ctx);
+		output(load(++index, getLocation(ctx.exp())), ctx);
+		output(ret(index), ctx);
 	}
 
 	@Override public void exitCond(HelloParser.CondContext ctx) {
+		// TODO
+		location.put(ctx, ++index);
 	}
 
 	@Override public void exitLOrExp(HelloParser.LOrExpContext ctx) {
 		if (ctx.getChildCount() == 1) {
 			//lAndExp
+			location.put(ctx, location.get(ctx.lAndExp()));
 		} else {
 			//lOrExp '||' lAndExp
 		}
@@ -174,7 +227,9 @@ public class Translate extends HelloBaseListener {
 			location.put(ctx, location.get(ctx.eqExp()));
 		} else {
 			//lAndExp '&&' eqExp
-
+			int index1 = location.get(ctx.lAndExp());
+			int index2 = location.get(ctx.eqExp());
+			output(load(++index, index1), ctx);
 		}
 	}
 
@@ -194,12 +249,12 @@ public class Translate extends HelloBaseListener {
 					break;
 			}
 			int index1 = getLocation(ctx.eqExp());
-			output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
+			output(load(++index, index1), ctx);
 			index1 = index;
 			int index2 = getLocation(ctx.relExp());
-			output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
+			output(load(++index, index2), ctx);
 			index2 = index;
-			output("%" + (++index) + " = icmp " + symbol + " i32, i32* %" + index1 + ", %" + index2 + "\n\t", ctx);
+			output(icmp(++index, symbol, index1, index2), ctx);
 			location.put(ctx, index);
 		}
 	}
@@ -229,12 +284,12 @@ public class Translate extends HelloBaseListener {
 					break;
 			}
 			int index1 = getLocation(ctx.relExp());
-			output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
+			output(load(++index, index1), ctx);
 			index1 = index;
 			int index2 = getLocation(ctx.addExp());
-			output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
+			output(load(++index, index2), ctx);
 			index2 = index;
-			output("%" + (++index) + " = icmp " + symbol + " i32, i32* %" + index1 + ", %" + index2 + "\n\t", ctx);
+			output(icmp(++index, symbol, index1, index2), ctx);
 			location.put(ctx, index);
 		}
 	}
@@ -246,23 +301,23 @@ public class Translate extends HelloBaseListener {
 		String tmpVar = ctx.Ident().getText();
 		if (ctx.getChildCount() == 1) {
 			//Ident
-			output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
+			output(alloca(++index), ctx);
 			varMap.put(tmpVar, new Var(index));
 		} else {
 			//Ident = initVal
-			output("%" + (++index) + " = load i32, i32* %" + getLocation(ctx.initVal()) + ", align 4\n\t", ctx);
-			output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
+			output(load(++index, getLocation(ctx.initVal())), ctx);
+			output(alloca(++index), ctx);
 			varMap.put(tmpVar, new Var(index));
-			output("store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t", ctx);
+			output(store(index - 1, index), ctx);
 		}
 	}
 
 	@Override public void exitConstDef(HelloParser.ConstDefContext ctx) {
 		String tmpVar = ctx.Ident().getText();
-		output("%" + (++index) + " = load i32, i32* %" + getLocation(ctx.constInitVal()) + ", align 4\n\t", ctx);
-		output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
+		output(load(++index, getLocation(ctx.constInitVal())), ctx);
+		output(alloca(++index), ctx);
 		varMap.put(tmpVar, new Var(index, true));
-		output("store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t", ctx);
+		output(store(index - 1, index), ctx);
 	}
 
 	@Override public void exitInitVal(HelloParser.InitValContext ctx) {
@@ -296,21 +351,21 @@ public class Translate extends HelloBaseListener {
 	@Override public void exitAddExp2(HelloParser.AddExp2Context ctx) {
 		//加减法操作
 		int index1 = getLocation(ctx.addExp());
-		output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
+		output(load(++index, index1), ctx);
 		index1 = index;
 		int index2 = getLocation(ctx.mulExp());
-		output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
+		output(load(++index, index2), ctx);
 		index2 = index;
 		String symbol = ctx.getChild(1).getText();
 		if (symbol.equals("+")) {
 			// 加法
-			output("%" + (++index) + " = add nsw i32 %" + index1 + ", %" + index2 + "\n\t", ctx);
+			output(calc(++index, "add", index1, index2), ctx);
 		} else {
 			// 减法
-			output("%" + (++index) + " = sub nsw i32 %" + index1 + ", %" + index2 + "\n\t", ctx);
+			output(calc(++index, "sub", index1, index2), ctx);
 		}
-		output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
-		output("store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t", ctx);
+		output(alloca(++index), ctx);
+		output(store(index - 1, index), ctx);
 		location.put(ctx, index);
 	}
 
@@ -324,25 +379,25 @@ public class Translate extends HelloBaseListener {
 		String tmp = "";
 		//TODO S 乘除法
 		int index1 = getLocation(ctx.mulExp());
-		output("%" + (++index) + " = load i32, i32* %" + index1 + ", align 4\n\t", ctx);
+		output(load(++index, index1), ctx);
 		index1 = index;
 		int index2 = getLocation(ctx.unaryExp());
-		output("%" + (++index) + " = load i32, i32* %" + index2 + ", align 4\n\t", ctx);
+		output(load(++index, index2), ctx);
 		index2 = index;
 		String symbol = ctx.getChild(1).getText();
 		switch (symbol) {
 			case "*":
-				output("%" + (++index) + " = mul nsw i32 %" + index1 + ", %" + index2 + "\n\t", ctx);
+				output(calc(++index, "mul", index1, index2), ctx);
 				break;
 			case "/":
-				output("%" + (++index) + " = sdiv i32 %" + index1 + ", %" + index2 + "\n\t", ctx);
+				output(calc(++index, "sdiv", index1, index2), ctx);
 				break;
 			case "%":
-				output("%" + (++index) + " = srem i32 %" + index1 + ", %" + index2 + "\n\t", ctx);
+				output(calc(++index, "srem", index1, index2), ctx);
 				break;
 		}
-		output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
-		output("store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t", ctx);
+		output(alloca(++index), ctx);
+		output(store(index - 1, index), ctx);
 		location.put(ctx, index);
 	}
 
@@ -362,16 +417,15 @@ public class Translate extends HelloBaseListener {
 			throw new RuntimeException("params illegal!");
 		}
 		if (ctx.getChildCount() == 3) {
-
 			//Ident '(' ')' # calcResES
-			output("%" + (++index) + " = call i32 @" + ctx.Ident() + "()\n\t", ctx);
-			output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
-			output("store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t", ctx);
+			output(call(++index, ctx.Ident().getText()), ctx);
+			output(alloca(++index), ctx);
+			output(store(index - 1, index), ctx);
 			location.put(ctx, index);
 		} else {
 			//Ident '(' funcRParams ')' # calcResES
-			output("%" + (++index) + " = load i32, i32* %" + getLocation(ctx.funcRParams()) + "\n\t", ctx);
-			output("call void @" + ctx.Ident() + "(i32 %" + index + ")\n\t", ctx);
+			output(load(++index, getLocation(ctx.funcRParams())), ctx);
+			output(call(ctx.Ident().getText(), index), ctx);
 			// TODO 好像用不到
 			location.put(ctx, index);
 		}
@@ -389,11 +443,12 @@ public class Translate extends HelloBaseListener {
 			case "+":
 				break;
 			case "-":
-				//                tmp = -tmp;
-				output("%" + (++index) + " = load i32, i32* %" + tmpIndex + "\n\t", ctx);
-				output("%" + (++index) + " = sub nsw i32 0, %" + (index - 1) + "\n\t", ctx);
-				output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
-				output("store i32 %" + (index - 1) + ", i32* %" + index + ",align 4\n\t", ctx);
+				output(load(++index, tmpIndex), ctx);
+				output(calc(++index, "sub", index - 1), ctx);
+				output(load(++index, tmpIndex), ctx);
+				output(calc(++index, "sub", index - 1), ctx);
+				output(alloca(++index), ctx);
+				output(store(index - 1, index), ctx);
 				tmpIndex = index;
 				break;
 			case "!":
@@ -424,8 +479,8 @@ public class Translate extends HelloBaseListener {
 			tmp = Integer.parseInt(number);
 		}
 		// 分配地址
-		output("%" + (++index) + " = alloca i32, align 4\n\t", ctx);
-		output("store i32 " + tmp + ", i32* %" + index + ", align 4" + "\n\t", ctx);
+		output(alloca(++index), ctx);
+		output(store(tmp, index), ctx);
 		location.put(ctx, index);
 	}
 

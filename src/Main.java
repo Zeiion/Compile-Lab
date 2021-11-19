@@ -26,15 +26,15 @@ public class Main {
 			ParseTree tree = parser.hello();
 
 			// visitor模式
-//			MyVisitor visitor = new MyVisitor();
-//			visitor.visit(tree);
-//			while(!MyVisitor.stack.isEmpty()){
-//				System.out.println(MyVisitor.stack.pop());;
-//			}
+			//			MyVisitor visitor = new MyVisitor();
+			//			visitor.visit(tree);
+			//			while(!MyVisitor.stack.isEmpty()){
+			//				System.out.println(MyVisitor.stack.pop());;
+			//			}
 
 			// 遍历语法分析书
-			 ParseTreeWalker walker = new ParseTreeWalker();
-			 walker.walk(new Translate(), tree);
+			ParseTreeWalker walker = new ParseTreeWalker();
+			walker.walk(new Translate(), tree);
 		} catch (Exception e) {
 			System.out.println(e);
 			System.exit(-1);
@@ -42,3 +42,4 @@ public class Main {
 		System.exit(0);
 	}
 }
+
