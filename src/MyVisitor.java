@@ -61,7 +61,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static String load(int to, int from) {
-		return "%" + to + " = load i32, i32* %" + from + ", align4\n\t";
+		return "%" + to + " = load i32, i32* %" + from + ", align 4\n\t";
 	}
 
 	public static String alloca(int to) {
