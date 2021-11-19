@@ -88,7 +88,7 @@ public class Translate extends HelloBaseListener {
 	}
 
 	public static String store(String value, int to) {
-		return "store i32 %" + value + ", i32* %" + to + ", align 4\n\t";
+		return "store i32 " + value + ", i32* %" + to + ", align 4\n\t";
 	}
 
 	public static String call(int to, String ident) {
@@ -506,7 +506,7 @@ public class Translate extends HelloBaseListener {
 		}
 		// 分配地址
 		output(alloca(++index), ctx);
-		output(store(tmp, index), ctx);
+		output(store(String.valueOf(tmp), index), ctx);
 		location.put(ctx, index);
 	}
 
