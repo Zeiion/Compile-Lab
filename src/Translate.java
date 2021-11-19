@@ -35,7 +35,7 @@ public class Translate extends HelloBaseListener {
 		} catch (NullPointerException e) {
 			return "";
 		}
-		return ret;
+		return ret == null ? "" : ret;
 	}
 
 	public static int getLocation(ParserRuleContext ctx) {
@@ -49,6 +49,7 @@ public class Translate extends HelloBaseListener {
 	}
 
 	public static void output(String s, ParserRuleContext ctx) {
+		System.out.println("--" + ctx.getText() + " " + s);
 		if (getLock(ctx)) {
 			debugSout(ctx, "lock!");
 			lockStore.put(ctx, getLockStore(ctx) + s);
@@ -62,7 +63,7 @@ public class Translate extends HelloBaseListener {
 	}
 
 	public static String alloca(int to) {
-		return "%" + to + " = alloca i32, align 4";
+		return "%" + to + " = alloca i32, align 4\n\t";
 	}
 
 	public static String icmp(int to, String symbol, int index1) {
@@ -78,12 +79,16 @@ public class Translate extends HelloBaseListener {
 		return "br i1 %" + judge + ", label %" + trueLabel + ", label %" + falseLabel + "\n\t";
 	}
 
+	public static String br(int label) {
+		return "br label %" + label + "\n\t";
+	}
+
 	public static String store(int from, int to) {
-		return "store i32 %" + from + ", i32* %" + to + ", align 4";
+		return "store i32 %" + from + ", i32* %" + to + ", align 4\n\t";
 	}
 
 	public static String store(String value, int to) {
-		return "store i32 %" + value + ", i32* %" + to + ", align 4";
+		return "store i32 %" + value + ", i32* %" + to + ", align 4\n\t";
 	}
 
 	public static String call(int to, String ident) {
@@ -115,7 +120,7 @@ public class Translate extends HelloBaseListener {
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
-		System.out.println(ctx.getText() + " " + s);
+		//		System.out.println(ctx.getText() + " " + s);
 	}
 
 	public static void checkIdent(HelloParser.CalcResESContext ctx) throws Exception {
@@ -218,6 +223,19 @@ public class Translate extends HelloBaseListener {
 			location.put(ctx, location.get(ctx.lAndExp()));
 		} else {
 			//lOrExp '||' lAndExp
+			String store1 = lockStore.get(ctx.lOrExp());
+			String store2 = lockStore.get(ctx.lAndExp());
+			int index1 = location.get(ctx.lOrExp());
+			int index2 = location.get(ctx.lAndExp());
+			output(load(++index, index1), ctx);
+			output(load(++index, index2), ctx);
+			output(store1 + br(index1, ++index, ++index), ctx);
+			int trueIndex = index - 1;
+			int falseIndex = index;
+			// true
+			output(label(trueIndex, ""), ctx);
+			// false
+			output(label(falseIndex, store2 + br(index2, ++index, ++index)), ctx);
 		}
 	}
 
@@ -227,9 +245,19 @@ public class Translate extends HelloBaseListener {
 			location.put(ctx, location.get(ctx.eqExp()));
 		} else {
 			//lAndExp '&&' eqExp
+			String store1 = lockStore.get(ctx.lAndExp());
+			String store2 = lockStore.get(ctx.eqExp());
 			int index1 = location.get(ctx.lAndExp());
 			int index2 = location.get(ctx.eqExp());
 			output(load(++index, index1), ctx);
+			output(load(++index, index2), ctx);
+			output(store1 + br(index1, ++index, ++index), ctx);
+			int trueIndex = index - 1;
+			int falseIndex = index;
+			// true
+			output(label(trueIndex, store2 + br(index2, ++index, ++index)), ctx);
+			// false
+			output(label(falseIndex, br(index)), ctx);
 		}
 	}
 
@@ -502,12 +530,14 @@ public class Translate extends HelloBaseListener {
 	}
 
 	@Override public void exitEveryRule(ParserRuleContext ctx) {
-		debugSout(ctx, "--debug");
-		lock.put(ctx, false);
-		if (getLock(ctx.getParent())) {
-			lockStore.put(ctx.getParent(), getLockStore(ctx.getParent()) + getLockStore(ctx));
-		} else {
-			output(getLockStore(ctx), ctx);
+		//		debugSout(ctx, "--debug");
+		if (getLock(ctx)) {
+			lock.put(ctx, false);
+			if (getLock(ctx.getParent())) {
+				lockStore.put(ctx.getParent(), getLockStore(ctx.getParent()) + getLockStore(ctx));
+			} else {
+				output(getLockStore(ctx), ctx);
+			}
 		}
 	}
 
