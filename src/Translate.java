@@ -100,6 +100,9 @@ public class Translate extends HelloBaseListener {
 	}
 
 	public static String calc(int to, String symbol, int index1, int index2) {
+		if (symbol.equals("sdiv") || symbol.equals("srem")) {
+			return "%" + to + " = " + symbol + " i32 %" + index1 + ", %" + index2 + "\n\t";
+		}
 		return "%" + to + " = " + symbol + " nsw i32 %" + index1 + ", %" + index2 + "\n\t";
 	}
 
