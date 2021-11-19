@@ -473,8 +473,6 @@ public class Translate extends HelloBaseListener {
 			case "-":
 				output(load(++index, tmpIndex), ctx);
 				output(calc(++index, "sub", index - 1), ctx);
-				output(load(++index, tmpIndex), ctx);
-				output(calc(++index, "sub", index - 1), ctx);
 				output(alloca(++index), ctx);
 				output(store(index - 1, index), ctx);
 				tmpIndex = index;
