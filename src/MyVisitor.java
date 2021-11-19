@@ -542,7 +542,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		}
 		// 分配地址
 		output(alloca(++index), ctx);
-		output(store(tmp, index), ctx);
+		output(store(String.valueOf(tmp), index), ctx);
 		location.put(ctx, index);
 		return null;
 	}
