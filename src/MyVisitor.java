@@ -237,7 +237,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		output(br(endIndex), ctx);
 		//TODO else
 		if (ctx.getChildCount() > 5) {
-			elseIndex = ++index;
 			output(label(elseIndex, ""), ctx);
 			visit(ctx.stmt(1));
 			output(br(endIndex), ctx);
