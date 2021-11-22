@@ -6,7 +6,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	private boolean constMode = false;
 	// TODO public HashMap<String,> voidMap
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
-		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)";
+		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)\n";
 	public static String output = "";
 	public int index = 0;
 	//	public HashMap<String, Integer> varIndexMap = new HashMap<>();
@@ -61,63 +61,63 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static String load(int to, int from) {
-		return "%" + to + " = load i32, i32* %" + from + ", align 4\n\t";
+		return "%x" + to + " = load i32, i32* %x" + from + ", align 4\n\t";
 	}
 
 	public static String alloca(int to) {
-		return "%" + to + " = alloca i32, align 4\n\t";
+		return "%x" + to + " = alloca i32, align 4\n\t";
 	}
 
 	public static String icmp(int to, String symbol, int index1) {
 		//ne 0
-		return "%" + to + " = icmp " + symbol + " i32 %" + index1 + ", 0\n\t";
+		return "%x" + to + " = icmp " + symbol + " i32 %x" + index1 + ", 0\n\t";
 	}
 
 	public static String icmp(int to, String symbol, int index1, int index2) {
-		return "%" + to + " = icmp " + symbol + " i32 %" + index1 + ", %" + index2 + "\n\t";
+		return "%x" + to + " = icmp " + symbol + " i32 %x" + index1 + ", %x" + index2 + "\n\t";
 	}
 
 	public static String br(int judge, int trueLabel, int falseLabel) {
-		return "br i1 %" + judge + ", label %" + trueLabel + ", label %" + falseLabel + "\n\t";
+		return "br i1 %x" + judge + ", label %x" + trueLabel + ", label %x" + falseLabel + "\n\t";
 	}
 
 	public static String br(int label) {
-		return "br label %" + label + "\n\t";
+		return "br label %x" + label + "\n\t";
 	}
 
 	public static String store(int from, int to) {
-		return "store i32 %" + from + ", i32* %" + to + ", align 4\n\t";
+		return "store i32 %x" + from + ", i32* %x" + to + ", align 4\n\t";
 	}
 
 	public static String store(String value, int to) {
-		return "store i32 " + value + ", i32* %" + to + ", align 4\n\t";
+		return "store i32 " + value + ", i32* %x" + to + ", align 4\n\t";
 	}
 
 	public static String call(int to, String ident) {
-		return "%" + to + " = call i32 @" + ident + "()\n\t";
+		return "%x" + to + " = call i32 @" + ident + "()\n\t";
 	}
 
 	public static String call(String ident, int param) {
-		return "call void @" + ident + "(i32 %" + param + ")\n\t";
+		return "call void @" + ident + "(i32 %x" + param + ")\n\t";
 	}
 
 	public static String calc(int to, String symbol, int index1, int index2) {
 		if (symbol.equals("sdiv") || symbol.equals("srem")) {
-			return "%" + to + " = " + symbol + " i32 %" + index1 + ", %" + index2 + "\n\t";
+			return "%x" + to + " = " + symbol + " i32 %x" + index1 + ", %x" + index2 + "\n\t";
 		}
-		return "%" + to + " = " + symbol + " nsw i32 %" + index1 + ", %" + index2 + "\n\t";
+		return "%x" + to + " = " + symbol + " nsw i32 %x" + index1 + ", %x" + index2 + "\n\t";
 	}
 
 	public static String calc(int to, String symbol, int index1) {
-		return "%" + to + " = " + symbol + " nsw i32 0, %" + index1 + "\n\t";
+		return "%x" + to + " = " + symbol + " nsw i32 0, %x" + index1 + "\n\t";
 	}
 
 	public static String label(int label, String s) {
-		return "\n" + label + ":                                               ; preds = %0\n\t" + s;
+		return "\nx" + label + ":                                               ; preds = %x0\n\t" + s;
 	}
 
 	public static String ret(int retIndex) {
-		return "ret i32 %" + retIndex + "\n";
+		return "ret i32 %x" + retIndex + "\n";
 	}
 
 	public static void sout(String s) {
@@ -190,17 +190,46 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	// 'if' '(' cond ')' stmt ('else' stmt)? # stmt4
 	@Override public Void visitStmt4(HelloParser.Stmt4Context ctx) {
-		visitChildren(ctx);
-		lock.put(ctx, true);
+		//		visit(ctx.cond());
+		//		lock.put(ctx, true);
+		//		int condIndex = getLocation(ctx.cond());
+		//		int ifIndex = ++index;
+		//		int elseIndex = 0;
+		//
+		//		// TODO if
+		//		visit(ctx.stmt(0));
+		//		output(label(ifIndex, "" + br(endIndex)), ctx);
+		//		//TODO else
+		//		if (ctx.getChildCount() > 5) {
+		//			elseIndex = ++index;
+		//			visit(ctx.stmt(1));
+		//		}
+		//		int endIndex = ++index;
+		//		output(br(condIndex, ifIndex, elseIndex), ctx);
+		//		output(label(elseIndex, "" + br(endIndex)), ctx);
+		//		output(label(endIndex,""),ctx);
+
+		visit(ctx.cond());
 		int condIndex = getLocation(ctx.cond());
-		output(br(condIndex, ++index, ++index), ctx);
+		int ifIndex = ++index;
+		int elseIndex = 0;
+		if (ctx.getChildCount() > 5) {
+			elseIndex = ++index;
+		}
+		int endIndex = ++index;
+		output(br(condIndex, ifIndex, elseIndex == 0 ? endIndex : elseIndex), ctx);
 		// TODO if
-		output(label(index - 1, store(4, index + 1)), ctx);
+		output(label(ifIndex, ""), ctx);
+		visit(ctx.stmt(0));
+		output(br(endIndex), ctx);
 		//TODO else
 		if (ctx.getChildCount() > 5) {
-			output(label(index, store(5, index + 1)) + label(++index, load(13, 4)) + (++index) + call("putint", 13)
-				+ "  ret i32 0", ctx);
+			elseIndex = ++index;
+			output(label(elseIndex, ""), ctx);
+			visit(ctx.stmt(1));
+			output(br(endIndex), ctx);
 		}
+		output(label(endIndex, ""), ctx);
 		return null;
 	}
 
@@ -215,7 +244,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitCond(HelloParser.CondContext ctx) {
 		visitChildren(ctx);
 		// TODO
-		location.put(ctx, ++index);
+		location.put(ctx, location.get(ctx.lOrExp()));
 		return null;
 	}
 
@@ -244,25 +273,54 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	@Override public Void visitLAndExp(HelloParser.LAndExpContext ctx) {
-		visitChildren(ctx);
 		if (ctx.getChildCount() == 1) {
 			//eqExp
+			visitChildren(ctx);
 			location.put(ctx, location.get(ctx.eqExp()));
 		} else {
 			//lAndExp '&&' eqExp
-			String store1 = lockStore.get(ctx.lAndExp());
-			String store2 = lockStore.get(ctx.eqExp());
+			int res = ++index;
+			visit(ctx.lAndExp());
 			int index1 = location.get(ctx.lAndExp());
-			int index2 = location.get(ctx.eqExp());
 			output(load(++index, index1), ctx);
-			output(load(++index, index2), ctx);
-			output(store1 + br(index1, ++index, ++index), ctx);
-			int trueIndex = index - 1;
-			int falseIndex = index;
+			index1 = index;
+			// TODO 是不是这个，，
+			output(icmp(++index, "eq", index1), ctx);
+			index1 = index;
+			int trueIndex = ++index;
+			int falseIndex = ++index;
+			int endIndex = ++index;
+			output(br(index1, trueIndex, falseIndex), ctx);
 			// true
-			output(label(trueIndex, store2 + br(index2, ++index, ++index)), ctx);
+			output(label(trueIndex, ""), ctx);
+			//
+			output(br(endIndex), ctx);
 			// false
-			output(label(falseIndex, br(index)), ctx);
+			output(label(falseIndex, ""), ctx);
+			visit(ctx.eqExp());
+			int index2 = location.get(ctx.eqExp());
+			output(load(++index, index2), ctx);
+			index2 = index;
+			// TODO 是不是这个，，
+			output(icmp(++index, "eq", index2), ctx);
+			index2 = index;
+			output(br(index2, trueIndex, endIndex), ctx);
+			// end
+			output(label(endIndex, ""), ctx);
+
+			//			String store1 = lockStore.get(ctx.lAndExp());
+			//			String store2 = lockStore.get(ctx.eqExp());
+			//			int index1 = location.get(ctx.lAndExp());
+			//			int index2 = location.get(ctx.eqExp());
+			//			output(load(++index, index1), ctx);
+			//			output(load(++index, index2), ctx);
+			//			output(store1 + br(index1, ++index, ++index), ctx);
+			//			int trueIndex = index - 1;
+			//			int falseIndex = index;
+			//			// true
+			//			output(label(trueIndex, store2 + br(index2, ++index, ++index)), ctx);
+			//			// false
+			//			output(label(falseIndex, br(index)), ctx);
 		}
 		return null;
 	}
@@ -300,8 +358,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		if (ctx.getChildCount() == 1) {
 			//AddExp
 			int tmpIndex = getLocation(ctx.addExp());
-			//TODO
-			//output("%" + (++index) + " = icmp ne i32 %" + tmpIndex + ", 0\n\t", ctx);
 			location.put(ctx, tmpIndex);
 		} else {
 			//relExp ('<' | '>' | '<=' | '>=') addExp
@@ -426,7 +482,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return null;
 	}
 
-	/* mulExp ('*' | '/' | '%') unaryExp # mulExp2 */
+	/* mulExp ('*' | '/' | '%x') unaryExp # mulExp2 */
 	@Override public Void visitMulExp2(HelloParser.MulExp2Context ctx) {
 		visitChildren(ctx);
 		String tmp = "";
@@ -445,7 +501,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			case "/":
 				output(calc(++index, "sdiv", index1, index2), ctx);
 				break;
-			case "%":
+			case "%x":
 				output(calc(++index, "srem", index1, index2), ctx);
 				break;
 		}
