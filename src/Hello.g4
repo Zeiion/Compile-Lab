@@ -44,9 +44,9 @@ relExp       : addExp
 eqExp        : relExp
                 | eqExp ('==' | '!=') relExp;
 lAndExp      : eqExp
-                | lAndExp '&&' eqExp;
+                | eqExp '&&' lAndExp;
 lOrExp       : lAndExp
-                | lOrExp '||' lAndExp;
+                | lAndExp '||' lOrExp;
 
 fragment INT: 'int';
 BType : INT;

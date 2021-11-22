@@ -254,7 +254,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			//lAndExp
 			location.put(ctx, location.get(ctx.lAndExp()));
 		} else {
-			//lOrExp '||' lAndExp
+			//lAndExp '||' lOrExp
 			String store1 = lockStore.get(ctx.lOrExp());
 			String store2 = lockStore.get(ctx.lAndExp());
 			int index1 = location.get(ctx.lOrExp());
@@ -278,10 +278,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			visitChildren(ctx);
 			location.put(ctx, location.get(ctx.eqExp()));
 		} else {
-			//lAndExp '&&' eqExp
+			//eqExp '&&' lAndExp
 			int res = ++index;
-			visit(ctx.lAndExp());
-			int index1 = location.get(ctx.lAndExp());
+			visit(ctx.eqExp());
+			int index1 = location.get(ctx.eqExp());
 			output(load(++index, index1), ctx);
 			index1 = index;
 			// TODO 是不是这个，，
@@ -297,8 +297,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			output(br(endIndex), ctx);
 			// false
 			output(label(falseIndex, ""), ctx);
-			visit(ctx.eqExp());
-			int index2 = location.get(ctx.eqExp());
+			visit(ctx.lAndExp());
+			int index2 = location.get(ctx.lAndExp());
 			output(load(++index, index2), ctx);
 			index2 = index;
 			// TODO 是不是这个，，
