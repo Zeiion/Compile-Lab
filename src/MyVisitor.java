@@ -8,7 +8,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
 		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)\n";
 	public static String output = "";
-	public int index = 0;
+	public static int index = 0;
 	//	public HashMap<String, Integer> varIndexMap = new HashMap<>();
 	public HashMap<String, Var> varMap = new HashMap<>();
 	public static ParseTreeProperty<String> store = new ParseTreeProperty<>();
@@ -116,6 +116,15 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return "\nx" + label + ":                                               ; preds = %x0\n\t" + s;
 	}
 
+	public static String zext(int to, int from) {
+		return "%x" + to + " = zext i1 %x" + from + " to i32\n\t";
+	}
+
+	public static String toi32point(int tmpIndex) {
+		int i = ++index;
+		return alloca(i) + store(tmpIndex, i);
+	}
+
 	public static String ret(int retIndex) {
 		return "ret i32 %x" + retIndex + "\n";
 	}
@@ -217,6 +226,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			elseIndex = ++index;
 		}
 		int endIndex = ++index;
+		output(load(++index, condIndex), ctx);
+		condIndex = index;
+		output(icmp(++index, "ne", condIndex), ctx);
+		condIndex = index;
 		output(br(condIndex, ifIndex, elseIndex == 0 ? endIndex : elseIndex), ctx);
 		// TODO if
 		output(label(ifIndex, ""), ctx);
@@ -255,19 +268,39 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			location.put(ctx, location.get(ctx.lAndExp()));
 		} else {
 			//lAndExp '||' lOrExp
-			String store1 = lockStore.get(ctx.lOrExp());
-			String store2 = lockStore.get(ctx.lAndExp());
-			int index1 = location.get(ctx.lOrExp());
-			int index2 = location.get(ctx.lAndExp());
+			int res = ++index;
+			output(alloca(res), ctx);
+			visit(ctx.lAndExp());
+			int index1 = location.get(ctx.lAndExp());
+			int falseIndex = ++index;
+			int endIndex = ++index;
+			int failIndex = ++index;
+			int successIndex = ++index;
 			output(load(++index, index1), ctx);
-			output(load(++index, index2), ctx);
-			output(store1 + br(index1, ++index, ++index), ctx);
-			int trueIndex = index - 1;
-			int falseIndex = index;
-			// true
-			output(label(trueIndex, ""), ctx);
+			index1 = index;
+			output(icmp(++index, "ne", index1), ctx);
+			index1 = index;
+			output(br(index1, successIndex, falseIndex), ctx);
 			// false
-			output(label(falseIndex, store2 + br(index2, ++index, ++index)), ctx);
+			output(label(falseIndex, ""), ctx);
+			visit(ctx.lOrExp());
+			int index2 = location.get(ctx.lOrExp());
+			output(load(++index, index2), ctx);
+			index2 = index;
+			output(icmp(++index, "ne", index2), ctx);
+			index2 = index;
+			output(br(index2, successIndex, failIndex), ctx);
+			// fail
+			output(label(failIndex, ""), ctx);
+			output(store("0", res), ctx);
+			output(br(endIndex), ctx);
+			// success
+			output(label(successIndex, ""), ctx);
+			output(store("1", res), ctx);
+			output(br(endIndex), ctx);
+			// end
+			output(label(endIndex, ""), ctx);
+			location.put(ctx, res);
 		}
 		return null;
 	}
@@ -280,52 +313,44 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		} else {
 			//eqExp '&&' lAndExp
 			int res = ++index;
+			output(alloca(res), ctx);
 			visit(ctx.eqExp());
 			int index1 = location.get(ctx.eqExp());
+			int trueIndex = ++index;
+			int endIndex = ++index;
+			int failIndex = ++index;
 			output(load(++index, index1), ctx);
 			index1 = index;
-			// TODO 是不是这个，，
-			output(icmp(++index, "eq", index1), ctx);
+			output(icmp(++index, "ne", index1), ctx);
 			index1 = index;
-			int trueIndex = ++index;
-			int falseIndex = ++index;
-			int endIndex = ++index;
-			output(br(index1, trueIndex, falseIndex), ctx);
+			output(br(index1, trueIndex, failIndex), ctx);
 			// true
 			output(label(trueIndex, ""), ctx);
-			//
-			output(br(endIndex), ctx);
-			// false
-			output(label(falseIndex, ""), ctx);
 			visit(ctx.lAndExp());
+			int successIndex = ++index;
 			int index2 = location.get(ctx.lAndExp());
 			output(load(++index, index2), ctx);
 			index2 = index;
-			// TODO 是不是这个，，
-			output(icmp(++index, "eq", index2), ctx);
+			output(icmp(++index, "ne", index2), ctx);
 			index2 = index;
-			output(br(index2, trueIndex, endIndex), ctx);
+			output(br(index2, successIndex, failIndex), ctx);
+			// fail
+			output(label(failIndex, ""), ctx);
+			output(store("0", res), ctx);
+			output(br(endIndex), ctx);
+			// success
+			output(label(successIndex, ""), ctx);
+			output(store("1", res), ctx);
+			output(br(endIndex), ctx);
 			// end
 			output(label(endIndex, ""), ctx);
-
-			//			String store1 = lockStore.get(ctx.lAndExp());
-			//			String store2 = lockStore.get(ctx.eqExp());
-			//			int index1 = location.get(ctx.lAndExp());
-			//			int index2 = location.get(ctx.eqExp());
-			//			output(load(++index, index1), ctx);
-			//			output(load(++index, index2), ctx);
-			//			output(store1 + br(index1, ++index, ++index), ctx);
-			//			int trueIndex = index - 1;
-			//			int falseIndex = index;
-			//			// true
-			//			output(label(trueIndex, store2 + br(index2, ++index, ++index)), ctx);
-			//			// false
-			//			output(label(falseIndex, br(index)), ctx);
+			location.put(ctx, res);
 		}
 		return null;
 	}
 
 	@Override public Void visitEqExp(HelloParser.EqExpContext ctx) {
+		// 返回的都是 i32 类型地址
 		visitChildren(ctx);
 		if (ctx.getChildCount() == 1) {
 			//relExp
@@ -348,6 +373,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			output(load(++index, index2), ctx);
 			index2 = index;
 			output(icmp(++index, symbol, index1, index2), ctx);
+			output(zext(++index, index - 1), ctx);
+			output(toi32point(index), ctx);
 			location.put(ctx, index);
 		}
 		return null;
@@ -359,6 +386,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			//AddExp
 			int tmpIndex = getLocation(ctx.addExp());
 			location.put(ctx, tmpIndex);
+
 		} else {
 			//relExp ('<' | '>' | '<=' | '>=') addExp
 			String symbol = ctx.getChild(1).getText();
@@ -383,6 +411,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			output(load(++index, index2), ctx);
 			index2 = index;
 			output(icmp(++index, symbol, index1, index2), ctx);
+			output(zext(++index, index - 1), ctx);
+			output(toi32point(index), ctx);
 			location.put(ctx, index);
 		}
 		return null;
