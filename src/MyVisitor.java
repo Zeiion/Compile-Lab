@@ -596,6 +596,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				tmpIndex = index;
 				break;
 			case "!":
+				output(load(++index, tmpIndex), ctx);
+				output(icmp(++index, "ne", index - 1), ctx);
+				output(zext(++index, index - 1), ctx);
+				output(toi32point(index), ctx);
+				tmpIndex = index;
 				break;
 		}
 		location.put(ctx, tmpIndex);
