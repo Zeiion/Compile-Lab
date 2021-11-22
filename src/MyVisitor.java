@@ -597,7 +597,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				break;
 			case "!":
 				output(load(++index, tmpIndex), ctx);
-				output(icmp(++index, "ne", index - 1), ctx);
+				output(icmp(++index, "eq", index - 1), ctx);
 				output(zext(++index, index - 1), ctx);
 				output(toi32point(index), ctx);
 				tmpIndex = index;
