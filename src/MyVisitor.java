@@ -11,6 +11,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)\n";
 	public static String output = "";
 	public static int index = 0;
+	public static int globalIndex = 0;
+	public static ParserRuleContext hello;
 
 	public static ParseTreeProperty<String> store = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Integer> location = new ParseTreeProperty<>();
@@ -20,7 +22,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static Stack<ParserRuleContext> blockStack = new Stack<>();
 	public static ParseTreeProperty<ArrayList<Var>> blockVar = new ParseTreeProperty<>();
 
-	public static Var getVarIndex(String var) {
+	public static Var getVar(String var) {
 		int i = blockStack.size();
 		while (--i >= 0) {
 			ParserRuleContext tmpCtx = blockStack.get(i);
@@ -36,6 +38,15 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 		}
 		throw new RuntimeException("no such var!");
+	}
+
+	public static Var getGlobalVarById(int id) {
+		for (Var v : blockVar.get(hello)) {
+			if (v.index == id) {
+				return v;
+			}
+		}
+		throw new RuntimeException("no such global var!");
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
@@ -73,6 +84,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static boolean isGlobal() {
+		//		System.out.println("isGlobal " + blockStack.peek().getClass().equals(HelloParser.HelloContext.class));
 		return blockStack.peek().getClass().equals(HelloParser.HelloContext.class);
 	}
 
@@ -90,21 +102,29 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		}
 	}
 
+	public static String getReg(int i) {
+		if (i < 0) {
+			String ident = getGlobalVarById(i).name;
+			return "@" + ident;
+		}
+		return "%x" + i;
+	}
+
 	public static String load(int to, int from) {
-		return "%x" + to + " = load i32, i32* %x" + from + ", align 4\n\t";
+		return getReg(to) + " = load i32, i32* " + getReg(from) + ", align 4\n\t";
 	}
 
 	public static String alloca(int to) {
-		return "%x" + to + " = alloca i32, align 4\n\t";
+		return getReg(to) + " = alloca i32, align 4\n\t";
 	}
 
 	public static String icmp(int to, String symbol, int index1) {
 		//ne 0
-		return "%x" + to + " = icmp " + symbol + " i32 %x" + index1 + ", 0\n\t";
+		return getReg(to) + " = icmp " + symbol + " i32 " + getReg(index1) + ", 0\n\t";
 	}
 
 	public static String icmp(int to, String symbol, int index1, int index2) {
-		return "%x" + to + " = icmp " + symbol + " i32 %x" + index1 + ", %x" + index2 + "\n\t";
+		return getReg(to) + " = icmp " + symbol + " i32 " + getReg(index1) + ", " + getReg(index2) + "\n\t";
 	}
 
 	public static String br(int judge, int trueLabel, int falseLabel) {
@@ -116,38 +136,42 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static String store(int from, int to) {
-		return "store i32 %x" + from + ", i32* %x" + to + ", align 4\n\t";
+		return "store i32 " + getReg(from) + ", i32* " + getReg(to) + ", align 4\n\t";
 	}
 
 	public static String store(String value, int to) {
-		return "store i32 " + value + ", i32* %x" + to + ", align 4\n\t";
+		return "store i32 " + value + ", i32* " + getReg(to) + ", align 4\n\t";
 	}
 
 	public static String call(int to, String ident) {
-		return "%x" + to + " = call i32 @" + ident + "()\n\t";
+		return getReg(to) + " = call i32 @" + ident + "()\n\t";
 	}
 
 	public static String call(String ident, int param) {
-		return "call void @" + ident + "(i32 %x" + param + ")\n\t";
+		return "call void @" + ident + "(i32 " + getReg(param) + ")\n\t";
 	}
 
 	public static String calc(int to, String symbol, int index1, int index2) {
 		if (symbol.equals("sdiv") || symbol.equals("srem")) {
-			return "%x" + to + " = " + symbol + " i32 %x" + index1 + ", %x" + index2 + "\n\t";
+			return getReg(to) + " = " + symbol + " i32 " + getReg(index1) + ", " + getReg(index2) + "\n\t";
 		}
-		return "%x" + to + " = " + symbol + " nsw i32 %x" + index1 + ", %x" + index2 + "\n\t";
+		return getReg(to) + " = " + symbol + " nsw i32 " + getReg(index1) + ", " + getReg(index2) + "\n\t";
 	}
 
 	public static String calc(int to, String symbol, int index1) {
-		return "%x" + to + " = " + symbol + " nsw i32 0, %x" + index1 + "\n\t";
+		return getReg(to) + " = " + symbol + " nsw i32 0, " + getReg(index1) + "\n\t";
 	}
 
 	public static String label(int label, String s) {
-		return "\nx" + label + ":                                               ; preds = %x0\n\t" + s;
+		return "\nx" + label + ":                                               ; preds = ???\n\t" + s;
+	}
+
+	public static String dso(String ident, String value) {
+		return "@" + ident + " = dso_local global i32 " + value + "\n";
 	}
 
 	public static String zext(int to, int from) {
-		return "%x" + to + " = zext i1 %x" + from + " to i32\n\t";
+		return getReg(to) + " = zext i1 " + getReg(from) + " to i32\n\t";
 	}
 
 	public static String toi32point(int tmpIndex) {
@@ -168,6 +192,21 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 		}
 		tmpList.add(new Var(tmpVar, tmpIndex, isConst));
+	}
+
+	public static void newGlobalVar(String tmpVar, String value, int tmpIndex, boolean isConst) {
+		ParserRuleContext tmpCtx = blockStack.peek();
+		ArrayList<Var> tmpList = blockVar.get(tmpCtx);
+		if (tmpList == null) {
+			tmpList = new ArrayList<>();
+			blockVar.put(tmpCtx, tmpList);
+		}
+		for (Var v : tmpList) {
+			if (v.name.equals(tmpVar)) {
+				throw new RuntimeException("global var already exist!");
+			}
+		}
+		tmpList.add(new Var(true, Integer.valueOf(value), tmpVar, tmpIndex, isConst));
 	}
 
 	public static String ret(int retIndex) {
@@ -220,6 +259,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	@Override public Void visitHello(HelloParser.HelloContext ctx) {
+		hello = ctx;
 		blockStack.push(ctx);
 		visitChildren(ctx);
 		sout(globalOutput);
@@ -244,7 +284,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitStmt1(HelloParser.Stmt1Context ctx) {
 		visitChildren(ctx);
 		String ident = ctx.lVal().Ident().getText();
-		if (getVarIndex(ident).isConst) {
+		if (getVar(ident).isConst) {
 			throw new RuntimeException(ident + " is const!");
 		}
 		int tmpIndex = getLocation(ctx.exp());
@@ -481,16 +521,22 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitVarDef(HelloParser.VarDefContext ctx) {
 		visitChildren(ctx);
 		String tmpVar = ctx.Ident().getText();
-		if (ctx.getChildCount() == 1) {
-			//Ident
-			output(alloca(++index), ctx);
-			newVar(tmpVar, index, false);
+		if (isGlobal()) {
+			//TODO 全局变量
+			newGlobalVar(tmpVar, store.get(ctx.initVal()), --globalIndex, false);
+			output(dso(tmpVar, String.valueOf(store.get(ctx.initVal()))), ctx);
 		} else {
-			//Ident = initVal
-			output(load(++index, getLocation(ctx.initVal())), ctx);
-			output(alloca(++index), ctx);
-			newVar(tmpVar, index, false);
-			output(store(index - 1, index), ctx);
+			if (ctx.getChildCount() == 1) {
+				//Ident
+				output(alloca(++index), ctx);
+				newVar(tmpVar, index, false);
+			} else {
+				//Ident = initVal
+				output(load(++index, getLocation(ctx.initVal())), ctx);
+				output(alloca(++index), ctx);
+				newVar(tmpVar, index, false);
+				output(store(index - 1, index), ctx);
+			}
 		}
 		return null;
 	}
@@ -498,28 +544,43 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitConstDef(HelloParser.ConstDefContext ctx) {
 		visitChildren(ctx);
 		String tmpVar = ctx.Ident().getText();
-		output(load(++index, getLocation(ctx.constInitVal())), ctx);
-		output(alloca(++index), ctx);
-		newVar(tmpVar, index, true);
-		output(store(index - 1, index), ctx);
+		if (isGlobal()) {
+			// TODO 全局变量
+			newGlobalVar(tmpVar, store.get(ctx.constInitVal()), --globalIndex, true);
+			output(dso(tmpVar, String.valueOf(store.get(ctx.constInitVal()))), ctx);
+		} else {
+			output(load(++index, getLocation(ctx.constInitVal())), ctx);
+			output(alloca(++index), ctx);
+			newVar(tmpVar, index, true);
+			output(store(index - 1, index), ctx);
+		}
 		return null;
 	}
 
 	@Override public Void visitInitVal(HelloParser.InitValContext ctx) {
 		visitChildren(ctx);
 		location.put(ctx, getLocation(ctx.exp()));
+		if (isGlobal()) {
+			store.put(ctx, store.get(ctx.exp()));
+		}
 		return null;
 	}
 
 	@Override public Void visitConstInitVal(HelloParser.ConstInitValContext ctx) {
 		visitChildren(ctx);
 		location.put(ctx, getLocation(ctx.constExp()));
+		if (isGlobal()) {
+			store.put(ctx, store.get(ctx.constExp()));
+		}
 		return null;
 	}
 
 	@Override public Void visitExp(HelloParser.ExpContext ctx) {
 		visitChildren(ctx);
 		location.put(ctx, getLocation(ctx.addExp()));
+		if (isGlobal()) {
+			store.put(ctx, store.get(ctx.addExp()));
+		}
 		return null;
 	}
 
@@ -528,6 +589,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		constMode = false;
 		location.put(ctx, getLocation(ctx.addExp()));
+		if (isGlobal()) {
+			store.put(ctx, store.get(ctx.addExp()));
+		}
 		return null;
 	}
 
@@ -535,6 +599,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitAddExp1(HelloParser.AddExp1Context ctx) {
 		visitChildren(ctx);
 		location.put(ctx, getLocation(ctx.mulExp()));
+		if (isGlobal()) {
+			store.put(ctx, store.get(ctx.mulExp()));
+		}
 		return null;
 	}
 
@@ -542,22 +609,37 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitAddExp2(HelloParser.AddExp2Context ctx) {
 		visitChildren(ctx);
 		//加减法操作
-		int index1 = getLocation(ctx.addExp());
-		output(load(++index, index1), ctx);
-		index1 = index;
-		int index2 = getLocation(ctx.mulExp());
-		output(load(++index, index2), ctx);
-		index2 = index;
 		String symbol = ctx.getChild(1).getText();
-		if (symbol.equals("+")) {
-			// 加法
-			output(calc(++index, "add", index1, index2), ctx);
+		if (isGlobal()) {
+			//TODO 全局
+			int value1 = Integer.parseInt(store.get(ctx.addExp()));
+			int value2 = Integer.parseInt(store.get(ctx.mulExp()));
+			int res = 0;
+			if (symbol.equals("+")) {
+				// 加法
+				res = value1 + value2;
+			} else {
+				// 减法
+				res = value1 - value2;
+			}
+			store.put(ctx, String.valueOf(res));
 		} else {
-			// 减法
-			output(calc(++index, "sub", index1, index2), ctx);
+			int index1 = getLocation(ctx.addExp());
+			output(load(++index, index1), ctx);
+			index1 = index;
+			int index2 = getLocation(ctx.mulExp());
+			output(load(++index, index2), ctx);
+			index2 = index;
+			if (symbol.equals("+")) {
+				// 加法
+				output(calc(++index, "add", index1, index2), ctx);
+			} else {
+				// 减法
+				output(calc(++index, "sub", index1, index2), ctx);
+			}
+			output(alloca(++index), ctx);
+			output(store(index - 1, index), ctx);
 		}
-		output(alloca(++index), ctx);
-		output(store(index - 1, index), ctx);
 		location.put(ctx, index);
 		return null;
 	}
@@ -566,6 +648,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitMulExp1(HelloParser.MulExp1Context ctx) {
 		visitChildren(ctx);
 		location.put(ctx, getLocation(ctx.unaryExp()));
+		if (isGlobal()) {
+			store.put(ctx, store.get(ctx.unaryExp()));
+		}
 		return null;
 	}
 
@@ -574,26 +659,45 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		String tmp = "";
 		//TODO S 乘除法
-		int index1 = getLocation(ctx.mulExp());
-		output(load(++index, index1), ctx);
-		index1 = index;
-		int index2 = getLocation(ctx.unaryExp());
-		output(load(++index, index2), ctx);
-		index2 = index;
 		String symbol = ctx.getChild(1).getText();
-		switch (symbol) {
-			case "*":
-				output(calc(++index, "mul", index1, index2), ctx);
-				break;
-			case "/":
-				output(calc(++index, "sdiv", index1, index2), ctx);
-				break;
-			case "%x":
-				output(calc(++index, "srem", index1, index2), ctx);
-				break;
+		if (isGlobal()) {
+			// TODO 全局
+			int value1 = Integer.parseInt(store.get(ctx.mulExp()));
+			int value2 = Integer.parseInt(store.get(ctx.unaryExp()));
+			int res = 0;
+			switch (symbol) {
+				case "*":
+					res = value1 * value2;
+					break;
+				case "/":
+					res = value1 / value2;
+					break;
+				case "%":
+					res = value1 % value2;
+					break;
+			}
+			store.put(ctx, String.valueOf(res));
+		} else {
+			int index1 = getLocation(ctx.mulExp());
+			output(load(++index, index1), ctx);
+			index1 = index;
+			int index2 = getLocation(ctx.unaryExp());
+			output(load(++index, index2), ctx);
+			index2 = index;
+			switch (symbol) {
+				case "*":
+					output(calc(++index, "mul", index1, index2), ctx);
+					break;
+				case "/":
+					output(calc(++index, "sdiv", index1, index2), ctx);
+					break;
+				case "%":
+					output(calc(++index, "srem", index1, index2), ctx);
+					break;
+			}
+			output(alloca(++index), ctx);
+			output(store(index - 1, index), ctx);
 		}
-		output(alloca(++index), ctx);
-		output(store(index - 1, index), ctx);
 		location.put(ctx, index);
 		return null;
 	}
@@ -636,6 +740,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		// 保存地址
 		location.put(ctx, getLocation(ctx.primaryExp()));
+		// 存储值
+		store.put(ctx, store.get(ctx.primaryExp()));
 		return null;
 	}
 
@@ -666,21 +772,29 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	/*  PrimaryExp
-	 *   保存地址
 	 * */
 	@Override public Void visitPrimaryExp1(HelloParser.PrimaryExp1Context ctx) {
+		//'(' exp ')'
 		visitChildren(ctx);
 		location.put(ctx, getLocation(ctx.exp()));
+		if (isGlobal()) {
+			store.put(ctx, store.get(ctx.exp()));
+		}
 		return null;
 	}
 
 	@Override public Void visitPrimaryExp2(HelloParser.PrimaryExp2Context ctx) {
+		//lVal
 		visitChildren(ctx);
 		location.put(ctx, getLocation(ctx.lVal()));
+		if (isGlobal()) {
+			store.put(ctx, store.get(ctx.lVal()));
+		}
 		return null;
 	}
 
 	@Override public Void visitPrimaryExp3(HelloParser.PrimaryExp3Context ctx) {
+		//Number
 		visitChildren(ctx);
 		int tmp = 0;
 		String number = ctx.Number().toString();
@@ -691,9 +805,15 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		} else {
 			tmp = Integer.parseInt(number);
 		}
-		// 分配地址
-		output(alloca(++index), ctx);
-		output(store(String.valueOf(tmp), index), ctx);
+		if (isGlobal()) {
+			// 存储值
+			store.put(ctx, String.valueOf(tmp));
+		} else {
+			// 分配地址
+			output(alloca(++index), ctx);
+			output(store(String.valueOf(tmp), index), ctx);
+		}
+		// TODO to avoid none-nes error
 		location.put(ctx, index);
 		return null;
 	}
@@ -703,11 +823,14 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		String ident = ctx.Ident().getText();
 		if (constMode) {
-			if (!getVarIndex(ident).isConst) {
+			if (!getVar(ident).isConst) {
 				throw new RuntimeException(ident + " should be ident");
 			}
 		}
-		location.put(ctx, getVarIndex(ident).index);
+		location.put(ctx, getVar(ident).index);
+		if (isGlobal()) {
+			store.put(ctx, String.valueOf(getVar(ident).value));
+		}
 		return null;
 	}
 
