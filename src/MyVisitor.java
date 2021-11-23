@@ -22,6 +22,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static Stack<ParserRuleContext> blockStack = new Stack<>();
 	public static ParseTreeProperty<ArrayList<Var>> blockVar = new ParseTreeProperty<>();
 
+	public static Stack<ParserRuleContext> whileStack = new Stack<>();
+	public static ParseTreeProperty<Integer> whileStart = new ParseTreeProperty<>();
+	public static ParseTreeProperty<Integer> whileEnd = new ParseTreeProperty<>();
+
 	public static Var getVar(String var) {
 		int i = blockStack.size();
 		while (--i >= 0) {
@@ -344,13 +348,20 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	// 'while' '(' cond ')' stmt # stmt6
 	@Override public Void visitStmt6(HelloParser.Stmt6Context ctx) {
+		whileStack.push(ctx);
 		int startIndex = ++index;
+		// save startIndex
+		whileStart.put(ctx, startIndex);
 		output(br(startIndex), ctx);
 		output(label(startIndex, ""), ctx);
 		visit(ctx.cond());
 		int condIndex = getLocation(ctx.cond());
 		int trueIndex = ++index;
+
 		int endIndex = ++index;
+		// save endIndex
+		whileEnd.put(ctx, endIndex);
+
 		output(load(++index, condIndex), ctx);
 		condIndex = index;
 		output(icmp(++index, "ne", condIndex), ctx);
@@ -362,18 +373,27 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		output(br(startIndex), ctx);
 		// end
 		output(label(endIndex, ""), ctx);
+		whileStack.pop();
 		return null;
 	}
 
 	// 'break' ';' # breakStmt
 	@Override public Void visitBreakStmt(HelloParser.BreakStmtContext ctx) {
 		visitChildren(ctx);
+		// 跳到endIndex
+		ParserRuleContext tmpWhile = whileStack.peek();
+		int endIndex = whileEnd.get(tmpWhile);
+		output(br(endIndex), ctx);
 		return null;
 	}
 
 	// 'continue' ';' # continueStmt
 	@Override public Void visitContinueStmt(HelloParser.ContinueStmtContext ctx) {
 		visitChildren(ctx);
+		// 跳到startIndex
+		ParserRuleContext tmpWhile = whileStack.peek();
+		int startIndex = whileStart.get(tmpWhile);
+		output(br(startIndex), ctx);
 		return null;
 	}
 
