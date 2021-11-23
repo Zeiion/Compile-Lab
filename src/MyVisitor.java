@@ -33,6 +33,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 			for (Var v : tmpBlockVar) {
 				if (v.name.equals(var)) {
+					if (isGlobal()) {
+						if (!v.isConst) {
+							throw new RuntimeException(v.name + " should be const!");
+						}
+					}
 					return v;
 				}
 			}
@@ -205,6 +210,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			if (v.name.equals(tmpVar)) {
 				throw new RuntimeException("global var already exist!");
 			}
+		}
+		if (value == null) {
+			// 全局量 初始化为0
+			value = "0";
 		}
 		tmpList.add(new Var(true, Integer.valueOf(value), tmpVar, tmpIndex, isConst));
 	}
