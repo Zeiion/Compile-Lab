@@ -58,11 +58,19 @@ public interface HelloVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVarDecl(HelloParser.VarDeclContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link HelloParser#varDef}.
+	 * Visit a parse tree produced by the {@code varDef1}
+	 * labeled alternative in {@link HelloParser#varDef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitVarDef(HelloParser.VarDefContext ctx);
+	T visitVarDef1(HelloParser.VarDef1Context ctx);
+	/**
+	 * Visit a parse tree produced by the {@code varDef2}
+	 * labeled alternative in {@link HelloParser#varDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVarDef2(HelloParser.VarDef2Context ctx);
 	/**
 	 * Visit a parse tree produced by {@link HelloParser#initVal}.
 	 * @param ctx the parse tree

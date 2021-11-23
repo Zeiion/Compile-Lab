@@ -87,15 +87,29 @@ public interface HelloListener extends ParseTreeListener {
 	 */
 	void exitVarDecl(HelloParser.VarDeclContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link HelloParser#varDef}.
+	 * Enter a parse tree produced by the {@code varDef1}
+	 * labeled alternative in {@link HelloParser#varDef}.
 	 * @param ctx the parse tree
 	 */
-	void enterVarDef(HelloParser.VarDefContext ctx);
+	void enterVarDef1(HelloParser.VarDef1Context ctx);
 	/**
-	 * Exit a parse tree produced by {@link HelloParser#varDef}.
+	 * Exit a parse tree produced by the {@code varDef1}
+	 * labeled alternative in {@link HelloParser#varDef}.
 	 * @param ctx the parse tree
 	 */
-	void exitVarDef(HelloParser.VarDefContext ctx);
+	void exitVarDef1(HelloParser.VarDef1Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code varDef2}
+	 * labeled alternative in {@link HelloParser#varDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterVarDef2(HelloParser.VarDef2Context ctx);
+	/**
+	 * Exit a parse tree produced by the {@code varDef2}
+	 * labeled alternative in {@link HelloParser#varDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitVarDef2(HelloParser.VarDef2Context ctx);
 	/**
 	 * Enter a parse tree produced by {@link HelloParser#initVal}.
 	 * @param ctx the parse tree

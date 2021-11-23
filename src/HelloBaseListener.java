@@ -111,13 +111,25 @@ public class HelloBaseListener implements HelloListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterVarDef(HelloParser.VarDefContext ctx) { }
+	@Override public void enterVarDef1(HelloParser.VarDef1Context ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitVarDef(HelloParser.VarDefContext ctx) { }
+	@Override public void exitVarDef1(HelloParser.VarDef1Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterVarDef2(HelloParser.VarDef2Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVarDef2(HelloParser.VarDef2Context ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

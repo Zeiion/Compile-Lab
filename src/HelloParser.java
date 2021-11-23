@@ -638,6 +638,43 @@ public class HelloParser extends Parser {
 	}
 
 	public static class VarDefContext extends ParserRuleContext {
+		public VarDefContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_varDef; }
+	 
+		public VarDefContext() { }
+		public void copyFrom(VarDefContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class VarDef2Context extends VarDefContext {
+		public TerminalNode Ident() { return getToken(HelloParser.Ident, 0); }
+		public InitValContext initVal() {
+			return getRuleContext(InitValContext.class,0);
+		}
+		public List<ConstExpContext> constExp() {
+			return getRuleContexts(ConstExpContext.class);
+		}
+		public ConstExpContext constExp(int i) {
+			return getRuleContext(ConstExpContext.class,i);
+		}
+		public VarDef2Context(VarDefContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterVarDef2(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitVarDef2(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitVarDef2(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class VarDef1Context extends VarDefContext {
 		public TerminalNode Ident() { return getToken(HelloParser.Ident, 0); }
 		public List<ConstExpContext> constExp() {
 			return getRuleContexts(ConstExpContext.class);
@@ -645,24 +682,18 @@ public class HelloParser extends Parser {
 		public ConstExpContext constExp(int i) {
 			return getRuleContext(ConstExpContext.class,i);
 		}
-		public InitValContext initVal() {
-			return getRuleContext(InitValContext.class,0);
-		}
-		public VarDefContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_varDef; }
+		public VarDef1Context(VarDefContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterVarDef(this);
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).enterVarDef1(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitVarDef(this);
+			if ( listener instanceof HelloListener ) ((HelloListener)listener).exitVarDef1(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitVarDef(this);
+			if ( visitor instanceof HelloVisitor ) return ((HelloVisitor<? extends T>)visitor).visitVarDef1(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -676,6 +707,7 @@ public class HelloParser extends Parser {
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,10,_ctx) ) {
 			case 1:
+				_localctx = new VarDef1Context(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(121);
@@ -701,6 +733,7 @@ public class HelloParser extends Parser {
 				}
 				break;
 			case 2:
+				_localctx = new VarDef2Context(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(131);

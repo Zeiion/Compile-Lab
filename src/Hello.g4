@@ -10,8 +10,9 @@ constInitVal : constExp
                 | '{' ( constInitVal (',' constInitVal)* )? '}';
 constExp     : addExp;
 varDecl      : BType varDef (',' varDef)* ';';
-varDef       : Ident ( '[' constExp ']')*
-                | Ident ( '[' constExp ']')* '=' initVal;
+varDef       : Ident ( '[' constExp ']')*   # varDef1
+                | Ident ( '[' constExp ']')* '=' initVal  # varDef2
+                ;
 initVal      : exp
                 | '{' ( initVal (',' initVal)* )? '}';
 funcDef      : BType Ident '(' ')' block; // 保证当前 Ident 只为 "main"

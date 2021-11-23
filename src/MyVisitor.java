@@ -15,6 +15,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static int globalIndex = 0;
 	public static ParserRuleContext hello;
 
+	// 定义数组时
+	public static boolean defArray = false;
+
 	public static ParseTreeProperty<String> store = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Integer> location = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Boolean> lock = new ParseTreeProperty<>();
@@ -94,6 +97,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static boolean isGlobal() {
+		if (defArray) {
+			return true;
+		}
 		//		System.out.println("isGlobal " + blockStack.peek().getClass().equals(HelloParser.HelloContext.class));
 		return blockStack.peek().getClass().equals(HelloParser.HelloContext.class);
 	}
@@ -126,6 +132,16 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	public static String alloca(int to) {
 		return getReg(to) + " = alloca i32, align 4\n\t";
+	}
+
+	public static String allocaN(int to, int... arr) {
+		//[2 x [2 x i32]]
+		String tmp = "i32";
+		for (int i = arr.length - 1; i >= 0; i--) {
+			tmp = "[" + arr[i] + " x " + tmp + "]";
+		}
+		System.out.println("tmp " + tmp);
+		return getReg(to) + " = " + tmp + "\n\t";
 	}
 
 	public static String icmp(int to, String symbol, int index1) {
@@ -563,20 +579,46 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	/**
-	 * Ident | Ident '=' initVal;
+	 * Ident ( '[' constExp ']')*   # varDef1 1 + 3n
 	 */
-	@Override public Void visitVarDef(HelloParser.VarDefContext ctx) {
-		visitChildren(ctx);
+	@Override public Void visitVarDef1(HelloParser.VarDef1Context ctx) {
 		String tmpVar = ctx.Ident().getText();
-		if (isGlobal()) {
-			// 全局变量
-			newGlobalVar(tmpVar, store.get(ctx.initVal()), --globalIndex, false);
-			output(dso(tmpVar, store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal()))), ctx);
-		} else {
-			if (ctx.getChildCount() == 1) {
+		if (ctx.getChildCount() == 1) {
+			visitChildren(ctx);
+			if (isGlobal()) {
+				// 全局变量
+				newGlobalVar(tmpVar, "0", --globalIndex, false);
+				output(dso(tmpVar, "0"), ctx);
+			} else {
 				//Ident
 				output(alloca(++index), ctx);
 				newVar(tmpVar, index, false);
+			}
+		} else {
+			defArray = true;
+			int dimension = (ctx.getChildCount() - 1) / 3;
+			ArrayList<Integer> expList = new ArrayList<>();
+			for (int i = 0; i < dimension; i++) {
+				visit(ctx.constExp(i));
+				expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+			}
+			defArray = false;
+		}
+		return null;
+	}
+
+	/**
+	 * Ident ( '[' constExp ']' )* '=' initVal  # varDef2 3 + 3n
+	 */
+	@Override public Void visitVarDef2(HelloParser.VarDef2Context ctx) {
+		String tmpVar = ctx.Ident().getText();
+		if (ctx.getChildCount() == 3) {
+			visitChildren(ctx);
+			if (isGlobal()) {
+				// 全局变量
+				newGlobalVar(tmpVar, store.get(ctx.initVal()), --globalIndex, false);
+				output(dso(tmpVar, store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal()))),
+					ctx);
 			} else {
 				//Ident = initVal
 				output(load(++index, getLocation(ctx.initVal())), ctx);
@@ -584,6 +626,16 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				newVar(tmpVar, index, false);
 				output(store(index - 1, index), ctx);
 			}
+		} else {
+			defArray = true;
+			int dimension = (ctx.getChildCount() - 3) / 3;
+			ArrayList<Integer> expList = new ArrayList<>();
+			for (int i = 0; i < dimension; i++) {
+				visit(ctx.constExp(i));
+				expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+			}
+			defArray = false;
+			visit(ctx.initVal());
 		}
 		return null;
 	}
