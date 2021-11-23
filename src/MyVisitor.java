@@ -1,6 +1,4 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Stack;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -74,15 +72,19 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return ret;
 	}
 
+	public static boolean isGlobal() {
+		return blockStack.peek().getClass().equals(HelloParser.HelloContext.class);
+	}
+
 	public static void output(String s, ParserRuleContext ctx) {
 		//		System.out.println("--" + ctx.getText() + " " + s);
 		if (getLock(ctx)) {
 			//			debugSout(ctx, "lock!");
 			lockStore.put(ctx, getLockStore(ctx) + s);
 		} else {
-			if(blockStack.peek().getClass().equals(HelloParser.HelloContext.class)){
+			if (isGlobal()) {
 				globalOutput += s;
-			}else{
+			} else {
 				output += s;
 			}
 		}
