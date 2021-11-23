@@ -333,12 +333,12 @@ public class Translate extends HelloBaseListener {
 		if (ctx.getChildCount() == 1) {
 			//Ident
 			output(alloca(++index), ctx);
-			varMap.put(tmpVar, new Var(index));
+			varMap.put(tmpVar, new Var(tmpVar, index));
 		} else {
 			//Ident = initVal
 			output(load(++index, getLocation(ctx.initVal())), ctx);
 			output(alloca(++index), ctx);
-			varMap.put(tmpVar, new Var(index));
+			varMap.put(tmpVar, new Var(tmpVar, index));
 			output(store(index - 1, index), ctx);
 		}
 	}
@@ -347,7 +347,7 @@ public class Translate extends HelloBaseListener {
 		String tmpVar = ctx.Ident().getText();
 		output(load(++index, getLocation(ctx.constInitVal())), ctx);
 		output(alloca(++index), ctx);
-		varMap.put(tmpVar, new Var(index, true));
+		varMap.put(tmpVar, new Var(tmpVar, index, true));
 		output(store(index - 1, index), ctx);
 	}
 

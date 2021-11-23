@@ -1,4 +1,7 @@
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
@@ -10,11 +13,32 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static String output = "";
 	public static int index = 0;
 	//	public HashMap<String, Integer> varIndexMap = new HashMap<>();
-	public HashMap<String, Var> varMap = new HashMap<>();
+	//	public HashMap<String, Var> varMap = new HashMap<>();
 	public static ParseTreeProperty<String> store = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Integer> location = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Boolean> lock = new ParseTreeProperty<>();
 	public static ParseTreeProperty<String> lockStore = new ParseTreeProperty<>();
+
+	public static Stack<ParserRuleContext> blockStack = new Stack<>();
+	public static ParseTreeProperty<ArrayList<Var>> blockVar = new ParseTreeProperty<>();
+
+	public static Var getVarIndex(String var) {
+		int i = blockStack.size();
+		while (--i >= 0) {
+			ParserRuleContext tmpCtx = blockStack.get(i);
+			ArrayList<Var> tmpBlockVar = blockVar.get(tmpCtx);
+			if (tmpBlockVar == null) {
+				tmpBlockVar = new ArrayList<>();
+				blockVar.put(tmpCtx, tmpBlockVar);
+			}
+			for (Var v : tmpBlockVar) {
+				if (v.name.equals(var)) {
+					return v;
+				}
+			}
+		}
+		throw new RuntimeException("no such var!");
+	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
 		//		System.out.println(ctx.getText() + " " + s);
@@ -125,6 +149,21 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return alloca(i) + store(tmpIndex, i);
 	}
 
+	public static void newVar(String tmpVar, int tmpIndex, boolean isConst) {
+		ParserRuleContext tmpCtx = blockStack.peek();
+		ArrayList<Var> tmpList = blockVar.get(tmpCtx);
+		if (tmpList == null) {
+			tmpList = new ArrayList<>();
+			blockVar.put(tmpCtx, tmpList);
+		}
+		for(Var v:tmpList){
+			if(v.name.equals(tmpVar)){
+				throw new RuntimeException("var already exist!");
+			}
+		}
+		tmpList.add(new Var(tmpVar, tmpIndex, isConst));
+	}
+
 	public static String ret(int retIndex) {
 		return "ret i32 %x" + retIndex + "\n";
 	}
@@ -182,11 +221,18 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return null;
 	}
 
+	@Override public Void visitBlock(HelloParser.BlockContext ctx) {
+		blockStack.push(ctx);
+		visitChildren(ctx);
+		blockStack.pop();
+		return null;
+	}
+
 	//  lVal '=' exp ';' # stmt1
 	@Override public Void visitStmt1(HelloParser.Stmt1Context ctx) {
 		visitChildren(ctx);
 		String ident = ctx.lVal().Ident().getText();
-		if (varMap.get(ident).isConst) {
+		if (getVarIndex(ident).isConst) {
 			throw new RuntimeException(ident + " is const!");
 		}
 		int tmpIndex = getLocation(ctx.exp());
@@ -426,12 +472,12 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		if (ctx.getChildCount() == 1) {
 			//Ident
 			output(alloca(++index), ctx);
-			varMap.put(tmpVar, new Var(index));
+			newVar(tmpVar, index, false);
 		} else {
 			//Ident = initVal
 			output(load(++index, getLocation(ctx.initVal())), ctx);
 			output(alloca(++index), ctx);
-			varMap.put(tmpVar, new Var(index));
+			newVar(tmpVar, index, false);
 			output(store(index - 1, index), ctx);
 		}
 		return null;
@@ -442,7 +488,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		String tmpVar = ctx.Ident().getText();
 		output(load(++index, getLocation(ctx.constInitVal())), ctx);
 		output(alloca(++index), ctx);
-		varMap.put(tmpVar, new Var(index, true));
+		newVar(tmpVar, index, true);
 		output(store(index - 1, index), ctx);
 		return null;
 	}
@@ -645,11 +691,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		String ident = ctx.Ident().getText();
 		if (constMode) {
-			if (!varMap.get(ident).isConst) {
+			if (!getVarIndex(ident).isConst) {
 				throw new RuntimeException(ident + " should be ident");
 			}
 		}
-		location.put(ctx, varMap.get(ident).index);
+		location.put(ctx, getVarIndex(ident).index);
 		return null;
 	}
 
