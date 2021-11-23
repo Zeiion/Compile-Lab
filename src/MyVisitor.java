@@ -533,7 +533,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		if (isGlobal()) {
 			//TODO 全局变量
 			newGlobalVar(tmpVar, store.get(ctx.initVal()), --globalIndex, false);
-			output(dso(tmpVar, String.valueOf(store.get(ctx.initVal()))), ctx);
+			output(dso(tmpVar, store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal()))), ctx);
 		} else {
 			if (ctx.getChildCount() == 1) {
 				//Ident
@@ -556,7 +556,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		if (isGlobal()) {
 			// TODO 全局变量
 			newGlobalVar(tmpVar, store.get(ctx.constInitVal()), --globalIndex, true);
-			output(dso(tmpVar, String.valueOf(store.get(ctx.constInitVal()))), ctx);
+			output(dso(tmpVar,
+				store.get(ctx.constInitVal()) == null ? "0" : String.valueOf(store.get(ctx.constInitVal()))), ctx);
 		} else {
 			output(load(++index, getLocation(ctx.constInitVal())), ctx);
 			output(alloca(++index), ctx);
