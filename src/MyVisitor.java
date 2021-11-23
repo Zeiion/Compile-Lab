@@ -8,7 +8,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	public static String globalOutput = "";
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
-		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)\n";
+		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)\n"
+		+ "declare void @memset(i32*, i32, i32)\n";
 	public static String output = "";
 	public static int index = 0;
 	public static int globalIndex = 0;
@@ -544,7 +545,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					symbol = "sle";
 					break;
 				case ">=":
-					symbol = "slg";
+					symbol = "sge";
 					break;
 			}
 			int index1 = getLocation(ctx.relExp());
