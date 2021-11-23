@@ -306,24 +306,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	// 'if' '(' cond ')' stmt ('else' stmt)? # stmt4
 	@Override public Void visitStmt4(HelloParser.Stmt4Context ctx) {
-		//		visit(ctx.cond());
-		//		lock.put(ctx, true);
-		//		int condIndex = getLocation(ctx.cond());
-		//		int ifIndex = ++index;
-		//		int elseIndex = 0;
-		//
-		//		// TODO if
-		//		visit(ctx.stmt(0));
-		//		output(label(ifIndex, "" + br(endIndex)), ctx);
-		//		//TODO else
-		//		if (ctx.getChildCount() > 5) {
-		//			elseIndex = ++index;
-		//			visit(ctx.stmt(1));
-		//		}
-		//		int endIndex = ++index;
-		//		output(br(condIndex, ifIndex, elseIndex), ctx);
-		//		output(label(elseIndex, "" + br(endIndex)), ctx);
-		//		output(label(endIndex,""),ctx);
 
 		visit(ctx.cond());
 		int condIndex = getLocation(ctx.cond());
@@ -338,11 +320,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		output(icmp(++index, "ne", condIndex), ctx);
 		condIndex = index;
 		output(br(condIndex, ifIndex, elseIndex == 0 ? endIndex : elseIndex), ctx);
-		// TODO if
+		// if
 		output(label(ifIndex, ""), ctx);
 		visit(ctx.stmt(0));
 		output(br(endIndex), ctx);
-		//TODO else
+		// else
 		if (ctx.getChildCount() > 5) {
 			output(label(elseIndex, ""), ctx);
 			visit(ctx.stmt(1));
@@ -357,6 +339,29 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		output(load(++index, getLocation(ctx.exp())), ctx);
 		output(ret(index), ctx);
+		return null;
+	}
+
+	// 'while' '(' cond ')' stmt # stmt6
+	@Override public Void visitStmt6(HelloParser.Stmt6Context ctx) {
+		int startIndex = ++index;
+		output(br(startIndex), ctx);
+		output(label(startIndex, ""), ctx);
+		visit(ctx.cond());
+		int condIndex = getLocation(ctx.cond());
+		int trueIndex = ++index;
+		int endIndex = ++index;
+		output(load(++index, condIndex), ctx);
+		condIndex = index;
+		output(icmp(++index, "ne", condIndex), ctx);
+		condIndex = index;
+		output(br(condIndex, trueIndex, endIndex), ctx);
+		// while
+		output(label(trueIndex, ""), ctx);
+		visit(ctx.stmt());
+		output(br(startIndex), ctx);
+		// end
+		output(label(endIndex, ""), ctx);
 		return null;
 	}
 
@@ -531,7 +536,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		String tmpVar = ctx.Ident().getText();
 		if (isGlobal()) {
-			//TODO 全局变量
+			// 全局变量
 			newGlobalVar(tmpVar, store.get(ctx.initVal()), --globalIndex, false);
 			output(dso(tmpVar, store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal()))), ctx);
 		} else {
@@ -554,7 +559,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		String tmpVar = ctx.Ident().getText();
 		if (isGlobal()) {
-			// TODO 全局变量
+			// 全局变量
 			newGlobalVar(tmpVar, store.get(ctx.constInitVal()), --globalIndex, true);
 			output(dso(tmpVar,
 				store.get(ctx.constInitVal()) == null ? "0" : String.valueOf(store.get(ctx.constInitVal()))), ctx);
@@ -621,7 +626,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		//加减法操作
 		String symbol = ctx.getChild(1).getText();
 		if (isGlobal()) {
-			//TODO 全局
+			// 全局
 			int value1 = Integer.parseInt(store.get(ctx.addExp()));
 			int value2 = Integer.parseInt(store.get(ctx.mulExp()));
 			int res = 0;
@@ -671,7 +676,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		//TODO S 乘除法
 		String symbol = ctx.getChild(1).getText();
 		if (isGlobal()) {
-			// TODO 全局
+			// 全局
 			int value1 = Integer.parseInt(store.get(ctx.mulExp()));
 			int value2 = Integer.parseInt(store.get(ctx.unaryExp()));
 			int res = 0;
