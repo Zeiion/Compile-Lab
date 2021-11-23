@@ -365,6 +365,18 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return null;
 	}
 
+	// 'break' ';' # breakStmt
+	@Override public Void visitBreakStmt(HelloParser.BreakStmtContext ctx) {
+		visitChildren(ctx);
+		return null;
+	}
+
+	// 'continue' ';' # continueStmt
+	@Override public Void visitContinueStmt(HelloParser.ContinueStmtContext ctx) {
+		visitChildren(ctx);
+		return null;
+	}
+
 	@Override public Void visitCond(HelloParser.CondContext ctx) {
 		visitChildren(ctx);
 		// TODO
