@@ -1,4 +1,4 @@
-// Generated from D:/0_ToDo/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
+// Generated from D:/Zeiion/Code/Java/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -196,6 +196,42 @@ public interface HelloListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStmt5(HelloParser.Stmt5Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code stmt6}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterStmt6(HelloParser.Stmt6Context ctx);
+	/**
+	 * Exit a parse tree produced by the {@code stmt6}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitStmt6(HelloParser.Stmt6Context ctx);
+	/**
+	 * Enter a parse tree produced by the {@code breakStmt}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterBreakStmt(HelloParser.BreakStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code breakStmt}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitBreakStmt(HelloParser.BreakStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code continueStmt}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinueStmt(HelloParser.ContinueStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code continueStmt}
+	 * labeled alternative in {@link HelloParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinueStmt(HelloParser.ContinueStmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link HelloParser#exp}.
 	 * @param ctx the parse tree

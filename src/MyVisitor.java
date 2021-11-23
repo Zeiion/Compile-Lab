@@ -7,13 +7,13 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 public class MyVisitor extends HelloBaseVisitor<Void> {
 	private boolean constMode = false;
-	// TODO public HashMap<String,> voidMap
+
+	public static String globalOutput = "";
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
 		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)\n";
 	public static String output = "";
 	public static int index = 0;
-	//	public HashMap<String, Integer> varIndexMap = new HashMap<>();
-	//	public HashMap<String, Var> varMap = new HashMap<>();
+
 	public static ParseTreeProperty<String> store = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Integer> location = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Boolean> lock = new ParseTreeProperty<>();
@@ -80,7 +80,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			//			debugSout(ctx, "lock!");
 			lockStore.put(ctx, getLockStore(ctx) + s);
 		} else {
-			output += s;
+			if(blockStack.peek().getClass().equals(HelloParser.HelloContext.class)){
+				globalOutput += s;
+			}else{
+				output += s;
+			}
 		}
 	}
 
@@ -156,8 +160,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			tmpList = new ArrayList<>();
 			blockVar.put(tmpCtx, tmpList);
 		}
-		for(Var v:tmpList){
-			if(v.name.equals(tmpVar)){
+		for (Var v : tmpList) {
+			if (v.name.equals(tmpVar)) {
 				throw new RuntimeException("var already exist!");
 			}
 		}
@@ -213,11 +217,17 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		}
 	}
 
-	@Override public Void visitFuncDef(HelloParser.FuncDefContext ctx) {
+	@Override public Void visitHello(HelloParser.HelloContext ctx) {
+		blockStack.push(ctx);
 		visitChildren(ctx);
-		//        sout("define dso_local i32 @main(){\n\t"+ result.get(ctx.block()) +"}");
+		sout(globalOutput);
 		sout(prefix);
 		sout("define dso_local i32 @main(){\n\t" + output + "}");
+		return null;
+	}
+
+	@Override public Void visitFuncDef(HelloParser.FuncDefContext ctx) {
+		visitChildren(ctx);
 		return null;
 	}
 

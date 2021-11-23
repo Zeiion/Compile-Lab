@@ -2,16 +2,18 @@
 grammar Hello;
 
 hello : compUnit;
-compUnit     : funcDef;
+compUnit     : decl* funcDef;
 decl         : constDecl | varDecl;
 constDecl    : 'const' BType constDef (',' constDef)* ';';
-constDef     : Ident '=' constInitVal;
-constInitVal : constExp;
+constDef     : Ident ( '[' constExp ']')* '=' constInitVal;
+constInitVal : constExp
+                | '{' ( constInitVal (',' constInitVal)* )? '}';
 constExp     : addExp;
 varDecl      : BType varDef (',' varDef)* ';';
-varDef       : Ident
-                | Ident '=' initVal;
-initVal      : exp;
+varDef       : Ident ( '[' constExp ']')*
+                | Ident ( '[' constExp ']')* '=' initVal;
+initVal      : exp
+                | '{' ( initVal (',' initVal)* )? '}';
 funcDef      : BType Ident '(' ')' block; // 保证当前 Ident 只为 "main"
 block        : '{' blockItem* '}';
 blockItem    : decl | stmt;
@@ -20,10 +22,13 @@ stmt         : lVal '=' exp ';' # stmt1
                 | exp? ';' # stmt3
                 | 'if' '(' cond ')' stmt ('else' stmt)? # stmt4
                 | 'return' exp ';' # stmt5
+                | 'while' '(' cond ')' stmt # stmt6
+                | 'break' ';' # breakStmt
+                | 'continue' ';' # continueStmt
                 ;
 exp          : addExp;
 cond         : lOrExp ;
-lVal         : Ident;
+lVal         : Ident ( '[' exp ']')*;
 primaryExp   : '(' exp ')' # primaryExp1
                 | lVal # primaryExp2
                 | Number # primaryExp3
