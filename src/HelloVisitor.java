@@ -1,4 +1,4 @@
-// Generated from D:/Zeiion/Code/Java/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
+// Generated from D:/0_ToDo/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -27,6 +27,12 @@ public interface HelloVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDecl(HelloParser.DeclContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link HelloParser#funcDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFuncDef(HelloParser.FuncDefContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link HelloParser#constDecl}.
 	 * @param ctx the parse tree
@@ -78,11 +84,17 @@ public interface HelloVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInitVal(HelloParser.InitValContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link HelloParser#funcDef}.
+	 * Visit a parse tree produced by {@link HelloParser#funcFParams}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFuncDef(HelloParser.FuncDefContext ctx);
+	T visitFuncFParams(HelloParser.FuncFParamsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link HelloParser#funcFParam}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFuncFParam(HelloParser.FuncFParamContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link HelloParser#block}.
 	 * @param ctx the parse tree
@@ -275,4 +287,10 @@ public interface HelloVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLOrExp(HelloParser.LOrExpContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link HelloParser#funcType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFuncType(HelloParser.FuncTypeContext ctx);
 }

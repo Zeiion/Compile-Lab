@@ -1,4 +1,4 @@
-// Generated from D:/Zeiion/Code/Java/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
+// Generated from D:/0_ToDo/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -46,6 +46,18 @@ public class HelloBaseListener implements HelloListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDecl(HelloParser.DeclContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFuncDef(HelloParser.FuncDefContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFuncDef(HelloParser.FuncDefContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -147,13 +159,25 @@ public class HelloBaseListener implements HelloListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFuncDef(HelloParser.FuncDefContext ctx) { }
+	@Override public void enterFuncFParams(HelloParser.FuncFParamsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFuncDef(HelloParser.FuncDefContext ctx) { }
+	@Override public void exitFuncFParams(HelloParser.FuncFParamsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFuncFParam(HelloParser.FuncFParamContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFuncFParam(HelloParser.FuncFParamContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -502,6 +526,18 @@ public class HelloBaseListener implements HelloListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitLOrExp(HelloParser.LOrExpContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFuncType(HelloParser.FuncTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFuncType(HelloParser.FuncTypeContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

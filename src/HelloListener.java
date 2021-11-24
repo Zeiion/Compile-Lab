@@ -1,4 +1,4 @@
-// Generated from D:/Zeiion/Code/Java/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
+// Generated from D:/0_ToDo/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -36,6 +36,16 @@ public interface HelloListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDecl(HelloParser.DeclContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link HelloParser#funcDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterFuncDef(HelloParser.FuncDefContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link HelloParser#funcDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitFuncDef(HelloParser.FuncDefContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link HelloParser#constDecl}.
 	 * @param ctx the parse tree
@@ -121,15 +131,25 @@ public interface HelloListener extends ParseTreeListener {
 	 */
 	void exitInitVal(HelloParser.InitValContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link HelloParser#funcDef}.
+	 * Enter a parse tree produced by {@link HelloParser#funcFParams}.
 	 * @param ctx the parse tree
 	 */
-	void enterFuncDef(HelloParser.FuncDefContext ctx);
+	void enterFuncFParams(HelloParser.FuncFParamsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link HelloParser#funcDef}.
+	 * Exit a parse tree produced by {@link HelloParser#funcFParams}.
 	 * @param ctx the parse tree
 	 */
-	void exitFuncDef(HelloParser.FuncDefContext ctx);
+	void exitFuncFParams(HelloParser.FuncFParamsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link HelloParser#funcFParam}.
+	 * @param ctx the parse tree
+	 */
+	void enterFuncFParam(HelloParser.FuncFParamContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link HelloParser#funcFParam}.
+	 * @param ctx the parse tree
+	 */
+	void exitFuncFParam(HelloParser.FuncFParamContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link HelloParser#block}.
 	 * @param ctx the parse tree
@@ -456,4 +476,14 @@ public interface HelloListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLOrExp(HelloParser.LOrExpContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link HelloParser#funcType}.
+	 * @param ctx the parse tree
+	 */
+	void enterFuncType(HelloParser.FuncTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link HelloParser#funcType}.
+	 * @param ctx the parse tree
+	 */
+	void exitFuncType(HelloParser.FuncTypeContext ctx);
 }

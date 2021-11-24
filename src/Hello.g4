@@ -2,8 +2,10 @@
 grammar Hello;
 
 hello : compUnit;
-compUnit     : decl* funcDef;
+compUnit     : (decl | funcDef) compUnit
+              | (decl | funcDef); // new
 decl         : constDecl | varDecl;
+funcDef      : funcType Ident '(' funcFParams? ')' block; // new
 constDecl    : 'const' BType constDef (',' constDef)* ';';
 constDef     : Ident ( '[' constExp ']')* '=' constInitVal;
 constInitVal : constExp
@@ -15,14 +17,16 @@ varDef       : Ident ( '[' constExp ']')*   # varDef1
                 ;
 initVal      : exp
                 | '{' ( initVal (',' initVal)* )? '}';
-funcDef      : BType Ident '(' ')' block; // 保证当前 Ident 只为 "main"
+funcFParams  : funcFParam ( ',' funcFParam )*; // [new]
+funcFParam   : BType Ident ('[' ']' ('[' exp ']')* )?; // [new]
+
 block        : '{' blockItem* '}';
 blockItem    : decl | stmt;
 stmt         : lVal '=' exp ';' # stmt1
                 | block # stmt2
                 | exp? ';' # stmt3
                 | 'if' '(' cond ')' stmt ('else' stmt)? # stmt4
-                | 'return' exp ';' # stmt5
+                | 'return' exp? ';' # stmt5 //new
                 | 'while' '(' cond ')' stmt # stmt6
                 | 'break' ';' # breakStmt
                 | 'continue' ';' # continueStmt
@@ -54,9 +58,9 @@ lAndExp      : eqExp
 lOrExp       : lAndExp
                 | lAndExp '||' lOrExp;
 
+funcType: BType | 'void';
 fragment INT: 'int';
 BType : INT;
-FuncType: INT;
 Ident : Nondigit (Nondigit | Digit)*;
 Number : DecimalConst | OctalConst | HexaDecimalConst;
 fragment DecimalConst : '0' | [1-9] Digit*;
