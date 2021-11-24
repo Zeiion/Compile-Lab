@@ -699,7 +699,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				// 全局变量
 				newGlobalVar(tmpVar, store.get(ctx.initVal()), --globalIndex, false);
 				output(dsoG(tmpVar,
-					"i32" + store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal()))), ctx);
+					"i32" + (store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal())))), ctx);
 			} else {
 				//Ident = initVal
 				output(load(++index, getLocation(ctx.initVal())), ctx);
@@ -882,8 +882,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			if (isGlobal()) {
 				// 全局变量
 				newGlobalVar(tmpVar, store.get(ctx.constInitVal()), --globalIndex, true);
-				output(dsoG(tmpVar, "i32 " + store.get(ctx.constInitVal()) == null ? "0"
-					: String.valueOf(store.get(ctx.constInitVal()))), ctx);
+				output(dsoG(tmpVar, "i32 " + (store.get(ctx.constInitVal()) == null ? "0"
+					: String.valueOf(store.get(ctx.constInitVal())))), ctx);
 			} else {
 				output(load(++index, getLocation(ctx.constInitVal())), ctx);
 				output(alloca(++index), ctx);
@@ -1235,7 +1235,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				break;
 			case "-":
 				if (isGlobal()) {
-					store.put(ctx, store.get(ctx.unaryExp()));
+					int tmp = Integer.parseInt(store.get(ctx.unaryExp())) * (-1);
+					store.put(ctx, String.valueOf(tmp));
 					break;
 				}
 				output(load(++index, tmpIndex), ctx);
