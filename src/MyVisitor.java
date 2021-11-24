@@ -648,7 +648,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			if (isGlobal()) {
 				// 全局变量
 				newGlobalVar(tmpVar, "0", --globalIndex, false);
-				output(dsoG(tmpVar, "0"), ctx);
+				output(dsoG(tmpVar, "i32 0"), ctx);
 			} else {
 				//Ident
 				output(alloca(++index), ctx);
@@ -698,8 +698,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			if (isGlobal()) {
 				// 全局变量
 				newGlobalVar(tmpVar, store.get(ctx.initVal()), --globalIndex, false);
-				output(dsoG(tmpVar, store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal()))),
-					ctx);
+				output(dsoG(tmpVar,
+					"i32" + store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal()))), ctx);
 			} else {
 				//Ident = initVal
 				output(load(++index, getLocation(ctx.initVal())), ctx);
@@ -882,8 +882,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			if (isGlobal()) {
 				// 全局变量
 				newGlobalVar(tmpVar, store.get(ctx.constInitVal()), --globalIndex, true);
-				output(dsoG(tmpVar,
-					store.get(ctx.constInitVal()) == null ? "0" : String.valueOf(store.get(ctx.constInitVal()))), ctx);
+				output(dsoG(tmpVar, "i32 " + store.get(ctx.constInitVal()) == null ? "0"
+					: String.valueOf(store.get(ctx.constInitVal()))), ctx);
 			} else {
 				output(load(++index, getLocation(ctx.constInitVal())), ctx);
 				output(alloca(++index), ctx);
@@ -924,7 +924,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				}
 				String initString = generateGlobalArrayInitialString(0, type, expList, tmpStack);
 
-				output(dsoG(tmpVar, initString), ctx);
+				output(dsoC(tmpVar, initString), ctx);
 
 				newGlobalArrayVar(tmpVar, --globalIndex, true, dimension, saveList, type, expList);
 			} else {
@@ -1234,6 +1234,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			case "+":
 				break;
 			case "-":
+				if (isGlobal()) {
+					store.put(ctx, store.get(ctx.unaryExp()));
+					break;
+				}
 				output(load(++index, tmpIndex), ctx);
 				output(calc(++index, "sub", index - 1), ctx);
 				output(alloca(++index), ctx);
