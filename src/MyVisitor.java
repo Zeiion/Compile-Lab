@@ -876,9 +876,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	 * Ident ( '[' constExp ']')* '=' constInitVal 3+3n
 	 * */
 	@Override public Void visitConstDef(HelloParser.ConstDefContext ctx) {
-		visitChildren(ctx);
 		String tmpVar = ctx.Ident().getText();
 		if (ctx.getChildCount() == 3) {
+			visitChildren(ctx);
 			if (isGlobal()) {
 				// 全局变量
 				newGlobalVar(tmpVar, store.get(ctx.constInitVal()), --globalIndex, true);
@@ -906,15 +906,15 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				//TODO global
 				//@b = dso_local constant [2 x [3 x i32]] [[3 x i32] [i32 1, i32 0, i32 0], [3 x i32] zeroinitializer]
 
-				//'{' ( initVal (',' initVal)* )? '}' 2+(1+2n)
-				HelloParser.ConstInitValContext initVal = ctx.constInitVal();
+				//'{' ( constInitVal (',' constInitVal)* )? '}' 2+(1+2n)
+				HelloParser.ConstInitValContext constInitVal = ctx.constInitVal();
 				// 初始化 如果需要的话
 				// output(getelementptr(++index, type, addrIndex, 0, 0), ctx);
 				ArrayList<Integer> saveList = new ArrayList<>(); // 保存的是所有数据
 				defArray = true;
-				visitChildren(initVal);
+				visitChildren(constInitVal);
 				defArray = false;
-				constInitialArray(initVal, type, expList, saveList, 0);
+				constInitialArray(constInitVal, type, expList, saveList, 0);
 
 				// TODO 多维
 				// [2 x [3 x i32]] [[3 x i32] [i32 1, i32 0, i32 0], [3 x i32] zeroinitializer]
@@ -1034,7 +1034,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		}
 	}
 
-
 	@Override public Void visitInitVal(HelloParser.InitValContext ctx) {
 		visitChildren(ctx);
 		if (ctx.getChildCount() == 1) {
@@ -1048,9 +1047,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	@Override public Void visitConstInitVal(HelloParser.ConstInitValContext ctx) {
 		visitChildren(ctx);
-		location.put(ctx, getLocation(ctx.constExp()));
-		if (isGlobal()) {
-			store.put(ctx, store.get(ctx.constExp()));
+		if (ctx.getChildCount() == 1) {
+			location.put(ctx, getLocation(ctx.constExp()));
+			if (isGlobal()) {
+				store.put(ctx, store.get(ctx.constExp()));
+			}
 		}
 		return null;
 	}
