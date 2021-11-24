@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -10,10 +11,13 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
 		+ "declare void @putch(i32)\n" + "declare i32 @getarray(i32*)\n" + "declare void @putarray(i32, i32*)\n"
 		+ "declare void @memset(i32*, i32, i32)\n";
-	public static String output = "";
+	//	public static String output = "";
+	public static ParseTreeProperty<StringBuilder> output = new ParseTreeProperty<>();
 	public static int index = 0;
 	public static int globalIndex = 0;
 	public static ParserRuleContext hello;
+	public static boolean hasMain = false;
+	public static HashMap<ParserRuleContext, Func> funcMap = new HashMap<>();
 
 	// 定义数组时
 	public static boolean defArray = false;
@@ -29,6 +33,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static Stack<ParserRuleContext> whileStack = new Stack<>();
 	public static ParseTreeProperty<Integer> whileStart = new ParseTreeProperty<>();
 	public static ParseTreeProperty<Integer> whileEnd = new ParseTreeProperty<>();
+
+	public static Stack<ParserRuleContext> funcStack = new Stack<>();
+	public static ArrayList<ParserRuleContext> funcList = new ArrayList<>();
 
 	public static Var getVar(String var) {
 		int i = blockStack.size();
@@ -101,7 +108,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			return true;
 		}
 		//		System.out.println("isGlobal " + blockStack.peek().getClass().equals(HelloParser.HelloContext.class));
-		return blockStack.peek().getClass().equals(HelloParser.HelloContext.class);
+		//		return blockStack.peek().getClass().equals(HelloParser.HelloContext.class);
+		return funcStack.isEmpty();
 	}
 
 	public static void output(String s, ParserRuleContext ctx) {
@@ -113,7 +121,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			if (isGlobal()) {
 				globalOutput += s;
 			} else {
-				output += s;
+				if (output.get(funcStack.peek()) == null) {
+					StringBuilder sb = new StringBuilder();
+					output.put(funcStack.peek(), sb);
+				}
+				output.get(funcStack.peek()).append(s);
 			}
 		}
 	}
@@ -124,6 +136,24 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			return "@" + ident;
 		}
 		return "%x" + i;
+	}
+
+	public static String define(String type, String name, ArrayList<Var> params, String content) {
+		// TODO params
+		return "define dso_local " + type + " @" + name + "(" + defineParams(params) + ") {\n\t" + content + "}\n";
+	}
+
+	public static String defineParams(ArrayList<Var> params) {
+		String tmp = "";
+		for (int i = 0; i < params.size(); i++) {
+			Var v = params.get(i);
+			if (v.isArray) {
+				tmp += subArrayType(v.type) + "*";
+				continue;
+			}
+			tmp += v.type;
+		}
+		return tmp;
 	}
 
 	public static String load(int to, int from) {
@@ -184,8 +214,22 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return "call void @" + ident + "(i32 " + getReg(param) + ")\n\t";
 	}
 
+	public static String proCall(String name, ArrayList<Var> params) {
+		Func f = findFuncByName(name);
+		if (params.size() != f.params.size()) {
+			throw new RuntimeException("params number not match!");
+		}
+		for (int i = 0; i < params.size(); i++) {
+			if (!f.params.get(i).type.equals(params.get(i))) {
+				throw new RuntimeException("params type not match!");
+			}
+			//TODO 对比每个参数
+		}
+		return "call " + f.type + " @" + name + "(" + "类型加地址" + ")\n\t";
+	}
+
 	public static String calc(int to, String symbol, int index1, int index2) {
-		if (symbol.equals("sdiv") || symbol.equals("srem")) {
+		if ("sdiv".equals(symbol) || "srem".equals(symbol)) {
 			return getReg(to) + " = " + symbol + " i32 " + getReg(index1) + ", " + getReg(index2) + "\n\t";
 		}
 		return getReg(to) + " = " + symbol + " nsw i32 " + getReg(index1) + ", " + getReg(index2) + "\n\t";
@@ -357,12 +401,50 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		visitChildren(ctx);
 		sout(globalOutput);
 		sout(prefix);
-		sout("define dso_local i32 @main(){\n\t" + output + "}");
+		for (ParserRuleContext p : funcList) {
+			sout(define(funcMap.get(p).type, funcMap.get(p).name, funcMap.get(p).params, output.get(p).toString()));
+		}
+		if (!hasMain) {
+			throw new RuntimeException("no main error!");
+		}
 		return null;
 	}
 
 	@Override public Void visitFuncDef(HelloParser.FuncDefContext ctx) {
+		funcList.add(ctx);
+		funcStack.push(ctx);
+		funcMap.put(ctx, new Func());
 		visitChildren(ctx);
+		String name = ctx.Ident().getText();
+		String type = ctx.funcType().getText();
+		Func f = funcMap.get(ctx);
+		f.name = name;
+		f.type = type;
+		if ("main".equals(name)) {
+			if (hasMain) {
+				throw new RuntimeException("already has main!");
+			} else {
+				hasMain = true;
+			}
+		}
+		funcStack.pop();
+		return null;
+	}
+
+	public static Func findFuncByName(String name) {
+		for (ParserRuleContext p : funcList) {
+			Func f = funcMap.get(p);
+			if (f.name.equals(name)) {
+				return f;
+			}
+		}
+		throw new RuntimeException("func " + name + "not found!");
+	}
+
+	@Override public Void visitFuncFParams(HelloParser.FuncFParamsContext ctx) {
+		visitChildren(ctx);
+		Func f = funcMap.get(ctx.getParent());
+		//TODO params arraylist
 		return null;
 	}
 
@@ -479,7 +561,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	@Override public Void visitCond(HelloParser.CondContext ctx) {
 		visitChildren(ctx);
-		// TODO
+		//
 		location.put(ctx, location.get(ctx.lOrExp()));
 		return null;
 	}
@@ -674,7 +756,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			defArray = false;
 			String type = generateArrayType(expList);
 			if (isGlobal()) {
-				//TODO global
+				// global
 				//@d = dso_local global [5 x i32] zeroinitializer
 				output(dsoG(tmpVar, type + " zeroinitializer"), ctx);
 				ArrayList<Integer> saveList = new ArrayList<>();
@@ -730,7 +812,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			// 获取当前数组type
 			String type = generateArrayType(expList);
 			if (isGlobal()) {
-				//TODO global
+				// global
 				//@b = dso_local global [2 x [3 x i32]] [[3 x i32] [i32 1, i32 0, i32 0], [3 x i32] zeroinitializer]
 
 				//'{' ( initVal (',' initVal)* )? '}' 2+(1+2n)
@@ -797,7 +879,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		Stack<Integer> tmpStack) {
 		String subType = subArrayType(type);
 		String tmp = type;
-		if (tmp.equals("i32")) {
+		if ("i32".equals(tmp)) {
 			return type + " " + tmpStack.pop();
 		}
 		tmp += " [";
@@ -838,7 +920,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		} else {
 			String subType = subArrayType(type);
 			int subCount = (count - 3) / 2 + 1; // initVal 的数量
-			if (subType.equals("i32")) {
+			if ("i32".equals(subType)) {
 				int totalCount = expList.get(layer);
 				for (int i = 0; i < subCount; i++) {
 					saveList.add(Integer.parseInt(store.get(tmp.initVal(i))));
@@ -918,7 +1000,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			// 获取当前数组type
 			String type = generateArrayType(expList);
 			if (isGlobal()) {
-				//TODO global
+				// global
 				//@b = dso_local constant [2 x [3 x i32]] [[3 x i32] [i32 1, i32 0, i32 0], [3 x i32] zeroinitializer]
 
 				//'{' ( constInitVal (',' constInitVal)* )? '}' 2+(1+2n)
@@ -1154,7 +1236,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitMulExp2(HelloParser.MulExp2Context ctx) {
 		visitChildren(ctx);
 		String tmp = "";
-		//TODO S 乘除法
+		// 乘除法
 		String symbol = ctx.getChild(1).getText();
 		if (isGlobal()) {
 			// 全局
@@ -1198,19 +1280,12 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return null;
 	}
 
-	// 函数
-	@Override public Void visitFuncRParams(HelloParser.FuncRParamsContext ctx) {
-		visitChildren(ctx);
-		//TODO 暂且这样
-		location.put(ctx, getLocation(ctx.exp(0)));
-		return null;
-	}
-
 	/* unaryExp
 	 *  表达式计算 要求是保存地址
 	 * */
 	@Override public Void visitCalcResES(HelloParser.CalcResESContext ctx) {
-		visitChildren(ctx);
+		//		visitChildren(ctx);
+		visit(ctx.Ident());
 		try {
 			checkIdent(ctx);
 		} catch (Exception e) {
@@ -1225,10 +1300,20 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		} else {
 			//Ident '(' funcRParams ')' # calcResES
 			output(load(++index, getLocation(ctx.funcRParams())), ctx);
-			output(call(ctx.Ident().getText(), index), ctx);
-			// TODO 好像用不到
+			// TODO 获取参数列表
+			ArrayList<Var> params = new ArrayList<>();
+			output(proCall(ctx.Ident().getText(), params), ctx);
+			// 好像用不到
 			location.put(ctx, index);
 		}
+		return null;
+	}
+
+	// 函数参数
+	@Override public Void visitFuncRParams(HelloParser.FuncRParamsContext ctx) {
+		visitChildren(ctx);
+		//TODO 暂且这样
+		location.put(ctx, getLocation(ctx.exp(0)));
 		return null;
 	}
 
@@ -1314,7 +1399,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			output(alloca(++index), ctx);
 			output(store(String.valueOf(tmp), index), ctx);
 		}
-		// TODO to avoid none-nes error
+		// to avoid none-nes error
 		location.put(ctx, index);
 		return null;
 	}
@@ -1336,7 +1421,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 		} else {
 			//Ident ( '[' exp ']')*
-			// TODO 获取数组的值 Global
+			// 获取数组的值 Global
 			Var tmpArrVar = getVar(ident);
 			int expCount = (ctx.getChildCount() - 1) / 3;
 			ArrayList<Integer> expIndexList = new ArrayList<>();
@@ -1346,9 +1431,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				}
 				ArrayList<Integer> dimensionList = tmpArrVar.dimensionList;
 				int tmpIndex = 0;
-				if (dimensionList.size() != expCount) {
-					throw new RuntimeException(tmpArrVar.name + " dimension not match!");
-				}
+				//	if (dimensionList.size() != expCount) {
+				//	throw new RuntimeException(tmpArrVar.name + " dimension not match!");
+				//	}
 				for (int i = expCount - 1; i >= 0; i--) {
 					if (i == expCount - 1) {
 						tmpIndex += expIndexList.get(i);
@@ -1370,7 +1455,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					output(load(++index, expTmpIndex), ctx);
 					expIndexList.add(index);
 				}
-				output(getelementptrAddr(++index, tmpArrVar.arrayType, tmpArrVar.index, expIndexList), ctx);
+				output(getelementptrAddr(++index, tmpArrVar.type, tmpArrVar.index, expIndexList), ctx);
 				location.put(ctx, index);
 			}
 		}

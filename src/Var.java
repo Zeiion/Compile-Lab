@@ -19,7 +19,6 @@ public class Var {
 	public boolean isArray = false;
 	public int dimension = 1;
 	public ArrayList<Integer> arrValues;
-	public String arrayType = "";
 	public ArrayList<Integer> dimensionList;
 
 	public Var(String name, int index) {
@@ -45,7 +44,7 @@ public class Var {
 		isArray = true;
 		this.dimension = dimension;
 		this.arrValues = arrValues;
-		this.arrayType = arrType;
+		this.type = arrType;
 		dimensionList = dArr;
 	}
 }
