@@ -37,7 +37,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static Stack<ParserRuleContext> funcStack = new Stack<>();
 	public static ArrayList<ParserRuleContext> funcList = new ArrayList<>();
 
-	public static Var getVar(String var) {
+	// 当前调用的函数的所有参数列表
+	public static Stack<ArrayList<Var>> tmpCallFuncParamsStack = new Stack<>();
+
+	public static Var getVarByName(String var) {
 		int i = blockStack.size();
 		while (--i >= 0) {
 			ParserRuleContext tmpCtx = blockStack.get(i);
@@ -58,6 +61,29 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 		}
 		throw new RuntimeException("no such var!");
+	}
+
+	public static Var getVarById(int id) {
+		int i = blockStack.size();
+		while (--i >= 0) {
+			ParserRuleContext tmpCtx = blockStack.get(i);
+			ArrayList<Var> tmpBlockVar = blockVar.get(tmpCtx);
+			if (tmpBlockVar == null) {
+				tmpBlockVar = new ArrayList<>();
+				blockVar.put(tmpCtx, tmpBlockVar);
+			}
+			for (Var v : tmpBlockVar) {
+				if (v.index == id) {
+					//					if (isGlobal()) {
+					//						if (!v.isConst && !v.isArray) {
+					//							throw new RuntimeException(v.name + " should be const!");
+					//						}
+					//					}
+					return v;
+				}
+			}
+		}
+		return null;
 	}
 
 	public static Var getGlobalVarById(int id) {
@@ -354,7 +380,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		System.out.print(s);
 	}
 
-	public static void checkIdent(HelloParser.CalcResESContext ctx) throws Exception {
+	public static void checkVoid(HelloParser.CalcResESContext ctx) throws Exception {
 		int count = ctx.getChildCount();
 		String ident = ctx.Ident().getText();
 		switch (ident) {
@@ -459,7 +485,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitStmt1(HelloParser.Stmt1Context ctx) {
 		visitChildren(ctx);
 		String ident = ctx.lVal().Ident().getText();
-		if (getVar(ident).isConst) {
+		if (getVarByName(ident).isConst) {
 			throw new RuntimeException(ident + " is const!");
 		}
 		int tmpIndex = getLocation(ctx.exp());
@@ -832,9 +858,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					tmpStack.push(saveList.get(i));
 				}
 				String initString = generateGlobalArrayInitialString(0, type, expList, tmpStack);
-
 				output(dsoG(tmpVar, initString), ctx);
-
 				newGlobalArrayVar(tmpVar, --globalIndex, false, dimension, saveList, type, expList);
 			} else {
 				output(allocaArray(++index, expList), ctx);
@@ -858,7 +882,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				output(getelementptr(++index, type, index - 1, tmpArrayList), ctx);
 				for (int i = 0; i < saveList.size(); i++) {
 					ArrayList<Integer> tmp = new ArrayList<>();
-					// change
+					// 获取偏移量
 					if (i == 0) {
 						tmp.add(0);
 					} else {
@@ -868,7 +892,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					output(getelementptr(++index, "i32", index - 1, tmp), ctx);
 					output(store(String.valueOf(saveList.get(i)), index), ctx);
 				}
-
 				newArrayVar(tmpVar, addrIndex, false, dimension, saveList, type, expList);
 			}
 		}
@@ -967,6 +990,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	/*
 	 * Ident ( '[' constExp ']')* '=' constInitVal 3+3n
+	 * const定义
 	 * */
 	@Override public Void visitConstDef(HelloParser.ConstDefContext ctx) {
 		String tmpVar = ctx.Ident().getText();
@@ -1134,6 +1158,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitInitVal(HelloParser.InitValContext ctx) {
 		visitChildren(ctx);
 		if (ctx.getChildCount() == 1) {
+			// 只处理非数组情况
 			location.put(ctx, getLocation(ctx.exp()));
 			if (isGlobal()) {
 				store.put(ctx, store.get(ctx.exp()));
@@ -1145,6 +1170,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitConstInitVal(HelloParser.ConstInitValContext ctx) {
 		visitChildren(ctx);
 		if (ctx.getChildCount() == 1) {
+			// 只处理非数组情况
 			location.put(ctx, getLocation(ctx.constExp()));
 			if (isGlobal()) {
 				store.put(ctx, store.get(ctx.constExp()));
@@ -1287,7 +1313,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		//		visitChildren(ctx);
 		visit(ctx.Ident());
 		try {
-			checkIdent(ctx);
+			checkVoid(ctx);
 		} catch (Exception e) {
 			throw new RuntimeException("params illegal!");
 		}
@@ -1299,9 +1325,12 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			location.put(ctx, index);
 		} else {
 			//Ident '(' funcRParams ')' # calcResES
-			output(load(++index, getLocation(ctx.funcRParams())), ctx);
+			//			output(load(++index, getLocation(ctx.funcRParams())), ctx);
 			// TODO 获取参数列表
 			ArrayList<Var> params = new ArrayList<>();
+			tmpCallFuncParamsStack.push(params);
+			// 让funcRParams的所有参数都加入peek的arraylist
+			visit(ctx.funcRParams());
 			output(proCall(ctx.Ident().getText(), params), ctx);
 			// 好像用不到
 			location.put(ctx, index);
@@ -1309,10 +1338,23 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return null;
 	}
 
-	// 函数参数
+	/* 函数参数
+	 * exp (',' exp)*;
+	 */
 	@Override public Void visitFuncRParams(HelloParser.FuncRParamsContext ctx) {
+		int paramCount = ctx.getChildCount() - 1 / 2;
 		visitChildren(ctx);
-		//TODO 暂且这样
+		//TODO
+		for (int i = 0; i < paramCount; i++) {
+			ArrayList<Var> tmpList = tmpCallFuncParamsStack.peek();
+			int tmpIndex = getLocation(ctx.exp(i));
+			if (getVarById(tmpIndex) == null) {
+				Var v = new Var();
+				v.index = tmpIndex;
+				tmpList.add(v);
+			}
+			//
+		}
 		location.put(ctx, getLocation(ctx.exp(0)));
 		return null;
 	}
@@ -1411,29 +1453,32 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		if (ctx.getChildCount() == 1) {
 			// Ident
 			if (constMode) {
-				if (!getVar(ident).isConst) {
+				if (!getVarByName(ident).isConst) {
 					throw new RuntimeException(ident + " should be ident");
 				}
 			}
-			location.put(ctx, getVar(ident).index);
+			location.put(ctx, getVarByName(ident).index);
 			if (isGlobal()) {
-				store.put(ctx, String.valueOf(getVar(ident).value));
+				store.put(ctx, String.valueOf(getVarByName(ident).value));
 			}
 		} else {
 			//Ident ( '[' exp ']')*
 			// 获取数组的值 Global
-			Var tmpArrVar = getVar(ident);
+			Var tmpArrVar = getVarByName(ident);
 			int expCount = (ctx.getChildCount() - 1) / 3;
 			ArrayList<Integer> expIndexList = new ArrayList<>();
 			if (isGlobal()) {
 				for (int i = 0; i < expCount; i++) {
+					// 全局 直接编译器计算出值
 					expIndexList.add(Integer.parseInt(store.get(ctx.exp(i))));
 				}
 				ArrayList<Integer> dimensionList = tmpArrVar.dimensionList;
 				int tmpIndex = 0;
-				//	if (dimensionList.size() != expCount) {
-				//	throw new RuntimeException(tmpArrVar.name + " dimension not match!");
-				//	}
+				if (dimensionList.size() > expCount) {
+					// TODO 少n个维度，作为函数参数
+					location.put(ctx, tmpArrVar.index);
+				}
+				// 根据偏移量计算出数据所在的偏移量tmpIndex
 				for (int i = expCount - 1; i >= 0; i--) {
 					if (i == expCount - 1) {
 						tmpIndex += expIndexList.get(i);
@@ -1442,11 +1487,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					tmpIndex += expIndexList.get(i) * dimensionList.get(i + 1);
 				}
 				store.put(ctx, String.valueOf(tmpArrVar.arrValues.get(tmpIndex)));
-				// 好像没啥用
-				location.put(ctx, index);
+				// array index
+				location.put(ctx, tmpArrVar.index);
 			} else {
 				if (constMode) {
-					if (!getVar(ident).isConst) {
+					if (!getVarByName(ident).isConst) {
 						throw new RuntimeException(ident + " should be ident");
 					}
 				}
@@ -1456,33 +1501,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					expIndexList.add(index);
 				}
 				output(getelementptrAddr(++index, tmpArrVar.type, tmpArrVar.index, expIndexList), ctx);
-				location.put(ctx, index);
+				location.put(ctx, tmpArrVar.index);
 			}
 		}
 		return null;
 	}
-
-	//	@Override public Void enterEveryRule(ParserRuleContext ctx) {
-	//		visitChildren(ctx);
-	//		if (getLock(ctx.getParent())) {
-	//			lock.put(ctx, true);
-	//		}
-	//		return null;
-	//	}
-	//
-	//	@Override public Void visitEveryRule(ParserRuleContext ctx) {
-	//		visitChildren(ctx);
-	//		//		debugSout(ctx, "--debug");
-	//		if (getLock(ctx)) {
-	//			lock.put(ctx, false);
-	//			if (getLock(ctx.getParent())) {
-	//				lockStore.put(ctx.getParent(), getLockStore(ctx.getParent()) + getLockStore(ctx));
-	//			} else {
-	//				output(getLockStore(ctx), ctx);
-	//			}
-	//		}
-	//		return null;
-	//	}
-	//
-
 }

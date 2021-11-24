@@ -18,8 +18,13 @@ public class Var {
 	// 是否是array
 	public boolean isArray = false;
 	public int dimension = 1;
+	// 数组中所有的值
 	public ArrayList<Integer> arrValues;
+	// 维度列表
 	public ArrayList<Integer> dimensionList;
+
+	public Var() {
+	}
 
 	public Var(String name, int index) {
 		this.name = name;
@@ -46,5 +51,20 @@ public class Var {
 		this.arrValues = arrValues;
 		this.type = arrType;
 		dimensionList = dArr;
+	}
+
+	public Var copyVar(Var v) {
+		Var vv = new Var();
+		vv.name = v.name;
+		vv.index = v.index;
+		vv.isConst = v.isConst;
+		vv.isGlobal = v.isGlobal;
+		vv.value = v.value;
+		vv.type = v.type;
+		vv.isArray = v.isArray;
+		vv.dimension = v.dimension;
+		vv.arrValues = v.arrValues;
+		vv.dimensionList = v.dimensionList;
+		return vv;
 	}
 }
