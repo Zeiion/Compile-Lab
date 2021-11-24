@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Var {
 
 	// 变量名
@@ -12,6 +14,12 @@ public class Var {
 	public int value = 0;
 	// 数据类型
 	public String type = "i32";
+
+	// 是否是array
+	public boolean isArray = false;
+	public int dimension = 1;
+	public ArrayList<Integer> arrValues;
+	public String arrayType = "";
 
 	public Var(String name, int index) {
 		this.name = name;
@@ -30,5 +38,12 @@ public class Var {
 		this.name = name;
 		this.index = index;
 		this.isConst = isConst;
+	}
+
+	public void setArray(int dimension, ArrayList<Integer> arrValues, String arrType) {
+		isArray = true;
+		this.dimension = dimension;
+		this.arrValues = arrValues;
+		this.arrayType = arrType;
 	}
 }

@@ -134,14 +134,18 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return getReg(to) + " = alloca i32, align 4\n\t";
 	}
 
-	public static String allocaN(int to, int... arr) {
+	public static String allocaN(int to, ArrayList<Integer> arr) {
 		//[2 x [2 x i32]]
+		//[2 x [2 x [2 x i32]]]
+		return getReg(to) + " = alloca " + generateArrayType(arr) + "\n\t";
+	}
+
+	public static String generateArrayType(ArrayList<Integer> arr) {
 		String tmp = "i32";
-		for (int i = arr.length - 1; i >= 0; i--) {
-			tmp = "[" + arr[i] + " x " + tmp + "]";
+		for (int i = arr.size() - 1; i >= 0; i--) {
+			tmp = "[" + arr.get(i) + " x " + tmp + "]";
 		}
-		System.out.println("tmp " + tmp);
-		return getReg(to) + " = " + tmp + "\n\t";
+		return tmp;
 	}
 
 	public static String icmp(int to, String symbol, int index1) {
@@ -200,6 +204,22 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return getReg(to) + " = zext i1 " + getReg(from) + " to i32\n\t";
 	}
 
+	public static String getelementptr(int to, String type, int from, ArrayList<Integer> bias) {
+		String biasString = "";
+		for (int b : bias) {
+			biasString += ", i32 " + b;
+		}
+		return getReg(to) + " = getelementptr " + type + "," + type + "* " + getReg(from) + biasString + "\n\t";
+	}
+
+	public static String getelementptrAddr(int to, String type, int from, ArrayList<Integer> bias) {
+		String biasString = ", i32 0";
+		for (int b : bias) {
+			biasString += ", i32 " + getReg(b);
+		}
+		return getReg(to) + " = getelementptr " + type + "," + type + "* " + getReg(from) + biasString + "\n\t";
+	}
+
 	public static String toi32point(int tmpIndex) {
 		int i = ++index;
 		return alloca(i) + store(tmpIndex, i);
@@ -237,6 +257,42 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			value = "0";
 		}
 		tmpList.add(new Var(true, Integer.valueOf(value), tmpVar, tmpIndex, isConst));
+	}
+
+	public static void newArrayVar(String tmpVar, int tmpIndex, boolean isConst, int dimension, ArrayList<Integer> arr,
+		String type) {
+		ParserRuleContext tmpCtx = blockStack.peek();
+		ArrayList<Var> tmpList = blockVar.get(tmpCtx);
+		if (tmpList == null) {
+			tmpList = new ArrayList<>();
+			blockVar.put(tmpCtx, tmpList);
+		}
+		for (Var v : tmpList) {
+			if (v.name.equals(tmpVar)) {
+				throw new RuntimeException("var already exist!");
+			}
+		}
+		Var tmp = new Var(tmpVar, tmpIndex, isConst);
+		tmp.setArray(dimension, arr, type);
+		tmpList.add(tmp);
+	}
+
+	public static void newGlobalArrayVar(String tmpVar, int tmpIndex, boolean isConst, int dimension,
+		ArrayList<Integer> arr, String type) {
+		ParserRuleContext tmpCtx = blockStack.peek();
+		ArrayList<Var> tmpList = blockVar.get(tmpCtx);
+		if (tmpList == null) {
+			tmpList = new ArrayList<>();
+			blockVar.put(tmpCtx, tmpList);
+		}
+		for (Var v : tmpList) {
+			if (v.name.equals(tmpVar)) {
+				throw new RuntimeException("var already exist!");
+			}
+		}
+		Var tmp = new Var(true, 0, tmpVar, tmpIndex, isConst);
+		tmp.setArray(dimension, arr, type);
+		tmpList.add(tmp);
 	}
 
 	public static String ret(int retIndex) {
@@ -595,14 +651,21 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				newVar(tmpVar, index, false);
 			}
 		} else {
-			defArray = true;
-			int dimension = (ctx.getChildCount() - 1) / 3;
-			ArrayList<Integer> expList = new ArrayList<>();
-			for (int i = 0; i < dimension; i++) {
-				visit(ctx.constExp(i));
-				expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+			if (isGlobal()) {
+				//TODO global
+				//@d = dso_local global [5 x i32] zeroinitializer
+			} else {
+				defArray = true;
+				int dimension = (ctx.getChildCount() - 1) / 3;
+				ArrayList<Integer> expList = new ArrayList<>();
+				for (int i = 0; i < dimension; i++) {
+					visit(ctx.constExp(i));
+					expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+				}
+				defArray = false;
+				output(allocaN(++index, expList), ctx);
+				// TODO 非全局未初始化报错？
 			}
-			defArray = false;
 		}
 		return null;
 	}
@@ -627,17 +690,122 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				output(store(index - 1, index), ctx);
 			}
 		} else {
-			defArray = true;
-			int dimension = (ctx.getChildCount() - 3) / 3;
-			ArrayList<Integer> expList = new ArrayList<>();
-			for (int i = 0; i < dimension; i++) {
-				visit(ctx.constExp(i));
-				expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+			if (isGlobal()) {
+				//TODO global
+				//@b = dso_local global [2 x [3 x i32]] [[3 x i32] [i32 1, i32 0, i32 0], [3 x i32] zeroinitializer]
+			} else {
+				defArray = true;
+				int dimension = (ctx.getChildCount() - 3) / 3;
+				ArrayList<Integer> expList = new ArrayList<>();
+				for (int i = 0; i < dimension; i++) {
+					visit(ctx.constExp(i));
+					expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+				}
+				defArray = false;
+				output(allocaN(++index, expList), ctx);
+				int addrIndex = index;
+				// 获取当前数组type
+				String type = generateArrayType(expList);
+				//visit(ctx.initVal());
+				//'{' ( initVal (',' initVal)* )? '}' 2+(1+2n)
+				HelloParser.InitValContext initVal = ctx.initVal();
+				// 初始化 如果需要的话
+				// output(getelementptr(++index, type, addrIndex, 0, 0), ctx);
+				ArrayList<Integer> saveList = new ArrayList<>();
+				defArray = true;
+				visitChildren(initVal);
+				defArray = false;
+				initialArray(initVal, type, addrIndex, expList, saveList, 0);
+
+				// TODO 多维
+				ArrayList<Integer> tmpArrayList = new ArrayList<>();
+				for (int i = 0; i < dimension + 1; i++) {
+					tmpArrayList.add(0);
+				}
+				output(getelementptr(++index, type, index - 1, tmpArrayList), ctx);
+				for (int i = 0; i < saveList.size(); i++) {
+					ArrayList<Integer> tmp = new ArrayList<>();
+					tmp.add(i);
+					//output(getelementptr(++index, subArrayType(type), index - 1, tmp), ctx);
+					output(getelementptr(++index, "i32", index - 1, tmp), ctx);
+					output(store(String.valueOf(saveList.get(i)), index), ctx);
+				}
+
+				newArrayVar(tmpVar, addrIndex, false, dimension, saveList, type);
 			}
-			defArray = false;
-			visit(ctx.initVal());
 		}
 		return null;
+	}
+
+	public static void initialArray(HelloParser.InitValContext tmp, String type, int fromIndex,
+		ArrayList<Integer> expList, ArrayList<Integer> saveList, int layer) {
+		//		output(getelementptr(++index, type, fromIndex, 0, 0), tmp);
+		int count = tmp.getChildCount();
+		if (count == 1) {
+			// exp 补全0 ???
+			saveList.add(Integer.parseInt(store.get(tmp.exp())));
+			int totalCount = 1;
+			for (int i = layer; i < expList.size(); i++) {
+				totalCount *= expList.get(i);
+			}
+			for (int i = 0; i < totalCount - 1; i++) {
+				saveList.add(0);
+			}
+		} else if (count == 2) {
+			// empty array 补全0
+			int totalCount = 1;
+			for (int i = layer; i < expList.size(); i++) {
+				totalCount *= expList.get(i);
+			}
+			for (int i = 0; i < totalCount; i++) {
+				saveList.add(0);
+			}
+		} else {
+			String subType = subArrayType(type);
+			int subCount = (count - 3) / 2 + 1; // initVal 的数量
+			if (subType.equals("i32")) {
+				int totalCount = expList.get(layer);
+				for (int i = 0; i < subCount; i++) {
+					saveList.add(Integer.parseInt(store.get(tmp.initVal(i))));
+				}
+				if (totalCount < subCount) {
+					throw new RuntimeException("array overflow!");
+				} else if (totalCount > subCount) {
+					// 补全少的初值为0
+					for (int i = 0; i < (totalCount - subCount); i++) {
+						saveList.add(0);
+					}
+				}
+			} else {
+				// TODO 多维数组
+				for (int i = 0; i < subCount; i++) {
+					initialArray(tmp.initVal(i), subType, fromIndex, expList, saveList, layer + 1);
+				}
+				int totalCount = expList.get(layer);
+				if (totalCount < subCount) {
+					throw new RuntimeException("array overflow!");
+				} else if (totalCount > subCount) {
+					for (int i = 0; i < (totalCount - subCount); i++) {
+						int total = 1;
+						for (int j = layer + 1; j < expList.size(); j++) {
+							total *= expList.get(j);
+						}
+						for (int j = 0; j < total; j++) {
+							saveList.add(0);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public static String subArrayType(String type) {
+		type = type.substring(1, type.length() - 1);
+		int start = type.indexOf("[");
+		if (start == -1) {
+			return "i32";
+		}
+		return type.substring(start);
 	}
 
 	@Override public Void visitConstDef(HelloParser.ConstDefContext ctx) {
@@ -659,9 +827,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	@Override public Void visitInitVal(HelloParser.InitValContext ctx) {
 		visitChildren(ctx);
-		location.put(ctx, getLocation(ctx.exp()));
-		if (isGlobal()) {
-			store.put(ctx, store.get(ctx.exp()));
+		if (ctx.getChildCount() == 1) {
+			location.put(ctx, getLocation(ctx.exp()));
+			if (isGlobal()) {
+				store.put(ctx, store.get(ctx.exp()));
+			}
 		}
 		return null;
 	}
@@ -918,18 +1088,42 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return null;
 	}
 
-	//Ident
+	//Ident ( '[' exp ']')* 1+3n
 	@Override public Void visitLVal(HelloParser.LValContext ctx) {
 		visitChildren(ctx);
 		String ident = ctx.Ident().getText();
-		if (constMode) {
-			if (!getVar(ident).isConst) {
-				throw new RuntimeException(ident + " should be ident");
+		if (ctx.getChildCount() == 1) {
+			// Ident
+			if (constMode) {
+				if (!getVar(ident).isConst) {
+					throw new RuntimeException(ident + " should be ident");
+				}
 			}
-		}
-		location.put(ctx, getVar(ident).index);
-		if (isGlobal()) {
-			store.put(ctx, String.valueOf(getVar(ident).value));
+			location.put(ctx, getVar(ident).index);
+			if (isGlobal()) {
+				store.put(ctx, String.valueOf(getVar(ident).value));
+			}
+		} else {
+			//Ident ( '[' exp ']')*
+			// TODO 获取数组的值
+			if (constMode) {
+				if (!getVar(ident).isConst) {
+					throw new RuntimeException(ident + " should be ident");
+				}
+			}
+			int expCount = (ctx.getChildCount() - 1) / 3;
+			Var tmpArrVar = getVar(ident);
+			ArrayList<Integer> expIndexList = new ArrayList<>();
+			for (int i = 0; i < expCount; i++) {
+				int expTmpIndex = location.get(ctx.exp(i));
+				output(load(++index, expTmpIndex), ctx);
+				expIndexList.add(index);
+			}
+			output(getelementptrAddr(++index, tmpArrVar.arrayType, tmpArrVar.index, expIndexList), ctx);
+			location.put(ctx, index);
+			if (isGlobal()) {
+				store.put(ctx, String.valueOf(getVar(ident).value));
+			}
 		}
 		return null;
 	}
