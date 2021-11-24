@@ -725,7 +725,12 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				output(getelementptr(++index, type, index - 1, tmpArrayList), ctx);
 				for (int i = 0; i < saveList.size(); i++) {
 					ArrayList<Integer> tmp = new ArrayList<>();
-					tmp.add(i);
+					// change
+					if (i == 0) {
+						tmp.add(0);
+					} else {
+						tmp.add(1);
+					}
 					//output(getelementptr(++index, subArrayType(type), index - 1, tmp), ctx);
 					output(getelementptr(++index, "i32", index - 1, tmp), ctx);
 					output(store(String.valueOf(saveList.get(i)), index), ctx);
