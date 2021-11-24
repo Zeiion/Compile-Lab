@@ -201,7 +201,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static String dsoC(String ident, String value) {
-		return "@" + ident + " = dso_local const " + value + "\n";
+		return "@" + ident + " = dso_local constant " + value + "\n";
 	}
 
 	public static String zext(int to, int from) {
