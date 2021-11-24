@@ -197,11 +197,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static String dsoG(String ident, String value) {
-		return "@" + ident + " = dso_local global i32 " + value + "\n";
+		return "@" + ident + " = dso_local global " + value + "\n";
 	}
 
 	public static String dsoC(String ident, String value) {
-		return "@" + ident + " = dso_local const i32 " + value + "\n";
+		return "@" + ident + " = dso_local const " + value + "\n";
 	}
 
 	public static String zext(int to, int from) {
