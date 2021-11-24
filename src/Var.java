@@ -20,6 +20,7 @@ public class Var {
 	public int dimension = 1;
 	public ArrayList<Integer> arrValues;
 	public String arrayType = "";
+	public ArrayList<Integer> dimensionList;
 
 	public Var(String name, int index) {
 		this.name = name;
@@ -40,10 +41,11 @@ public class Var {
 		this.isConst = isConst;
 	}
 
-	public void setArray(int dimension, ArrayList<Integer> arrValues, String arrType) {
+	public void setArray(int dimension, ArrayList<Integer> arrValues, String arrType, ArrayList<Integer> dArr) {
 		isArray = true;
 		this.dimension = dimension;
 		this.arrValues = arrValues;
 		this.arrayType = arrType;
+		dimensionList = dArr;
 	}
 }

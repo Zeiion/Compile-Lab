@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 public class MyVisitor extends HelloBaseVisitor<Void> {
-	private boolean constMode = false;
+	private static boolean constMode = false;
 
 	public static String globalOutput = "";
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
@@ -63,7 +63,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
-		//		System.out.println(ctx.getText() + " " + s);
+		System.out.println("----" + ctx.getText() + " " + s);
 	}
 
 	public static boolean getLock(ParserRuleContext ctx) {
@@ -264,7 +264,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static void newArrayVar(String tmpVar, int tmpIndex, boolean isConst, int dimension, ArrayList<Integer> arr,
-		String type) {
+		String type, ArrayList<Integer> dArr) {
 		ParserRuleContext tmpCtx = blockStack.peek();
 		ArrayList<Var> tmpList = blockVar.get(tmpCtx);
 		if (tmpList == null) {
@@ -277,12 +277,12 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 		}
 		Var tmp = new Var(tmpVar, tmpIndex, isConst);
-		tmp.setArray(dimension, arr, type);
+		tmp.setArray(dimension, arr, type, dArr);
 		tmpList.add(tmp);
 	}
 
 	public static void newGlobalArrayVar(String tmpVar, int tmpIndex, boolean isConst, int dimension,
-		ArrayList<Integer> arr, String type) {
+		ArrayList<Integer> arr, String type, ArrayList<Integer> dArr) {
 		ParserRuleContext tmpCtx = blockStack.peek();
 		ArrayList<Var> tmpList = blockVar.get(tmpCtx);
 		if (tmpList == null) {
@@ -295,7 +295,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 		}
 		Var tmp = new Var(true, 0, tmpVar, tmpIndex, isConst);
-		tmp.setArray(dimension, arr, type);
+		tmp.setArray(dimension, arr, type, dArr);
 		tmpList.add(tmp);
 	}
 
@@ -674,7 +674,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				for (int i = 0; i < totalNumber; i++) {
 					saveList.add(0);
 				}
-				newGlobalArrayVar(tmpVar, --globalIndex, false, dimension, saveList, type);
+				newGlobalArrayVar(tmpVar, --globalIndex, false, dimension, saveList, type, expList);
 			} else {
 				output(allocaArray(++index, expList), ctx);
 				// 非全局未初始化报错？
@@ -682,7 +682,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				for (int i = 0; i < totalNumber; i++) {
 					saveList.add(0);
 				}
-				newArrayVar(tmpVar, index, false, dimension, saveList, type);
+				newArrayVar(tmpVar, index, false, dimension, saveList, type, expList);
 			}
 		}
 		return null;
@@ -742,7 +742,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 				output(dsoG(tmpVar, initString), ctx);
 
-				newGlobalArrayVar(tmpVar, --globalIndex, false, dimension, saveList, type);
+				newGlobalArrayVar(tmpVar, --globalIndex, false, dimension, saveList, type, expList);
 			} else {
 				output(allocaArray(++index, expList), ctx);
 				int addrIndex = index;
@@ -776,7 +776,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					output(store(String.valueOf(saveList.get(i)), index), ctx);
 				}
 
-				newArrayVar(tmpVar, addrIndex, false, dimension, saveList, type);
+				newArrayVar(tmpVar, addrIndex, false, dimension, saveList, type, expList);
 			}
 		}
 		return null;
@@ -926,7 +926,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 				output(dsoG(tmpVar, initString), ctx);
 
-				newGlobalArrayVar(tmpVar, --globalIndex, true, dimension, saveList, type);
+				newGlobalArrayVar(tmpVar, --globalIndex, true, dimension, saveList, type, expList);
 			} else {
 				output(allocaArray(++index, expList), ctx);
 				int addrIndex = index;
@@ -962,7 +962,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					output(store(String.valueOf(saveList.get(i)), index), ctx);
 				}
 
-				newArrayVar(tmpVar, addrIndex, true, dimension, saveList, type);
+				newArrayVar(tmpVar, addrIndex, true, dimension, saveList, type, expList);
 			}
 		}
 		return null;
@@ -1061,6 +1061,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		location.put(ctx, getLocation(ctx.addExp()));
 		if (isGlobal()) {
 			store.put(ctx, store.get(ctx.addExp()));
+			debugSout(ctx, "exp" + store.get(ctx));
 		}
 		return null;
 	}
@@ -1316,24 +1317,42 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 		} else {
 			//Ident ( '[' exp ']')*
-			// TODO 获取数组的值
-			if (constMode) {
-				if (!getVar(ident).isConst) {
-					throw new RuntimeException(ident + " should be ident");
-				}
-			}
-			int expCount = (ctx.getChildCount() - 1) / 3;
+			// TODO 获取数组的值 Global
 			Var tmpArrVar = getVar(ident);
+			int expCount = (ctx.getChildCount() - 1) / 3;
 			ArrayList<Integer> expIndexList = new ArrayList<>();
-			for (int i = 0; i < expCount; i++) {
-				int expTmpIndex = location.get(ctx.exp(i));
-				output(load(++index, expTmpIndex), ctx);
-				expIndexList.add(index);
-			}
-			output(getelementptrAddr(++index, tmpArrVar.arrayType, tmpArrVar.index, expIndexList), ctx);
-			location.put(ctx, index);
 			if (isGlobal()) {
-				store.put(ctx, String.valueOf(getVar(ident).value));
+				for (int i = 0; i < expCount; i++) {
+					expIndexList.add(Integer.parseInt(store.get(ctx.exp(i))));
+				}
+				ArrayList<Integer> dimensionList = tmpArrVar.dimensionList;
+				int tmpIndex = 0;
+				if (dimensionList.size() != expCount) {
+					throw new RuntimeException(tmpArrVar.name + " dimension not match!");
+				}
+				for (int i = expCount - 1; i >= 0; i--) {
+					if (i == expCount - 1) {
+						tmpIndex += expIndexList.get(i);
+						continue;
+					}
+					tmpIndex += expIndexList.get(i) * dimensionList.get(i + 1);
+				}
+				store.put(ctx, String.valueOf(tmpArrVar.arrValues.get(tmpIndex)));
+				// 好像没啥用
+				location.put(ctx, index);
+			} else {
+				if (constMode) {
+					if (!getVar(ident).isConst) {
+						throw new RuntimeException(ident + " should be ident");
+					}
+				}
+				for (int i = 0; i < expCount; i++) {
+					int expTmpIndex = location.get(ctx.exp(i));
+					output(load(++index, expTmpIndex), ctx);
+					expIndexList.add(index);
+				}
+				output(getelementptrAddr(++index, tmpArrVar.arrayType, tmpArrVar.index, expIndexList), ctx);
+				location.put(ctx, index);
 			}
 		}
 		return null;
