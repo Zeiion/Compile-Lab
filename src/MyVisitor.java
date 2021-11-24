@@ -143,6 +143,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static String generateArrayType(ArrayList<Integer> arr) {
 		String tmp = "i32";
 		for (int i = arr.size() - 1; i >= 0; i--) {
+			if (arr.get(i) < 0) {
+				throw new RuntimeException(arr.get(i) + " is not allowed!");
+			}
 			tmp = "[" + arr.get(i) + " x " + tmp + "]";
 		}
 		return tmp;
@@ -661,7 +664,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			ArrayList<Integer> expList = new ArrayList<>();
 			for (int i = 0; i < dimension; i++) {
 				visit(ctx.constExp(i));
-				expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+				int tmpD = Integer.parseInt(store.get(ctx.constExp(i)));
+				if (tmpD < 0) {
+					throw new RuntimeException(tmpD + " is not allowed!");
+				}
+				expList.add(tmpD);
 				totalNumber *= expList.get(i);
 			}
 			defArray = false;
@@ -699,7 +706,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				// 全局变量
 				newGlobalVar(tmpVar, store.get(ctx.initVal()), --globalIndex, false);
 				output(dsoG(tmpVar,
-					"i32" + (store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal())))), ctx);
+					"i32 " + (store.get(ctx.initVal()) == null ? "0" : String.valueOf(store.get(ctx.initVal())))), ctx);
 			} else {
 				//Ident = initVal
 				output(load(++index, getLocation(ctx.initVal())), ctx);
@@ -713,7 +720,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			ArrayList<Integer> expList = new ArrayList<>(); // 保存的是维度信息
 			for (int i = 0; i < dimension; i++) {
 				visit(ctx.constExp(i));
-				expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+				int tmpD = Integer.parseInt(store.get(ctx.constExp(i)));
+				if (tmpD < 0) {
+					throw new RuntimeException(tmpD + " is not allowed!");
+				}
+				expList.add(tmpD);
 			}
 			defArray = false;
 			// 获取当前数组type
@@ -897,7 +908,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			ArrayList<Integer> expList = new ArrayList<>(); // 保存的是维度信息
 			for (int i = 0; i < dimension; i++) {
 				visit(ctx.constExp(i));
-				expList.add(Integer.parseInt(store.get(ctx.constExp(i))));
+				int tmpD = Integer.parseInt(store.get(ctx.constExp(i)));
+				if (tmpD < 0) {
+					throw new RuntimeException(tmpD + " is not allowed!");
+				}
+				expList.add(tmpD);
 			}
 			defArray = false;
 			// 获取当前数组type
