@@ -42,7 +42,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			for (Var v : tmpBlockVar) {
 				if (v.name.equals(var)) {
 					if (isGlobal()) {
-						if (!v.isConst) {
+						if (!v.isConst && !v.isArray) {
 							throw new RuntimeException(v.name + " should be const!");
 						}
 					}
