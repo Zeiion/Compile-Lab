@@ -63,7 +63,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
-		System.out.println("----" + ctx.getText() + " " + s);
+		//		System.out.println("----" + ctx.getText() + " " + s);
 	}
 
 	public static boolean getLock(ParserRuleContext ctx) {
@@ -1061,7 +1061,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		location.put(ctx, getLocation(ctx.addExp()));
 		if (isGlobal()) {
 			store.put(ctx, store.get(ctx.addExp()));
-			debugSout(ctx, "exp" + store.get(ctx));
 		}
 		return null;
 	}
