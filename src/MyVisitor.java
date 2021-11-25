@@ -233,11 +233,19 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		String tmp = "";
 		for (int i = 0; i < params.size(); i++) {
 			Var v = params.get(i);
-			if (v.isArray) {
-				tmp += subArrayType(v.type) + " " + getReg(v.fakeIndex);
-				continue;
+			if(i==0){
+				if (v.isArray) {
+					tmp += subArrayType(v.type) + " " + getReg(v.fakeIndex);
+					continue;
+				}
+				tmp += v.type + " " + getReg(v.fakeIndex);
+			}else{
+				if (v.isArray) {
+					tmp += ", "+subArrayType(v.type) + " " + getReg(v.fakeIndex);
+					continue;
+				}
+				tmp += ", "+v.type + " " + getReg(v.fakeIndex);
 			}
-			tmp += v.type + " " + getReg(v.fakeIndex);
 		}
 		return tmp;
 	}
