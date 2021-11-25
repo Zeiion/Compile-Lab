@@ -156,7 +156,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
-		System.out.println("----" + ctx.getText() + " " + s);
+		//		System.out.println("----" + ctx.getText() + " " + s);
 	}
 
 	public static boolean getLock(ParserRuleContext ctx) {
