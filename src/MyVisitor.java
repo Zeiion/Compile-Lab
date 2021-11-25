@@ -18,18 +18,19 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static ParserRuleContext hello;
 
 	public static ArrayList<Func> defaultFuncList = new ArrayList<>();
-	public static void initDefaultFuncList(){
+
+	public static void initDefaultFuncList() {
 		//putint
 		ArrayList<Var> pip = new ArrayList<>();
 		Var piv = new Var();
 		piv.type = "i32";
 		pip.add(piv);
-		Func putint = new Func("putint","void",pip);
+		Func putint = new Func("putint", "void", pip);
 		defaultFuncList.add(putint);
 
 		//getint
 		ArrayList<Var> gip = new ArrayList<>();
-		Func getint = new Func("getint","i32",gip);
+		Func getint = new Func("getint", "i32", gip);
 		defaultFuncList.add(getint);
 
 		//putch
@@ -37,12 +38,12 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		Var pcv = new Var();
 		pcv.type = "i32";
 		pcp.add(pcv);
-		Func putch = new Func("putch","void",pcp);
+		Func putch = new Func("putch", "void", pcp);
 		defaultFuncList.add(putch);
 
 		//getch
 		ArrayList<Var> gcp = new ArrayList<>();
-		Func getch = new Func("getch","i32",gcp);
+		Func getch = new Func("getch", "i32", gcp);
 		defaultFuncList.add(getch);
 
 		//putarray
@@ -57,14 +58,13 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		pav2.dimensionList.add(100);
 		pap.add(pav1);
 		pap.add(pav2);
-		Func putarray = new Func("putarray","void",pap);
+		Func putarray = new Func("putarray", "void", pap);
 		defaultFuncList.add(putarray);
-
 
 		//getarray
 		ArrayList<Var> gap = new ArrayList<>();
 		Var gav = new Var();
-		gav.isArray=true;
+		gav.isArray = true;
 		// TODO fake dimensionList/type i32*?
 		gav.dimensionList = new ArrayList<>();
 		gav.dimensionList.add(100);
@@ -72,7 +72,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		gav.dimension = 1;
 		gav.dimensionList = new ArrayList<>();
 		gap.add(gav);
-		Func getarray = new Func("getarray","i32",gap);
+		Func getarray = new Func("getarray", "i32", gap);
 		defaultFuncList.add(getarray);
 
 	}
@@ -160,13 +160,14 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static boolean getLock(ParserRuleContext ctx) {
-		boolean ret;
-		try {
-			ret = lock.get(ctx);
-		} catch (NullPointerException e) {
-			return false;
-		}
-		return ret;
+		return false;
+		//		boolean ret;
+		//		try {
+		//			ret = lock.get(ctx);
+		//		} catch (NullPointerException e) {
+		//			return false;
+		//		}
+		//		return ret;
 	}
 
 	public static String getLockStore(ParserRuleContext ctx) {
@@ -233,18 +234,18 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		String tmp = "";
 		for (int i = 0; i < params.size(); i++) {
 			Var v = params.get(i);
-			if(i==0){
+			if (i == 0) {
 				if (v.isArray) {
 					tmp += subArrayType(v.type) + " " + getReg(v.fakeIndex);
 					continue;
 				}
 				tmp += v.type + " " + getReg(v.fakeIndex);
-			}else{
+			} else {
 				if (v.isArray) {
-					tmp += ", "+subArrayType(v.type) + " " + getReg(v.fakeIndex);
+					tmp += ", " + subArrayType(v.type) + " " + getReg(v.fakeIndex);
 					continue;
 				}
-				tmp += ", "+v.type + " " + getReg(v.fakeIndex);
+				tmp += ", " + v.type + " " + getReg(v.fakeIndex);
 			}
 		}
 		return tmp;
@@ -326,7 +327,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			Var tmpParam = f.params.get(i);
 			Var tmpInputParam = params.get(i);
 			// TODO 看看都有没有定义type
-			if (!isArrayTypeEqual(tmpParam.type,params.get(i).type)) {
+			if (!isArrayTypeEqual(tmpParam.type, params.get(i).type)) {
 				throw new RuntimeException("params type not match!");
 			}
 			//TODO 对比每个参数
@@ -359,10 +360,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return "call " + f.type + " @" + name + "(" + ret + ")\n\t";
 	}
 
-	public static boolean isArrayTypeEqual(String a,String b){
-		if(a.equals(b)){
+	public static boolean isArrayTypeEqual(String a, String b) {
+		if (a.equals(b)) {
 			return true;
-		}else if(a.equals(subArrayType(b)+"*")||b.equals(subArrayType(a)+"*")){
+		} else if (a.equals(subArrayType(b) + "*") || b.equals(subArrayType(a) + "*")) {
 			return true;
 		}
 		return false;
@@ -378,7 +379,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			Var tmpParam = f.params.get(i);
 			Var tmpInputParam = params.get(i);
 			// TODO 看看都有没有定义type
-			if (!isArrayTypeEqual(tmpParam.type,params.get(i).type)) {
+			if (!isArrayTypeEqual(tmpParam.type, params.get(i).type)) {
 				throw new RuntimeException("params type not match!");
 			}
 			//TODO 对比每个参数
@@ -636,19 +637,19 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static Func findFuncByName(String name) {
-		for(Func f: defaultFuncList){
-			if(f.name.equals(name)){
+		for (Func f : defaultFuncList) {
+			if (f.name.equals(name)) {
 				return f;
 			}
 		}
-		try{
+		try {
 			for (ParserRuleContext p : funcList) {
 				Func f = funcMap.get(p);
 				if (f.name.equals(name)) {
 					return f;
 				}
 			}
-		}catch (Exception e){
+		} catch (Exception e) {
 			throw new RuntimeException("func " + name + " found error!");
 		}
 		throw new RuntimeException("func " + name + "not found!");
@@ -678,7 +679,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	BType Ident ('[' ']' ('[' exp ']')* )?; 2+(2+3n)?
 	* */
 	@Override public Void visitFuncFParam(HelloParser.FuncFParamContext ctx) {
+		defArray = true;
 		visitChildren(ctx);
+		defArray = false;
 		Func f = funcMap.get(funcStack.peek());
 		int count = ctx.getChildCount();
 		Var tmpVar = new Var();
@@ -703,8 +706,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			ArrayList<Integer> dimensionList = new ArrayList<>();
 			dimensionList.add(0);
 			for (int i = 1; i < expCount; i++) {
-				dimensionList.add(Integer.parseInt(store.get(ctx.exp(i))));
+				dimensionList.add(Integer.parseInt(store.get(ctx.exp(i - 1))));
 			}
+			tmpVar.dimensionList = dimensionList;
 			//TODO type
 			tmpVar.type = subArrayType(generateArrayType(dimensionList)) + "*";
 			//再分配一个地址
@@ -1777,12 +1781,12 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					// 先来个 i32的寄存器地址
 					output(alloca(++index), ctx);
 					output(store("0", index), ctx);
-					output(load(++index,index-1),ctx);
+					output(load(++index, index - 1), ctx);
 					tmpBias.add(index);
 					// 存储所有偏移 比如a[2][2] 那这里存 2 2的地址 再load
 					for (int i = 0; i < expCount; i++) {
 						int tmpIndex = expIndexList.get(i);
-//						output(load(++index,tmpIndex),ctx);
+						//						output(load(++index,tmpIndex),ctx);
 						tmpBias.add(tmpIndex);
 					}
 					for (int i = 0; i < dimensionList.size(); i++) {
