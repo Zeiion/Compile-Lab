@@ -1,4 +1,4 @@
-// Generated from D:/0_ToDo/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
+// Generated from D:/Zeiion/Code/Java/Compile-Lab/src\Hello.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -19,8 +19,8 @@ public class HelloParser extends Parser {
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, T__10=11, T__11=12, T__12=13, T__13=14, T__14=15, T__15=16, T__16=17, 
 		T__17=18, T__18=19, T__19=20, T__20=21, T__21=22, T__22=23, T__23=24, 
-		T__24=25, T__25=26, T__26=27, T__27=28, T__28=29, T__29=30, T__30=31, 
-		BType=32, Ident=33, Number=34, LINE_COMMENT=35, COMMENT=36, WS=37;
+		T__24=25, T__25=26, T__26=27, T__27=28, T__28=29, T__29=30, BType=31, 
+		Void=32, Ident=33, Number=34, LINE_COMMENT=35, COMMENT=36, WS=37;
 	public static final int
 		RULE_hello = 0, RULE_compUnit = 1, RULE_decl = 2, RULE_funcDef = 3, RULE_constDecl = 4, 
 		RULE_constDef = 5, RULE_constInitVal = 6, RULE_constExp = 7, RULE_varDecl = 8, 
@@ -45,7 +45,7 @@ public class HelloParser extends Parser {
 			null, "'('", "')'", "'const'", "','", "';'", "'['", "']'", "'='", "'{'", 
 			"'}'", "'if'", "'else'", "'return'", "'while'", "'break'", "'continue'", 
 			"'+'", "'-'", "'*'", "'/'", "'%'", "'!'", "'<'", "'>'", "'<='", "'>='", 
-			"'=='", "'!='", "'&&'", "'||'", "'void'"
+			"'=='", "'!='", "'&&'", "'||'", null, "'void'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -53,7 +53,7 @@ public class HelloParser extends Parser {
 		return new String[] {
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, null, null, null, 
-			null, null, null, null, null, null, null, null, "BType", "Ident", "Number", 
+			null, null, null, null, null, null, null, "BType", "Void", "Ident", "Number", 
 			"LINE_COMMENT", "COMMENT", "WS"
 		};
 	}
@@ -2653,6 +2653,7 @@ public class HelloParser extends Parser {
 
 	public static class FuncTypeContext extends ParserRuleContext {
 		public TerminalNode BType() { return getToken(HelloParser.BType, 0); }
+		public TerminalNode Void() { return getToken(HelloParser.Void, 0); }
 		public FuncTypeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2681,7 +2682,7 @@ public class HelloParser extends Parser {
 			{
 			setState(353);
 			_la = _input.LA(1);
-			if ( !(_la==T__30 || _la==BType) ) {
+			if ( !(_la==BType || _la==Void) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -2787,14 +2788,14 @@ public class HelloParser extends Parser {
 		"\2\2HG\3\2\2\2IK\3\2\2\2JB\3\2\2\2JH\3\2\2\2K\5\3\2\2\2LO\5\n\6\2MO\5"+
 		"\22\n\2NL\3\2\2\2NM\3\2\2\2O\7\3\2\2\2PQ\5<\37\2QR\7#\2\2RT\7\3\2\2SU"+
 		"\5\30\r\2TS\3\2\2\2TU\3\2\2\2UV\3\2\2\2VW\7\4\2\2WX\5\34\17\2X\t\3\2\2"+
-		"\2YZ\7\5\2\2Z[\7\"\2\2[`\5\f\7\2\\]\7\6\2\2]_\5\f\7\2^\\\3\2\2\2_b\3\2"+
+		"\2YZ\7\5\2\2Z[\7!\2\2[`\5\f\7\2\\]\7\6\2\2]_\5\f\7\2^\\\3\2\2\2_b\3\2"+
 		"\2\2`^\3\2\2\2`a\3\2\2\2ac\3\2\2\2b`\3\2\2\2cd\7\7\2\2d\13\3\2\2\2el\7"+
 		"#\2\2fg\7\b\2\2gh\5\20\t\2hi\7\t\2\2ik\3\2\2\2jf\3\2\2\2kn\3\2\2\2lj\3"+
 		"\2\2\2lm\3\2\2\2mo\3\2\2\2nl\3\2\2\2op\7\n\2\2pq\5\16\b\2q\r\3\2\2\2r"+
 		"\u0080\5\20\t\2s|\7\13\2\2ty\5\16\b\2uv\7\6\2\2vx\5\16\b\2wu\3\2\2\2x"+
 		"{\3\2\2\2yw\3\2\2\2yz\3\2\2\2z}\3\2\2\2{y\3\2\2\2|t\3\2\2\2|}\3\2\2\2"+
 		"}~\3\2\2\2~\u0080\7\f\2\2\177r\3\2\2\2\177s\3\2\2\2\u0080\17\3\2\2\2\u0081"+
-		"\u0082\5*\26\2\u0082\21\3\2\2\2\u0083\u0084\7\"\2\2\u0084\u0089\5\24\13"+
+		"\u0082\5*\26\2\u0082\21\3\2\2\2\u0083\u0084\7!\2\2\u0084\u0089\5\24\13"+
 		"\2\u0085\u0086\7\6\2\2\u0086\u0088\5\24\13\2\u0087\u0085\3\2\2\2\u0088"+
 		"\u008b\3\2\2\2\u0089\u0087\3\2\2\2\u0089\u008a\3\2\2\2\u008a\u008c\3\2"+
 		"\2\2\u008b\u0089\3\2\2\2\u008c\u008d\7\7\2\2\u008d\23\3\2\2\2\u008e\u0095"+
@@ -2813,8 +2814,8 @@ public class HelloParser extends Parser {
 		"\2\2\u00b3\u00a7\3\2\2\2\u00b4\27\3\2\2\2\u00b5\u00ba\5\32\16\2\u00b6"+
 		"\u00b7\7\6\2\2\u00b7\u00b9\5\32\16\2\u00b8\u00b6\3\2\2\2\u00b9\u00bc\3"+
 		"\2\2\2\u00ba\u00b8\3\2\2\2\u00ba\u00bb\3\2\2\2\u00bb\31\3\2\2\2\u00bc"+
-		"\u00ba\3\2\2\2\u00bd\u00be\7\"\2\2\u00be\u00ca\7#\2\2\u00bf\u00c0\7\b"+
-		"\2\2\u00c0\u00c7\7\t\2\2\u00c1\u00c2\7\b\2\2\u00c2\u00c3\5\"\22\2\u00c3"+
+		"\u00ba\3\2\2\2\u00bd\u00be\7!\2\2\u00be\u00ca\7#\2\2\u00bf\u00c0\7\b\2"+
+		"\2\u00c0\u00c7\7\t\2\2\u00c1\u00c2\7\b\2\2\u00c2\u00c3\5\"\22\2\u00c3"+
 		"\u00c4\7\t\2\2\u00c4\u00c6\3\2\2\2\u00c5\u00c1\3\2\2\2\u00c6\u00c9\3\2"+
 		"\2\2\u00c7\u00c5\3\2\2\2\u00c7\u00c8\3\2\2\2\u00c8\u00cb\3\2\2\2\u00c9"+
 		"\u00c7\3\2\2\2\u00ca\u00bf\3\2\2\2\u00ca\u00cb\3\2\2\2\u00cb\33\3\2\2"+

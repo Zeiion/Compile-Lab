@@ -1467,15 +1467,16 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			Var tmpArrVar = getVarByName(ident);
 			int expCount = (ctx.getChildCount() - 1) / 3;
 			ArrayList<Integer> expIndexList = new ArrayList<>();
+			ArrayList<Integer> dimensionList = tmpArrVar.dimensionList;
 			if (isGlobal()) {
 				for (int i = 0; i < expCount; i++) {
 					// 全局 直接编译器计算出值
 					expIndexList.add(Integer.parseInt(store.get(ctx.exp(i))));
 				}
-				ArrayList<Integer> dimensionList = tmpArrVar.dimensionList;
 				int tmpIndex = 0;
 				if (dimensionList.size() > expCount) {
 					// TODO 少n个维度，作为函数参数
+
 					location.put(ctx, tmpArrVar.index);
 				}
 				// 根据偏移量计算出数据所在的偏移量tmpIndex
@@ -1499,6 +1500,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					int expTmpIndex = location.get(ctx.exp(i));
 					output(load(++index, expTmpIndex), ctx);
 					expIndexList.add(index);
+				}
+				if (dimensionList.size() > expCount) {
+					// TODO 少n个维度，作为函数参数 如果是a[][2]这种情况怎么办，好像不可能
+
+					location.put(ctx, tmpArrVar.index);
 				}
 				output(getelementptrAddr(++index, tmpArrVar.type, tmpArrVar.index, expIndexList), ctx);
 				location.put(ctx, tmpArrVar.index);

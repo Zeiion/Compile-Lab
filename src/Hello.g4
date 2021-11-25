@@ -58,9 +58,10 @@ lAndExp      : eqExp
 lOrExp       : lAndExp
                 | lAndExp '||' lOrExp;
 
-funcType: BType | 'void';
+funcType: BType | Void;
 fragment INT: 'int';
 BType : INT;
+Void : 'void';
 Ident : Nondigit (Nondigit | Digit)*;
 Number : DecimalConst | OctalConst | HexaDecimalConst;
 fragment DecimalConst : '0' | [1-9] Digit*;
