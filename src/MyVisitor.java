@@ -16,8 +16,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static int index = 0;
 	public static int globalIndex = 0;
 	public static ParserRuleContext hello;
-	public static boolean hasMain = false;
-	public static HashMap<ParserRuleContext, Func> funcMap = new HashMap<>();
 
 	// 定义数组时
 	public static boolean defArray = false;
@@ -36,6 +34,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	public static Stack<ParserRuleContext> funcStack = new Stack<>();
 	public static ArrayList<ParserRuleContext> funcList = new ArrayList<>();
+	public static HashMap<ParserRuleContext, Func> funcMap = new HashMap<>();
+	public static boolean hasMain = false;
 
 	// 当前调用的函数的所有参数列表
 	public static Stack<ArrayList<Var>> tmpCallFuncParamsStack = new Stack<>();
@@ -174,10 +174,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		for (int i = 0; i < params.size(); i++) {
 			Var v = params.get(i);
 			if (v.isArray) {
-				tmp += subArrayType(v.type) + "*";
+				tmp += subArrayType(v.type) + " " + getReg(v.fakeIndex);
 				continue;
 			}
-			tmp += v.type;
+			tmp += v.type + " " + getReg(v.fakeIndex);
 		}
 		return tmp;
 	}
@@ -188,6 +188,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	public static String alloca(int to) {
 		return getReg(to) + " = alloca i32, align 4\n\t";
+	}
+
+	public static String alloca(int to, String type) {
+		return getReg(to) + " = alloca " + type + "\n\t";
 	}
 
 	public static String allocaArray(int to, ArrayList<Integer> arr) {
@@ -232,6 +236,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return "store i32 " + value + ", i32* " + getReg(to) + ", align 4\n\t";
 	}
 
+	public static String store(String type, int from, int to) {
+		return "store " + type + " " + getReg(from) + ", " + type + "* " + getReg(to) + ", align 4\n\t";
+	}
+
 	public static String call(int to, String ident) {
 		return getReg(to) + " = call i32 @" + ident + "()\n\t";
 	}
@@ -240,18 +248,90 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return "call void @" + ident + "(i32 " + getReg(param) + ")\n\t";
 	}
 
-	public static String proCall(String name, ArrayList<Var> params) {
+	public static String proCall(String name, ArrayList<Var> params, ParserRuleContext ctx) {
 		Func f = findFuncByName(name);
 		if (params.size() != f.params.size()) {
 			throw new RuntimeException("params number not match!");
 		}
+		String ret = "";
 		for (int i = 0; i < params.size(); i++) {
-			if (!f.params.get(i).type.equals(params.get(i))) {
+			Var tmpParam = f.params.get(i);
+			Var tmpInputParam = params.get(i);
+			// TODO 看看都有没有定义type
+			if (!tmpParam.type.equals(params.get(i).type)) {
 				throw new RuntimeException("params type not match!");
 			}
 			//TODO 对比每个参数
+			if (tmpParam.isArray) {
+				// 如果是数组，要对比dimension
+				if (tmpParam.dimension != tmpInputParam.dimension) {
+					throw new RuntimeException("dimension count not match!");
+				}
+				ArrayList<Integer> d1 = tmpParam.dimensionList;
+				ArrayList<Integer> d2 = tmpInputParam.dimensionList;
+				for (int j = 1; j < d1.size(); j++) {
+					if (!d1.get(j).equals(d2.get(j))) {
+						throw new RuntimeException("dimension not match!");
+					}
+				}
+				tmpInputParam.fakeIndex = tmpInputParam.index;
+			} else {
+				output(load(++index, tmpInputParam.index), ctx);
+				tmpInputParam.fakeIndex = index;
+			}
+			if (i == 0) {
+				ret += tmpParam.type + " " + getReg(tmpInputParam.fakeIndex);
+			} else {
+				ret += ", " + tmpParam.type + " " + getReg(tmpInputParam.fakeIndex);
+			}
 		}
-		return "call " + f.type + " @" + name + "(" + "类型加地址" + ")\n\t";
+		//call void @putarray(i32 %34, i32* %38)
+		//%8 = getelementptr [2 x [3 x i32]], [2 x [3 x i32]]* %1, i32 0, i32 0
+		//%9 = call i32 @sum2d([3 x i32]* %8)
+		return "call " + f.type + " @" + name + "(" + ret + ")\n\t";
+	}
+
+	public static String proCall(int id, String name, ArrayList<Var> params, ParserRuleContext ctx) {
+		Func f = findFuncByName(name);
+		if (params.size() != f.params.size()) {
+			throw new RuntimeException("params number not match!");
+		}
+		String ret = "";
+		for (int i = 0; i < params.size(); i++) {
+			Var tmpParam = f.params.get(i);
+			Var tmpInputParam = params.get(i);
+			// TODO 看看都有没有定义type
+			if (!tmpParam.type.equals(params.get(i).type)) {
+				throw new RuntimeException("params type not match!");
+			}
+			//TODO 对比每个参数
+			if (tmpParam.isArray) {
+				// 如果是数组，要对比dimension
+				if (tmpParam.dimension != tmpInputParam.dimension) {
+					throw new RuntimeException("dimension count not match!");
+				}
+				ArrayList<Integer> d1 = tmpParam.dimensionList;
+				ArrayList<Integer> d2 = tmpInputParam.dimensionList;
+				for (int j = 1; j < d1.size(); j++) {
+					if (!d1.get(j).equals(d2.get(j))) {
+						throw new RuntimeException("dimension not match!");
+					}
+				}
+				tmpInputParam.fakeIndex = tmpInputParam.index;
+			} else {
+				output(load(++index, tmpInputParam.index), ctx);
+				tmpInputParam.fakeIndex = index;
+			}
+			if (i == 0) {
+				ret += tmpParam.type + " " + getReg(tmpInputParam.fakeIndex);
+			} else {
+				ret += ", " + tmpParam.type + " " + getReg(tmpInputParam.fakeIndex);
+			}
+		}
+		//call void @putarray(i32 %34, i32* %38)
+		//%8 = getelementptr [2 x [3 x i32]], [2 x [3 x i32]]* %1, i32 0, i32 0
+		//%9 = call i32 @sum2d([3 x i32]* %8)
+		return getReg(id) + " = call " + f.type + " @" + name + "(" + ret + ")\n\t";
 	}
 
 	public static String calc(int to, String symbol, int index1, int index2) {
@@ -442,12 +522,14 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		funcList.add(ctx);
 		funcStack.push(ctx);
 		funcMap.put(ctx, new Func());
+		Func f = funcMap.get(ctx);
+		ArrayList<Var> params = new ArrayList<>();
+		f.params = params;
 		visitChildren(ctx);
 		String name = ctx.Ident().getText();
 		String type = ctx.funcType().getText();
-		Func f = funcMap.get(ctx);
 		f.name = name;
-		f.type = type;
+		f.type = type.equals("int") ? "i32" : "void";
 		if ("main".equals(name)) {
 			if (hasMain) {
 				throw new RuntimeException("already has main!");
@@ -471,8 +553,65 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	@Override public Void visitFuncFParams(HelloParser.FuncFParamsContext ctx) {
 		visitChildren(ctx);
-		Func f = funcMap.get(ctx.getParent());
-		//TODO params arraylist
+		HelloParser.FuncDefContext parent = (HelloParser.FuncDefContext)ctx.getParent();
+		Func f = funcMap.get(parent);
+		// 将参数加入block
+		ParserRuleContext block = parent.block();
+		blockStack.push(block);
+		for (int i = 0; i < f.params.size(); i++) {
+			Var v = f.params.get(i);
+			if (v.isArray) {
+				// TODO arrValues?
+				newArrayVar(v.name, v.index, v.isConst, v.dimension, v.arrValues, v.type, v.dimensionList);
+			} else {
+				newVar(v.name, v.index, v.isConst);
+			}
+		}
+		blockStack.pop();
+		return null;
+	}
+
+	/*
+	BType Ident ('[' ']' ('[' exp ']')* )?; 2+(2+3n)?
+	* */
+	@Override public Void visitFuncFParam(HelloParser.FuncFParamContext ctx) {
+		visitChildren(ctx);
+		Func f = funcMap.get(funcStack.peek());
+		int count = ctx.getChildCount();
+		Var tmpVar = new Var();
+		String name = ctx.Ident().getText();
+		tmpVar.name = name;
+		tmpVar.index = ++index;
+		// 还要重新分配一次
+		// %5 = alloca [3 x i32]*
+		// store [3 x i32]* %0, [3 x i32]* * %5
+		if (count == 2) {
+			// 普通int类型
+			output(alloca(++index), ctx);
+			output(store("i32", tmpVar.index, index), ctx);
+			//替换fakeId
+			tmpVar.fakeIndex = tmpVar.index;
+			tmpVar.index = index;
+		} else {
+			//array
+			int expCount = (count - 4) / 3 + 1; //包含空的[]
+			tmpVar.isArray = true;
+			tmpVar.dimension = expCount;
+			ArrayList<Integer> dimensionList = new ArrayList<>();
+			dimensionList.add(0);
+			for (int i = 1; i < expCount; i++) {
+				dimensionList.add(Integer.parseInt(store.get(ctx.exp(i))));
+			}
+			//TODO type
+			tmpVar.type = subArrayType(generateArrayType(dimensionList)) + "*";
+			//再分配一个地址
+			output(alloca(++index, tmpVar.type), ctx);
+			output(store(tmpVar.type, tmpVar.index, index), ctx);
+			//替换fakeId
+			tmpVar.fakeIndex = tmpVar.index;
+			tmpVar.index = index;
+		}
+		f.params.add(tmpVar);
 		return null;
 	}
 
@@ -1314,11 +1453,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitCalcResES(HelloParser.CalcResESContext ctx) {
 		//		visitChildren(ctx);
 		visit(ctx.Ident());
-		try {
-			checkVoid(ctx);
-		} catch (Exception e) {
-			throw new RuntimeException("params illegal!");
-		}
+		//		try {
+		//			checkVoid(ctx);
+		//		} catch (Exception e) {
+		//			throw new RuntimeException("params illegal!");
+		//		}
 		if (ctx.getChildCount() == 3) {
 			//Ident '(' ')' # calcResES
 			output(call(++index, ctx.Ident().getText()), ctx);
@@ -1333,9 +1472,19 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			tmpCallFuncParamsStack.push(params);
 			// 让funcRParams的所有参数都加入peek的arraylist
 			visit(ctx.funcRParams());
-			output(proCall(ctx.Ident().getText(), params), ctx);
-			// 好像用不到
+			Func f = findFuncByName(ctx.Ident().getText());
+			// TODO 函数返回值
+			if (f.type.equals("void")) {
+				// void
+				output(proCall(ctx.Ident().getText(), params, ctx), ctx);
+			} else {
+				// int
+				output(proCall(++index, ctx.Ident().getText(), params, ctx), ctx);
+				output(alloca(++index), ctx);
+				output(store(index - 1, index), ctx);
+			}
 			location.put(ctx, index);
+			tmpCallFuncParamsStack.pop();
 		}
 		return null;
 	}
@@ -1346,16 +1495,19 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitFuncRParams(HelloParser.FuncRParamsContext ctx) {
 		int paramCount = ctx.getChildCount() - 1 / 2;
 		visitChildren(ctx);
-		//TODO
+		//TODO params加入list，验证类型，只用传地址
 		for (int i = 0; i < paramCount; i++) {
 			ArrayList<Var> tmpList = tmpCallFuncParamsStack.peek();
 			int tmpIndex = getLocation(ctx.exp(i));
 			if (getVarById(tmpIndex) == null) {
+				//说明不是数组
 				Var v = new Var();
 				v.index = tmpIndex;
 				tmpList.add(v);
+			} else {
+				//数组
+				tmpList.add(getVarById(tmpIndex));
 			}
-			//
 		}
 		location.put(ctx, getLocation(ctx.exp(0)));
 		return null;
@@ -1477,10 +1629,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				}
 				int tmpIndex = 0;
 				if (dimensionList.size() > expCount) {
-					// TODO 少n个维度，作为函数参数
-
-					location.put(ctx, tmpArrVar.index);
-					return null;
+					//global 这个情况是不是就是报错
+					throw new RuntimeException("global dimension error?");
 				}
 				// 根据偏移量计算出数据所在的偏移量tmpIndex
 				for (int i = expCount - 1; i >= 0; i--) {
@@ -1491,7 +1641,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					tmpIndex += expIndexList.get(i) * dimensionList.get(i + 1);
 				}
 				store.put(ctx, String.valueOf(tmpArrVar.arrValues.get(tmpIndex)));
-				// array index
+				// array index TODO 不对的 但不一定用得到
 				location.put(ctx, tmpArrVar.index);
 			} else {
 				if (constMode) {
@@ -1509,28 +1659,31 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					//%4 = getelementptr [2 x [2 x [2 x i32]]], [2 x [2 x [2 x i32]]]* %2, i32 0, i32 1 对应a[][][] 的 a[1]
 					ArrayList<Integer> tmpBias = new ArrayList<>(); // 获取当前新数组地址的bias
 					ArrayList<Integer> tmpLeftBias = new ArrayList<>(); // 新数组的bias
-					String tmpType = "";
 					// 先来个 i32的寄存器地址
-					output(alloca(++index),ctx);
-					output(store("0",index),ctx);
+					output(alloca(++index), ctx);
+					output(store("0", index), ctx);
 					tmpBias.add(index);
 					// 存储所有偏移 比如a[2][2] 那这里存 2 2的地址
-					for(int i=0;i<expCount;i++){
+					for (int i = 0; i < expCount; i++) {
 						tmpBias.add(expIndexList.get(i));
 					}
-					for(int i=0;i<dimensionList.size();i++){
-						if(i<expCount) continue;
+					for (int i = 0; i < dimensionList.size(); i++) {
+						if (i < expCount) {
+							continue;
+						}
 						tmpLeftBias.add(expIndexList.get(i));
 					}
-					output(getelementptrAddr(++index,tmpArrVar.type,tmpArrVar.index,tmpBias),ctx);
+					//TODO type + *
+					String tmpType = subArrayType(generateArrayType(tmpLeftBias)) + "*";
+
+					output(getelementptrAddr(++index, tmpArrVar.type, tmpArrVar.index, tmpBias), ctx);
 					ArrayList<Integer> tmpValueArr = new ArrayList<>();
-					newArrayVar("",index,false,dimensionList.size()-expCount,tmpValueArr,tmpType,tmpLeftBias);
-					int tmpIndex = 1;
-					location.put(ctx, tmpIndex);
+					newArrayVar("", index, false, dimensionList.size() - expCount, tmpValueArr, tmpType, tmpLeftBias);
+					location.put(ctx, index);
 					return null;
 				}
 				output(getelementptrAddr(++index, tmpArrVar.type, tmpArrVar.index, expIndexList), ctx);
-				location.put(ctx, tmpArrVar.index);
+				location.put(ctx, index);
 			}
 		}
 		return null;

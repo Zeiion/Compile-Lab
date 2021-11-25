@@ -6,6 +6,7 @@ public class Var {
 	public String name;
 	// 地址索引
 	public int index;
+	public int fakeIndex;
 	// 是否是const
 	public boolean isConst = false;
 	// 是否是global
