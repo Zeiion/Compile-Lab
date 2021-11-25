@@ -281,6 +281,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return getReg(to) + " = zext i1 " + getReg(from) + " to i32\n\t";
 	}
 
+	/*i32 数值类型*/
 	public static String getelementptr(int to, String type, int from, ArrayList<Integer> bias) {
 		String biasString = "";
 		for (int b : bias) {
@@ -289,6 +290,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return getReg(to) + " = getelementptr " + type + "," + type + "* " + getReg(from) + biasString + "\n\t";
 	}
 
+	/*i32 寄存器地址类型*/
 	public static String getelementptrAddr(int to, String type, int from, ArrayList<Integer> bias) {
 		String biasString = ", i32 0";
 		for (int b : bias) {
@@ -1478,6 +1480,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					// TODO 少n个维度，作为函数参数
 
 					location.put(ctx, tmpArrVar.index);
+					return null;
 				}
 				// 根据偏移量计算出数据所在的偏移量tmpIndex
 				for (int i = expCount - 1; i >= 0; i--) {
@@ -1503,8 +1506,28 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				}
 				if (dimensionList.size() > expCount) {
 					// TODO 少n个维度，作为函数参数 如果是a[][2]这种情况怎么办，好像不可能
-
-					location.put(ctx, tmpArrVar.index);
+					//%4 = getelementptr [2 x [2 x [2 x i32]]], [2 x [2 x [2 x i32]]]* %2, i32 0, i32 1 对应a[][][] 的 a[1]
+					ArrayList<Integer> tmpBias = new ArrayList<>(); // 获取当前新数组地址的bias
+					ArrayList<Integer> tmpLeftBias = new ArrayList<>(); // 新数组的bias
+					String tmpType = "";
+					// 先来个 i32的寄存器地址
+					output(alloca(++index),ctx);
+					output(store("0",index),ctx);
+					tmpBias.add(index);
+					// 存储所有偏移 比如a[2][2] 那这里存 2 2的地址
+					for(int i=0;i<expCount;i++){
+						tmpBias.add(expIndexList.get(i));
+					}
+					for(int i=0;i<dimensionList.size();i++){
+						if(i<expCount) continue;
+						tmpLeftBias.add(expIndexList.get(i));
+					}
+					output(getelementptrAddr(++index,tmpArrVar.type,tmpArrVar.index,tmpBias),ctx);
+					ArrayList<Integer> tmpValueArr = new ArrayList<>();
+					newArrayVar("",index,false,dimensionList.size()-expCount,tmpValueArr,tmpType,tmpLeftBias);
+					int tmpIndex = 1;
+					location.put(ctx, tmpIndex);
+					return null;
 				}
 				output(getelementptrAddr(++index, tmpArrVar.type, tmpArrVar.index, expIndexList), ctx);
 				location.put(ctx, tmpArrVar.index);
