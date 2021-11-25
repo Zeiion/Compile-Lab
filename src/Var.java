@@ -54,7 +54,7 @@ public class Var {
 		dimensionList = dArr;
 	}
 
-	public Var copyVar(Var v) {
+	public static Var copyVar(Var v) {
 		Var vv = new Var();
 		vv.name = v.name;
 		vv.index = v.index;

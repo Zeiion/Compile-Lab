@@ -1,5 +1,6 @@
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Main {
@@ -33,6 +34,12 @@ public class Main {
 			//			walker.walk(new Translate(), tree);
 		} catch (Exception e) {
 			System.out.println(e);
+			System.out.println("output is ");
+			System.out.println(MyVisitor.globalOutput);
+			for (ParserRuleContext p : MyVisitor.funcList) {
+				System.out.println(MyVisitor.define(MyVisitor.funcMap.get(p).type, MyVisitor.funcMap.get(p).name,
+					MyVisitor.funcMap.get(p).params, MyVisitor.output.get(p).toString()));
+			}
 			System.exit(-1);
 		}
 		System.exit(0);

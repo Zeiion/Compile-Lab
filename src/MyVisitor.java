@@ -236,13 +236,13 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			Var v = params.get(i);
 			if (i == 0) {
 				if (v.isArray) {
-					tmp += subArrayType(v.type) + " " + getReg(v.fakeIndex);
+					tmp += subArrayType(v.type) + "* " + getReg(v.fakeIndex);
 					continue;
 				}
 				tmp += v.type + " " + getReg(v.fakeIndex);
 			} else {
 				if (v.isArray) {
-					tmp += ", " + subArrayType(v.type) + " " + getReg(v.fakeIndex);
+					tmp += ", " + subArrayType(v.type) + "* " + getReg(v.fakeIndex);
 					continue;
 				}
 				tmp += ", " + v.type + " " + getReg(v.fakeIndex);
@@ -253,6 +253,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 
 	public static String load(int to, int from) {
 		return getReg(to) + " = load i32, i32* " + getReg(from) + ", align 4\n\t";
+	}
+
+	public static String loadStar(int to, String type, int from) {
+		return getReg(to) + " = load " + type + ", " + type + "*" + " " + getReg(from) + ", align 4\n\t";
 	}
 
 	public static String alloca(int to) {
@@ -456,21 +460,71 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	/*i32 数值类型*/
-	public static String getelementptr(int to, String type, int from, ArrayList<Integer> bias) {
+	public static String getelementptr(int to, String type, int from, ArrayList<Integer> bias, ParserRuleContext ctx) {
+		boolean flag = false;
+		//		while (type.contains("*")) {
+		//			flag = true;
+		//			output(alloca(++index, type), ctx);
+		//			output(store(type, from, index), ctx);
+		//			output(loadStar(++index, type, index - 1), ctx);
+		//			from = index;
+		//			type = type.substring(0, type.length() - 1);
+		//		}
 		String biasString = "";
+		//		if (flag) {
+		//			// 去 0
+		//			bias = new ArrayList<>(bias.subList(1, bias.size()));
+		//		}
 		for (int b : bias) {
 			biasString += ", i32 " + b;
 		}
-		return getReg(to) + " = getelementptr " + type + "," + type + "* " + getReg(from) + biasString + "\n\t";
+		return getReg(to) + " = getelementptr " + type + ", " + type + "* " + getReg(from) + biasString + "\n\t";
 	}
 
 	/*i32 寄存器地址类型*/
-	public static String getelementptrAddr(int to, String type, int from, ArrayList<Integer> bias) {
-		String biasString = ", i32 0";
+	public static String getelementptrAddr(String targetType, Var tmpV, int to, String type, int from,
+		ArrayList<Integer> bias, ParserRuleContext ctx) {
+		boolean flag = false;
+		debugSout(ctx, "getele--" + type + " " + tmpV.type);
+		//		while (type.contains("*")) {
+		//		//			flag = true;
+		//		//			output(alloca(++index, type), ctx);
+		//		//			output(store(type, from, index), ctx);
+		//		//			output(loadStar(++index, type, index - 1), ctx);
+		//		//			from = index;
+		//		//			type = type.substring(0, type.length() - 1);
+		//		//		}
+		int biasCount = bias.size();
+		if (type.contains("*")) {
+			output(loadStar(++index, type, from), ctx);
+			type = subArrayType(type);
+			biasCount += 1;
+			from = index;
+		}
+		String tmpType = type;
+		if (targetType.contains("*")) {
+			targetType = subArrayType(targetType);
+			biasCount += 1;
+		}
+		while (!tmpType.equals(targetType)) {
+			biasCount -= 2;
+			tmpType = subArrayType(tmpType);
+		}
+		String biasString = "";
+		if (biasCount < 0) {
+			// 说明不够
+			for (int k = 0; k < (-biasCount); k++) {
+				biasString += ", i32 0";
+			}
+		}
+		//		if (!flag) {
+		//			biasString += ", i32 0";
+		//		}
+		//		String biasString = flag ? "" : ", i32 0";
 		for (int b : bias) {
 			biasString += ", i32 " + getReg(b);
 		}
-		return getReg(to) + " = getelementptr " + type + "," + type + "* " + getReg(from) + biasString + "\n\t";
+		return getReg(to) + " = getelementptr " + type + ", " + type + "* " + getReg(from) + biasString + "\n\t";
 	}
 
 	public static String toi32point(int tmpIndex) {
@@ -610,6 +664,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		if (!hasMain) {
 			throw new RuntimeException("no main error!");
 		}
+		sout("\n\n\n");
 		return null;
 	}
 
@@ -1092,7 +1147,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				//'{' ( initVal (',' initVal)* )? '}' 2+(1+2n)
 				HelloParser.InitValContext initVal = ctx.initVal();
 				// 初始化 如果需要的话
-				// output(getelementptr(++index, type, addrIndex, 0, 0), ctx);
 				ArrayList<Integer> saveList = new ArrayList<>(); // 保存的是所有数据
 				defArray = true;
 				visitChildren(initVal);
@@ -1115,7 +1169,6 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				//'{' ( initVal (',' initVal)* )? '}' 2+(1+2n)
 				HelloParser.InitValContext initVal = ctx.initVal();
 				// 初始化 如果需要的话
-				// output(getelementptr(++index, type, addrIndex, 0, 0), ctx);
 				ArrayList<Integer> saveList = new ArrayList<>();
 				defArray = true;
 				visitChildren(initVal);
@@ -1127,7 +1180,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				for (int i = 0; i < dimension + 1; i++) {
 					tmpArrayList.add(0);
 				}
-				output(getelementptr(++index, type, index - 1, tmpArrayList), ctx);
+				output(getelementptr(++index, type, index - 1, tmpArrayList, ctx), ctx);
 				for (int i = 0; i < saveList.size(); i++) {
 					ArrayList<Integer> tmp = new ArrayList<>();
 					// 获取偏移量
@@ -1137,7 +1190,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 						tmp.add(1);
 					}
 					//output(getelementptr(++index, subArrayType(type), index - 1, tmp), ctx);
-					output(getelementptr(++index, "i32", index - 1, tmp), ctx);
+					output(getelementptr(++index, "i32", index - 1, tmp, ctx), ctx);
 					output(store(String.valueOf(saveList.get(i)), index), ctx);
 				}
 				newArrayVar(tmpVar, addrIndex, false, dimension, saveList, type, expList);
@@ -1228,6 +1281,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static String subArrayType(String type) {
+		if (type.contains("*")) {
+			return type.substring(0, type.length() - 1);
+		}
 		type = type.substring(1, type.length() - 1);
 		int start = type.indexOf("[");
 		if (start == -1) {
@@ -1317,7 +1373,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				for (int i = 0; i < dimension + 1; i++) {
 					tmpArrayList.add(0);
 				}
-				output(getelementptr(++index, type, index - 1, tmpArrayList), ctx);
+				output(getelementptr(++index, type, index - 1, tmpArrayList, ctx), ctx);
 				for (int i = 0; i < saveList.size(); i++) {
 					ArrayList<Integer> tmp = new ArrayList<>();
 					// change
@@ -1327,7 +1383,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 						tmp.add(1);
 					}
 					//output(getelementptr(++index, subArrayType(type), index - 1, tmp), ctx);
-					output(getelementptr(++index, "i32", index - 1, tmp), ctx);
+					output(getelementptr(++index, "i32", index - 1, tmp, ctx), ctx);
 					output(store(String.valueOf(saveList.get(i)), index), ctx);
 				}
 
@@ -1730,9 +1786,22 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					throw new RuntimeException(ident + " should be ident");
 				}
 			}
-			location.put(ctx, getVarByName(ident).index);
+			Var v = getVarByName(ident);
+			if (v.isArray) {
+				String tmpType = v.type;
+				int retIndex = ++index;
+				debugSout(ctx, "type " + tmpType + " " + retIndex);
+				output(getelementptrAddr(subArrayType(v.type) + "*", v, retIndex, tmpType, v.index, new ArrayList<>(),
+					ctx), ctx);
+				Var newV = Var.copyVar(v);
+				newArrayVar(newV.name + retIndex + newV.name, retIndex, newV.isConst, newV.dimension, newV.arrValues,
+					tmpType, newV.dimensionList);
+				location.put(ctx, retIndex);
+			} else {
+				location.put(ctx, v.index);
+			}
 			if (isGlobal()) {
-				store.put(ctx, String.valueOf(getVarByName(ident).value));
+				store.put(ctx, String.valueOf(v.value));
 			}
 		} else {
 			//Ident ( '[' exp ']')*
@@ -1796,16 +1865,29 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 						tmpLeftBias.add(dimensionList.get(i));
 					}
 					//TODO type + *
-					String tmpType = subArrayType(generateArrayType(tmpLeftBias)) + "*";
+					String tmpType = tmpArrVar.type;
+					for (int i = 0; i <= expCount; i++) {
+						tmpType = subArrayType(tmpType);
+					}
+					tmpType += "*";
 
-					output(getelementptrAddr(++index, tmpArrVar.type, tmpArrVar.index, tmpBias), ctx);
+					int retIndex = ++index;
+					debugSout(ctx, "type " + tmpType + " " + retIndex);
+					output(
+						getelementptrAddr(tmpType, tmpArrVar, retIndex, tmpArrVar.type, tmpArrVar.index, tmpBias, ctx),
+						ctx);
 					ArrayList<Integer> tmpValueArr = new ArrayList<>();
-					newArrayVar("", index, false, dimensionList.size() - expCount, tmpValueArr, tmpType, tmpLeftBias);
-					location.put(ctx, index);
+					newArrayVar(tmpArrVar.name + retIndex + tmpArrVar.name, retIndex, false,
+						dimensionList.size() - expCount, tmpValueArr, tmpType, tmpLeftBias);
+					location.put(ctx, retIndex);
 					return null;
 				}
-				output(getelementptrAddr(++index, tmpArrVar.type, tmpArrVar.index, expIndexList), ctx);
-				location.put(ctx, index);
+				int retIndex = ++index;
+				debugSout(ctx, "type " + tmpArrVar.type + " " + retIndex);
+				output(
+					getelementptrAddr("i32", tmpArrVar, retIndex, tmpArrVar.type, tmpArrVar.index, expIndexList, ctx),
+					ctx);
+				location.put(ctx, retIndex);
 			}
 		}
 		return null;
