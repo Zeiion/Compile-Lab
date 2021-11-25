@@ -156,7 +156,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static void debugSout(ParserRuleContext ctx, Object s) {
-		//		System.out.println("----" + ctx.getText() + " " + s);
+		System.out.println("----" + ctx.getText() + " " + s);
 	}
 
 	public static boolean getLock(ParserRuleContext ctx) {
@@ -485,7 +485,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	public static String getelementptrAddr(String targetType, Var tmpV, int to, String type, int from,
 		ArrayList<Integer> bias, ParserRuleContext ctx) {
 		boolean flag = false;
-		debugSout(ctx, "getele--" + type + " " + tmpV.type);
+		debugSout(ctx, to + "--" + bias.size() + "--" + type + "--" + targetType);
 		//		while (type.contains("*")) {
 		//		//			flag = true;
 		//		//			output(alloca(++index, type), ctx);
@@ -504,10 +504,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		String tmpType = type;
 		if (targetType.contains("*")) {
 			targetType = subArrayType(targetType);
-			biasCount += 1;
+			biasCount -= 1;
 		}
 		while (!tmpType.equals(targetType)) {
-			biasCount -= 2;
+			biasCount -= 1;
 			tmpType = subArrayType(tmpType);
 		}
 		String biasString = "";
