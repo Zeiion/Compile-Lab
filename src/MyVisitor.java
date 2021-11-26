@@ -504,8 +504,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		String tmpType = type;
 		if (targetType.contains("*")) {
 			targetType = subArrayType(targetType);
-			biasCount -= 1;
 		}
+		biasCount -= 1;
 		while (!tmpType.equals(targetType)) {
 			biasCount -= 1;
 			tmpType = subArrayType(tmpType);
@@ -1653,9 +1653,11 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				output(proCall(name, params, ctx), ctx);
 			} else {
 				// int
-				output(proCall(++index, name, params, ctx), ctx);
-				output(alloca(++index), ctx);
-				output(store(index - 1, index), ctx);
+				int retIndex = ++index;
+				output(proCall(retIndex, name, params, ctx), ctx);
+				int allocaIndex = ++index;
+				output(alloca(allocaIndex), ctx);
+				output(store(retIndex, allocaIndex), ctx);
 			}
 			location.put(ctx, index);
 			tmpCallFuncParamsStack.pop();
@@ -1829,7 +1831,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					tmpIndex += expIndexList.get(i) * dimensionList.get(i + 1);
 				}
 				store.put(ctx, String.valueOf(tmpArrVar.arrValues.get(tmpIndex)));
-				// array index TODO 不对的 但不一定用得到
+				// array index TODO 不对的 但不一定用得到 全局的指针
 				location.put(ctx, tmpArrVar.index);
 			} else {
 				if (constMode) {
@@ -1843,15 +1845,16 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 					expIndexList.add(index);
 				}
 				if (dimensionList.size() > expCount) {
+					int n = dimensionList.size() - expCount;
 					// TODO 少n个维度，作为函数参数 如果是a[][2]这种情况怎么办，好像不可能
 					//%4 = getelementptr [2 x [2 x [2 x i32]]], [2 x [2 x [2 x i32]]]* %2, i32 0, i32 1 对应a[][][] 的 a[1]
 					ArrayList<Integer> tmpBias = new ArrayList<>(); // 获取当前新数组地址的bias
 					ArrayList<Integer> tmpLeftBias = new ArrayList<>(); // 新数组的bias
 					// 先来个 i32的寄存器地址
-					output(alloca(++index), ctx);
-					output(store("0", index), ctx);
-					output(load(++index, index - 1), ctx);
-					tmpBias.add(index);
+					//					output(alloca(++index), ctx);
+					//					output(store("0", index), ctx);
+					//					output(load(++index, index - 1), ctx);
+					//					tmpBias.add(index);
 					// 存储所有偏移 比如a[2][2] 那这里存 2 2的地址 再load
 					for (int i = 0; i < expCount; i++) {
 						int tmpIndex = expIndexList.get(i);
