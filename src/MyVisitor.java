@@ -689,6 +689,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 				hasMain = true;
 			}
 		}
+		if (type.equals("void")) {
+			output("ret void\n", ctx);
+		}
 		funcStack.pop();
 		return null;
 	}
