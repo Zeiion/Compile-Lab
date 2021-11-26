@@ -606,6 +606,10 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return "ret i32 %x" + retIndex + "\n";
 	}
 
+	public static String ret() {
+		return "ret void\n";
+	}
+
 	public static void sout(String s) {
 		System.out.print(s);
 	}
@@ -836,9 +840,13 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		return null;
 	}
 
-	//	'return' exp ';' # stmt5
+	//	'return' exp? ';' # stmt5
 	@Override public Void visitStmt5(HelloParser.Stmt5Context ctx) {
 		visitChildren(ctx);
+		if (ctx.getChildCount() == 2) {
+			output(ret(), ctx);
+			return null;
+		}
 		output(load(++index, getLocation(ctx.exp())), ctx);
 		output(ret(index), ctx);
 		return null;
