@@ -691,6 +691,8 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		}
 		if (type.equals("void")) {
 			output("ret void\n", ctx);
+		} else {
+			output("ret i32 0\n", ctx);
 		}
 		funcStack.pop();
 		return null;
