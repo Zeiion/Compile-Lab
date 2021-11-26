@@ -675,11 +675,13 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		Func f = funcMap.get(ctx);
 		ArrayList<Var> params = new ArrayList<>();
 		f.params = params;
-		visitChildren(ctx);
+		visit(ctx.Ident());
+		visit(ctx.funcType());
 		String name = ctx.Ident().getText();
 		String type = ctx.funcType().getText();
-		f.name = name;
 		f.type = type.equals("int") ? "i32" : "void";
+		f.name = name;
+		visitChildren(ctx);
 		if ("main".equals(name)) {
 			if (hasMain) {
 				throw new RuntimeException("already has main!");
