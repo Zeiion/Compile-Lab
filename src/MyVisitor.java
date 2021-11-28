@@ -911,9 +911,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	@Override public Void visitLOrExp(HelloParser.LOrExpContext ctx) {
-		visitChildren(ctx);
 		if (ctx.getChildCount() == 1) {
 			//lAndExp
+			visitChildren(ctx);
 			location.put(ctx, location.get(ctx.lAndExp()));
 		} else {
 			//lAndExp '||' lOrExp
