@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -686,7 +687,17 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		sout(globalOutput);
 		sout(prefix);
 		for (ParserRuleContext p : funcList) {
-			sout(define(funcMap.get(p).type, funcMap.get(p).name, funcMap.get(p).params, output.get(p).toString()));
+			ArrayList<String> outputs = new ArrayList<String>(Arrays.asList(output.get(p).toString().split("\n")));
+			String o1 = "";
+			String o2 = "";
+			for (String s : outputs) {
+				if (s.contains("alloca")) {
+					o1 += s + "\n";
+				} else {
+					o2 += s + "\n";
+				}
+			}
+			sout(define(funcMap.get(p).type, funcMap.get(p).name, funcMap.get(p).params, o1 + o2));
 		}
 		if (!hasMain) {
 			throw new RuntimeException("no main error!");
