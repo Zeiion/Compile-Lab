@@ -514,17 +514,24 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 		String biasString = "";
 		if (biasCount < 0) {
 			// 说明不够
+			biasString += ", i32 0";
+			biasCount++;
+			for (int b : bias) {
+				biasString += ", i32 " + getReg(b);
+			}
 			for (int k = 0; k < (-biasCount); k++) {
 				biasString += ", i32 0";
+			}
+		} else {
+			for (int b : bias) {
+				biasString += ", i32 " + getReg(b);
 			}
 		}
 		//		if (!flag) {
 		//			biasString += ", i32 0";
 		//		}
 		//		String biasString = flag ? "" : ", i32 0";
-		for (int b : bias) {
-			biasString += ", i32 " + getReg(b);
-		}
+
 		return getReg(to) + " = getelementptr " + type + ", " + type + "* " + getReg(from) + biasString + "\n\t";
 	}
 
