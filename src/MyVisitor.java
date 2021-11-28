@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 public class MyVisitor extends HelloBaseVisitor<Void> {
 	private static boolean constMode = false;
+	private static boolean constMode2 = false;
 
 	public static String globalOutput = "";
 	public String prefix = "declare i32 @getint()\n" + "declare void @putint(i32)\n" + "declare i32 @getch()\n"
@@ -191,7 +192,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	}
 
 	public static boolean isGlobal() {
-		if (defArray) {
+		if (defArray || constMode || constMode2) {
 			return true;
 		}
 		//		System.out.println("isGlobal " + blockStack.peek().getClass().equals(HelloParser.HelloContext.class));
@@ -545,6 +546,21 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			}
 		}
 		tmpList.add(new Var(tmpVar, tmpIndex, isConst));
+	}
+
+	public static void newVar(String tmpVar, int tmpIndex, boolean isConst, int value) {
+		ParserRuleContext tmpCtx = blockStack.peek();
+		ArrayList<Var> tmpList = blockVar.get(tmpCtx);
+		if (tmpList == null) {
+			tmpList = new ArrayList<>();
+			blockVar.put(tmpCtx, tmpList);
+		}
+		for (Var v : tmpList) {
+			if (v.name.equals(tmpVar)) {
+				throw new RuntimeException("var already exist!");
+			}
+		}
+		tmpList.add(new Var(false, value, tmpVar, tmpIndex, isConst));
 	}
 
 	public static void newGlobalVar(String tmpVar, String value, int tmpIndex, boolean isConst) {
@@ -1314,7 +1330,9 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 	@Override public Void visitConstDef(HelloParser.ConstDefContext ctx) {
 		String tmpVar = ctx.Ident().getText();
 		if (ctx.getChildCount() == 3) {
+			constMode2 = true;
 			visitChildren(ctx);
+			constMode2 = false;
 			if (isGlobal()) {
 				// 全局变量
 				newGlobalVar(tmpVar, store.get(ctx.constInitVal()), --globalIndex, true);
@@ -1323,7 +1341,7 @@ public class MyVisitor extends HelloBaseVisitor<Void> {
 			} else {
 				output(load(++index, getLocation(ctx.constInitVal())), ctx);
 				output(alloca(++index), ctx);
-				newVar(tmpVar, index, true);
+				newVar(tmpVar, index, true, Integer.parseInt(store.get(ctx.constInitVal())));
 				output(store(index - 1, index), ctx);
 			}
 		} else {
